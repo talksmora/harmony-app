@@ -231,6 +231,197 @@
     border-radius: 12px;
     text-align: left;
   }
+  
+  /* Concentric interactive drums and keyboard buttons style */
+  .drums-layout {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 30px auto;
+    flex-wrap: wrap;
+  }
+  .drum-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .drum-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--subtitle);
+    text-transform: uppercase;
+  }
+  .interactive-drum {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: #fdfaf2;
+    border: 12px solid #8b5a2b; /* Wooden ring */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15), inset 0 2px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.08s ease;
+  }
+  .interactive-drum:active {
+    transform: scale(0.97);
+  }
+  
+  /* Bayan Drum Styles */
+  .bayan-drum {
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, #fbf7eb 60%, #eadaa2 100%);
+    border-color: #7f8c8d; /* Metallic rim */
+  }
+  
+  /* Dayan Drum Styles */
+  .dayan-drum {
+    background: radial-gradient(circle, #fdfaf2 40%, #edd8ad 100%);
+  }
+
+  /* Concentric zones styling */
+  .drum-zone {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: transparent;
+    transition: all 0.15s ease;
+    user-select: none;
+    box-sizing: border-box;
+  }
+  .drum-zone:hover {
+    color: rgba(0,0,0,0.35);
+  }
+  .drum-zone.active-flash {
+    background: rgba(231, 76, 60, 0.3) !important;
+    color: #fff !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+  }
+
+  /* Bayan Zones */
+  .zone-ka {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    z-index: 1;
+    background: transparent;
+  }
+  .zone-ge {
+    width: 120px;
+    height: 120px;
+    z-index: 2;
+    background: #111; /* Black syahi */
+    border: 3px solid #222;
+    /* Offcenter syahi for Bayan */
+    top: 25px;
+    left: 35px;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.6);
+  }
+  .zone-ge:hover {
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* Dayan Zones */
+  .zone-na {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background: transparent;
+  }
+  .zone-te {
+    width: 78%;
+    height: 78%;
+    z-index: 2;
+    background: radial-gradient(circle, #fdfaf2 60%, #eadaa2 100%);
+    border: 1px dashed rgba(0,0,0,0.08);
+  }
+  .zone-tin {
+    width: 52%;
+    height: 52%;
+    z-index: 3;
+    background: radial-gradient(circle, #fdfaf2 50%, #edd8ad 100%);
+    border: 1.5px solid rgba(139, 90, 43, 0.12);
+  }
+  .zone-ti {
+    width: 28%;
+    height: 28%;
+    z-index: 4;
+    background: #111; /* Central black syahi */
+    border: 2px solid #222;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.6);
+  }
+  .zone-ti:hover {
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* Bol Buttons Section */
+  .bol-buttons-section {
+    margin: 25px auto 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 18px;
+    border-radius: 14px;
+    max-width: 600px;
+  }
+  .bol-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 480px) {
+    .bol-buttons-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .bol-btn {
+    padding: 12px 6px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+  }
+  .bol-btn-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+  .bol-btn-desc {
+    font-size: 0.7rem;
+    color: var(--subtitle);
+  }
+  
+  /* Color themes for bol types */
+  .bol-btn.btn-na { border-color: #2ecc71; color: #2ecc71; }
+  .bol-btn.btn-tin { border-color: #3498db; color: #3498db; }
+  .bol-btn.btn-te { border-color: #f1c40f; color: #f1c40f; }
+  .bol-btn.btn-ti { border-color: #9b59b6; color: #9b59b6; }
+  .bol-btn.btn-ge { border-color: #e74c3c; color: #e74c3c; }
+  .bol-btn.btn-ka { border-color: #e67e22; color: #e67e22; }
+  .bol-btn.btn-dha { border-color: #1abc9c; color: #1abc9c; }
+  .bol-btn.btn-dhin { border-color: #e84393; color: #e84393; }
+
+  /* Active states */
+  .bol-btn:active, .bol-btn.active-key {
+    transform: scale(0.95);
+    background: rgba(255,255,255,0.05);
+    box-shadow: 0 0 12px currentColor;
+  }
 </style>
 </head>
 <body data-page="tabla">
@@ -244,21 +435,62 @@
       <!-- Visual Drums Layout -->
       <div class="drums-layout">
         <!-- Bayan (Bass) -->
-        <div class="drum-wrapper" id="bayanWrapper">
-          <div class="drum-body bayan-drum">
-            <div class="syahi-offcenter"></div>
+        <div class="drum-container" id="bayanWrapper">
+          <div class="drum-title" id="lblBayan">બાયાન (BAAYAAN / BASS)</div>
+          <div class="interactive-drum bayan-drum">
+            <div class="drum-zone zone-ka" data-bol="Ka">Ka</div>
+            <div class="drum-zone zone-ge" data-bol="Ge">Ge</div>
           </div>
-          <span class="drum-label" id="lblBayan">બાયાન (Dagga / Bass)</span>
-          <span style="font-size: 0.75rem; color:var(--subtitle);" id="lblBayanBol"> બોલ: Ghe, Ka</span>
         </div>
 
         <!-- Dayan (Treble) -->
-        <div class="drum-wrapper" id="dayanWrapper">
-          <div class="drum-body dayan-drum">
-            <div class="syahi-center"></div>
+        <div class="drum-container" id="dayanWrapper">
+          <div class="drum-title" id="lblDayan">દાયાન (DAAYAAN / TREBLE)</div>
+          <div class="interactive-drum dayan-drum">
+            <div class="drum-zone zone-na" data-bol="Na">Na</div>
+            <div class="drum-zone zone-te" data-bol="Te">Te</div>
+            <div class="drum-zone zone-tin" data-bol="Tin">Tin</div>
+            <div class="drum-zone zone-ti" data-bol="Ti">Ti</div>
           </div>
-          <span class="drum-label" id="lblDayan">દાયાન (Tabla / Treble)</span>
-          <span style="font-size: 0.75rem; color:var(--subtitle);" id="lblDayanBol">બોલ: Ta, Tin, Na</span>
+        </div>
+      </div>
+
+      <!-- Bol Keyboard Player -->
+      <div class="bol-buttons-section">
+        <h4 id="lblTapBolHeader" style="margin-top:0; margin-bottom:12px; color:var(--subtitle); text-align:center;">બોલ વગાડવા માટે ટેપ કરો અથવા કીબોર્ડ વાપરો (Tap a bol or use keyboard):</h4>
+        <div class="bol-buttons-grid">
+          <button class="bol-btn btn-na" data-bol="Na" data-key="j">
+            <span class="bol-btn-name">Na</span>
+            <span class="bol-btn-desc">dayan [J]</span>
+          </button>
+          <button class="bol-btn btn-tin" data-bol="Tin" data-key="k">
+            <span class="bol-btn-name">Tin</span>
+            <span class="bol-btn-desc">dayan [K]</span>
+          </button>
+          <button class="bol-btn btn-te" data-bol="Te" data-key="l">
+            <span class="bol-btn-name">Te</span>
+            <span class="bol-btn-desc">dayan [L]</span>
+          </button>
+          <button class="bol-btn btn-ti" data-bol="Ti" data-key=";">
+            <span class="bol-btn-name">Ti</span>
+            <span class="bol-btn-desc">dayan [;]</span>
+          </button>
+          <button class="bol-btn btn-ge" data-bol="Ge" data-key="a">
+            <span class="bol-btn-name">Ge</span>
+            <span class="bol-btn-desc">bayan [A]</span>
+          </button>
+          <button class="bol-btn btn-ka" data-bol="Ka" data-key="s">
+            <span class="bol-btn-name">Ka</span>
+            <span class="bol-btn-desc">bayan [S]</span>
+          </button>
+          <button class="bol-btn btn-dha" data-bol="Dha" data-key="f">
+            <span class="bol-btn-name">Dha</span>
+            <span class="bol-btn-desc">both [F]</span>
+          </button>
+          <button class="bol-btn btn-dhin" data-bol="Dhin" data-key="g">
+            <span class="bol-btn-name">Dhin</span>
+            <span class="bol-btn-desc">both [G]</span>
+          </button>
         </div>
       </div>
 
@@ -744,40 +976,81 @@
     }
   }
 
-  // Interactive UI clicks
-  document.getElementById('bayanWrapper').addEventListener('click', () => {
+  // Trigger bol sound and visual flashing
+  function triggerBolVisualAndSound(bol) {
     initAudio();
-    // Alternates between Ghe and Ka on user click
-    if (Math.random() > 0.3) {
-      playGhe();
-      flashDrum('bayanWrapper', '#f0e2cf');
-    } else {
-      playKa();
-      flashDrum('bayanWrapper', '#999');
+    
+    // Play sound
+    playSpecificBol(bol, audioCtx.currentTime);
+    
+    // Trigger flash animation on the visual drum heads and concentric zones
+    const clean = bol.toLowerCase();
+    if (['dha', 'dhin', 'ge', 'ka'].includes(clean)) {
+      flashDrumZone('bayanWrapper', clean === 'ge' ? 'zone-ge' : 'zone-ka');
     }
-  });
-
-  document.getElementById('dayanWrapper').addEventListener('click', () => {
-    initAudio();
-    // Alternates between Ta, Tin on click
-    if (Math.random() > 0.4) {
-      playTa();
-      flashDrum('dayanWrapper', '#e0d0b0');
-    } else {
-      playTin();
-      flashDrum('dayanWrapper', '#8b5a2b');
+    if (['dha', 'dhin', 'na', 'te', 'tin', 'ti'].includes(clean)) {
+      let zoneClass = 'zone-na';
+      if (clean === 'te') zoneClass = 'zone-te';
+      if (clean === 'tin') zoneClass = 'zone-tin';
+      if (clean === 'ti') zoneClass = 'zone-ti';
+      flashDrumZone('dayanWrapper', zoneClass);
     }
-  });
-
-  function flashDrum(id, color) {
-    const el = document.getElementById(id).querySelector('.drum-body');
-    el.style.boxShadow = `0 0 25px ${color}`;
-    el.style.transform = 'scale(0.96)';
-    setTimeout(() => {
-      el.style.boxShadow = '';
-      el.style.transform = '';
-    }, 100);
   }
+
+  function flashDrumZone(drumId, zoneClass) {
+    const drum = document.getElementById(drumId);
+    if (!drum) return;
+    
+    // Slight scale down for tactile bounce
+    drum.style.transform = 'scale(0.96)';
+    setTimeout(() => { drum.style.transform = ''; }, 80);
+    
+    const zone = drum.querySelector('.' + zoneClass);
+    if (zone) {
+      zone.classList.add('active-flash');
+      setTimeout(() => { zone.classList.remove('active-flash'); }, 120);
+    }
+  }
+
+  // Wire up drum head zone clicks
+  document.querySelectorAll('.drum-zone').forEach(zone => {
+    zone.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      const bol = zone.getAttribute('data-bol');
+      triggerBolVisualAndSound(bol);
+    });
+  });
+
+  // Wire up bol buttons clicks
+  document.querySelectorAll('.bol-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const bol = btn.getAttribute('data-bol');
+      triggerBolVisualAndSound(bol);
+    });
+  });
+
+  // Wire up keyboard player shortcuts
+  window.addEventListener('keydown', (e) => {
+    // If user is typing in form inputs (like login or profile or owner console), don't trigger sounds!
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+      return;
+    }
+    const key = e.key.toLowerCase();
+    const btn = document.querySelector(`.bol-btn[data-key="${key}"]`);
+    if (btn) {
+      e.preventDefault();
+      btn.click();
+      btn.classList.add('active-key');
+    }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    const key = e.key.toLowerCase();
+    const btn = document.querySelector(`.bol-btn[data-key="${key}"]`);
+    if (btn) {
+      btn.classList.remove('active-key');
+    }
+  });
 
   // Rhythmic Loop engine (Scheduler)
   const TAAL_SEQUENCES = {
