@@ -244,7 +244,38 @@
   const feePlanSelect = document.getElementById('feePlanSelect');
   const valAmountText = document.getElementById('valAmountText');
 
-  valDueDate.textContent = isOwner ? '--' : dueDateStr;
+  let remainingText = '';
+  if (!isOwner) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const dDate = new Date(dueDateStr);
+    dDate.setHours(0,0,0,0);
+
+    const timeDiff = dDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+    if (diffDays > 0) {
+      remainingText = lang === 'en' 
+        ? ` (${diffDays} Days Remaining)` 
+        : lang === 'hi' 
+          ? ` (${diffDays} दिन शेष)` 
+          : ` (${diffDays} દિવસો બાકી)`;
+    } else if (diffDays === 0) {
+      remainingText = lang === 'en' 
+        ? ` (Due Today)` 
+        : lang === 'hi' 
+          ? ` (आज देय तिथि है)` 
+          : ` (આજે છેલ્લી તારીખ છે)`;
+    } else {
+      remainingText = lang === 'en' 
+        ? ` (Overdue by ${Math.abs(diffDays)} Days)` 
+        : lang === 'hi' 
+          ? ` (${Math.abs(diffDays)} दिनों की देरी)` 
+          : ` (${Math.abs(diffDays)} દિવસ મોડું)`;
+    }
+  }
+
+  valDueDate.textContent = (isOwner ? '--' : dueDateStr) + remainingText;
 
   if (feeStatus === 'Paid') {
     valStatus.textContent = t.paid;
