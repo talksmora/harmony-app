@@ -117,7 +117,7 @@
     <div class="msg" id="loginMsg"></div>
 
     <div class="dev-note">
-      <strong>Dev note:</strong> Supabase Phone Auth હજુ connect નથી થયું. અત્યારે "OTP મોકલો" દબાવતાં mock login થઈ જશે (કોઈ પણ number/OTP ચાલશે) જેથી app નું UI test કરી શકાય.
+      <strong>નોંધ:</strong> OTP કોડ તમારા WhatsApp અને SMS પર મોકલવામાં આવશે. કૃપા કરીને ખાતરી કરો કે તમે ક્લાસ ઓનર સાથે રજિસ્ટર્ડ છો.
     </div>
   </div>
 
@@ -134,10 +134,10 @@
       errPhoneEmpty: 'Mobile number લખો',
       errPhoneInvalid: 'Valid number લખો (E.164: +919876543210)',
       otpSent: 'OTP મોકલાયો ✅',
-      mockOtpSent: '(Mock mode) OTP મોકલાયો — કોઈ પણ 6 digit code enter કરો',
+      mockOtpSent: 'OTP મોકલાયો — કૃપા કરીને કોડ દાખલ કરો',
       errOtpEmpty: 'OTP લખો',
       errOtpFormat: '6-અંકી ન્યુમેરિક OTP લખો',
-      devNote: '<strong>Dev note:</strong> Supabase Phone Auth હજુ connect નથી થયું. અત્યારે "OTP મોકલો" દબાવતાં mock login થઈ જશે (કોઈ પણ number/OTP ચાલશે) જેથી app નું UI test કરી શકાય.'
+      devNote: '<strong>નોંધ:</strong> OTP કોડ તમારા WhatsApp અને SMS પર મોકલવામાં આવશે. કૃપા કરીને ખાતરી કરો કે તમે ક્લાસ ઓનર સાથે રજિસ્ટર્ડ છો.'
     },
     hi: {
       desc: 'अपना मोबाइल नंबर दर्ज करके लॉगिन करें',
@@ -148,10 +148,10 @@
       errPhoneEmpty: 'मोबाइल नंबर दर्ज करें',
       errPhoneInvalid: 'मान्य नंबर दर्ज करें (E.164: +919876543210)',
       otpSent: 'OTP भेजा गया ✅',
-      mockOtpSent: '(Mock mode) OTP भेजा गया — कोई भी 6 digit code दर्ज करें',
+      mockOtpSent: 'OTP भेजा गया — कृपया कोड दर्ज करें',
       errOtpEmpty: 'OTP दर्ज करें',
       errOtpFormat: '6-अंकीय न्यूमेरिक OTP दर्ज करें',
-      devNote: '<strong>Dev note:</strong> Supabase Phone Auth अभी कनेक्ट नहीं हुआ है। अभी "OTP भेजें" दबाने पर mock login हो जाएगा (कोई भी नंबर/OTP चलेगा) ताकि ऐप का UI टेस्ट किया जा सके।'
+      devNote: '<strong>नोट:</strong> OTP कोड आपके WhatsApp और SMS पर भेजा जाएगा। कृपया सुनिश्चित करें कि आप क्लास ओनर के साथ पंजीकृत हैं।'
     },
     en: {
       desc: 'Enter your mobile number to log in',
@@ -162,10 +162,10 @@
       errPhoneEmpty: 'Please enter your mobile number',
       errPhoneInvalid: 'Please enter a valid E.164 phone number (+919876543210)',
       otpSent: 'OTP Sent ✅',
-      mockOtpSent: '(Mock mode) OTP Sent — enter any 6 digit code',
+      mockOtpSent: 'OTP Sent — please enter the code',
       errOtpEmpty: 'Please enter the OTP',
       errOtpFormat: 'Please enter a 6-digit numeric OTP',
-      devNote: '<strong>Dev note:</strong> Supabase Phone Auth is not connected yet. Click "Send OTP" to use mock login (any number/OTP will work) to test the app UI.'
+      devNote: '<strong>Note:</strong> OTP code will be sent to your WhatsApp and SMS. Please make sure you are registered with the class owner.'
     }
   };
 
@@ -240,14 +240,14 @@
     }
 
     try {
-      await sendOtp(phone); // real Supabase call once configured
+      setMsg('Sending OTP...', 'ok');
+      await sendOtp(pendingPhone);
       setMsg(t.otpSent, 'ok');
+      phoneStep.style.display = 'none';
+      otpStep.style.display = 'block';
     } catch (err) {
-      // Supabase not configured yet -> fall back to mock flow so UI is testable today
-      setMsg(t.mockOtpSent, 'ok');
+      setMsg(err.message || 'OTP sending failed', 'error');
     }
-    phoneStep.style.display = 'none';
-    otpStep.style.display = 'block';
   });
 
   document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
@@ -256,7 +256,11 @@
     if (!otp) { setMsg(t.errOtpEmpty, 'error'); return; }
     if (!/^\d{6}$/.test(otp)) { setMsg(t.errOtpFormat, 'error'); return; }
     try {
-      const session = await verifyOtp(pendingPhone, otp); // real Supabase call once configured
+      setMsg('Verifying OTP...', 'ok');
+      const session = await verifyOtp(pendingPhone, otp);
+      if (!session) {
+        throw new Error(currentLang === 'en' ? 'Invalid OTP code' : currentLang === 'hi' ? 'अमान्य OTP कोड' : 'અમાન્ય OTP કોડ');
+      }
       const details = await getUserSessionDetails(pendingPhone);
       writeMockSession({
         phone: pendingPhone,
@@ -266,15 +270,7 @@
       });
       window.location.href = 'dashboard.html';
     } catch (err) {
-      // Mock fallback (no Supabase yet)
-      const details = await getUserSessionDetails(pendingPhone);
-      writeMockSession({
-        phone: pendingPhone,
-        isOwner: details.role === 'owner',
-        role: details.role,
-        permissions: details.permissions
-      });
-      window.location.href = 'dashboard.html';
+      setMsg(err.message || 'OTP verification failed', 'error');
     }
   });
 </script>
