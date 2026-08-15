@@ -1,8 +1,8 @@
-const CACHE_NAME = 'harmony-music-app-v107';
+const CACHE_NAME = 'harmony-music-app-v108';
 const ASSETS = [
   './', './index.html', './login.html', './dashboard.html', './profile.html', './daily-riyaz.html',
   './pitch-monitor.html', './pitch-monitor.css',
-  './progress.html', './owner-console.html', './practice-tool.html', './metronome.html', './tabla.html',
+  './progress.html', './owner-console.html', './practice-tool.html', './metronome.html', './tabla.html', './instruments.html',
   './shared/theme.css', './shared/app-shell.css', './shared/components.css',
   './shared/app-shell.js', './shared/supabase-client.js', './shared/utils.js',
   './manifest.json', './icon-192.png', './icon-512.png',

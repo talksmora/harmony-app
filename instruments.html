@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Instruments - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .inst-filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .filter-pill {
+    padding:8px 16px; border-radius:20px; border:1.5px solid var(--border);
+    background:var(--card-bg); color:var(--text); font-size:0.8rem; font-weight:600;
+    cursor:pointer; transition:all 0.2s ease; white-space:nowrap;
+  }
+  .filter-pill:hover { border-color:var(--accent); color:var(--accent); }
+  .filter-pill.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  .inst-search-wrap {
+    position:relative; margin-bottom:18px;
+  }
+  .inst-search-wrap input {
+    width:100%; padding:12px 16px 12px 42px; border-radius:14px;
+    border:1.5px solid var(--border); background:var(--card-bg); color:var(--text);
+    font-size:0.9rem; outline:none; transition:border 0.2s;
+  }
+  .inst-search-wrap input:focus { border-color:var(--accent); }
+  .inst-search-wrap .search-icon {
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    color:var(--subtitle); font-size:1.1rem; pointer-events:none;
+  }
+
+  .inst-grid {
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+    gap:14px; margin-top:10px;
+  }
+  .inst-card {
+    background:var(--card-bg); border:1.5px solid var(--border); border-radius:16px;
+    padding:18px; text-decoration:none; color:var(--text); display:flex; flex-direction:column;
+    gap:10px; transition:all 0.25s ease; cursor:pointer; position:relative; overflow:hidden;
+  }
+  .inst-card:hover {
+    border-color:var(--accent); transform:translateY(-3px);
+    box-shadow:0 8px 25px rgba(0,0,0,0.15);
+  }
+  .inst-card-top { display:flex; align-items:center; gap:12px; }
+  .inst-card-icon {
+    width:48px; height:48px; border-radius:14px; display:flex; align-items:center;
+    justify-content:center; font-size:1.6rem; flex-shrink:0;
+  }
+  .inst-card-info { flex:1; min-width:0; }
+  .inst-card-name { font-weight:700; font-size:0.95rem; margin:0 0 2px; }
+  .inst-card-cat {
+    font-size:0.65rem; font-weight:600; padding:3px 8px; border-radius:10px;
+    display:inline-block; text-transform:uppercase; letter-spacing:0.04em;
+  }
+  .inst-card-desc { font-size:0.78rem; color:var(--subtitle); line-height:1.4; margin:0; }
+  .inst-card-tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:auto; }
+  .inst-card-tag {
+    font-size:0.65rem; color:var(--subtitle); background:var(--bg);
+    padding:3px 8px; border-radius:8px;
+  }
+  .inst-card-play {
+    font-size:0.75rem; font-weight:700; color:var(--accent); margin-left:auto;
+  }
+  .inst-card.coming-soon { opacity:0.6; pointer-events:none; }
+  .inst-card .soon-badge {
+    position:absolute; top:10px; right:10px; background:#f39c12; color:#fff;
+    font-size:0.6rem; font-weight:700; padding:3px 8px; border-radius:8px;
+  }
+
+  /* Category colors */
+  .cat-indian { background:rgba(255,107,53,0.12); color:#e65100; }
+  .icon-indian { background:rgba(255,107,53,0.1); }
+  .cat-keyboard { background:rgba(103,58,183,0.12); color:#5e35b1; }
+  .icon-keyboard { background:rgba(103,58,183,0.1); }
+  .cat-string { background:rgba(33,150,243,0.12); color:#1565c0; }
+  .icon-string { background:rgba(33,150,243,0.1); }
+  .cat-percussion { background:rgba(233,30,99,0.12); color:#c2185b; }
+  .icon-percussion { background:rgba(233,30,99,0.1); }
+  .cat-woodwind { background:rgba(0,150,136,0.12); color:#00796b; }
+  .icon-woodwind { background:rgba(0,150,136,0.1); }
+  .cat-brass { background:rgba(255,193,7,0.12); color:#f57f17; }
+  .icon-brass { background:rgba(255,193,7,0.1); }
+  .cat-utility { background:rgba(96,125,139,0.12); color:#455a64; }
+  .icon-utility { background:rgba(96,125,139,0.1); }
+  .cat-gesture { background:rgba(156,39,176,0.12); color:#7b1fa2; }
+  .icon-gesture { background:rgba(156,39,176,0.1); }
+
+  .inst-count { font-size:0.8rem; color:var(--subtitle); margin-bottom:6px; }
+  .no-results {
+    text-align:center; padding:40px 20px; color:var(--subtitle); font-size:0.9rem;
+    display:none;
+  }
+
+  @media(max-width:600px) {
+    .inst-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <h2 id="instPageTitle" style="margin:0 0 4px;">🎵 બધા વાદ્ય સાધનો</h2>
+    <p id="instPageSub" style="color:var(--subtitle); margin:0 0 16px; font-size:0.85rem;">કેટેગરી પ્રમાણે ફિલ્ટર કરો — કોઈપણ instrument ટેપ કરી વગાડો</p>
+
+    <div class="inst-search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="search" id="instSearch" placeholder="Search instruments..." autocomplete="off">
+    </div>
+
+    <div class="inst-filters" id="instFilters"></div>
+    <div class="inst-count" id="instCount"></div>
+    <div class="inst-grid" id="instGrid"></div>
+    <div class="no-results" id="noResults">😕 કોઈ instrument મળ્યું નહિ</div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🎵 બધા વાદ્ય સાધનો',
+      sub: 'કેટેગરી પ્રમાણે ફિલ્ટર કરો — કોઈપણ instrument ટેપ કરી વગાડો',
+      search: 'વાદ્ય શોધો...',
+      all: 'બધા', indian: '🪘 ભારતીય શાસ્ત્રીય', keyboard: '🎹 કીબોર્ડ/કીઝ',
+      string: '🎸 તાર વાદ્ય', percussion: '🥁 તાલ વાદ્ય', woodwind: '🪈 ફૂંકણી વાદ્ય',
+      brass: '🎺 પિત્તળ વાદ્ય', utility: '🎯 ટ્યૂનર/ટૂલ', gesture: '🤚 જેશ્ચર',
+      playNow: 'વગાડો →', comingSoon: 'ટૂંક સમયમાં', showing: 'બતાવે છે',
+      of: 'માંથી', instruments: 'વાદ્યો', noResults: '😕 કોઈ instrument મળ્યું નહિ'
+    },
+    hi: {
+      title: '🎵 सभी वाद्य यंत्र',
+      sub: 'श्रेणी के अनुसार फ़िल्टर करें — किसी भी instrument को टैप करके बजाएं',
+      search: 'वाद्य खोजें...',
+      all: 'सभी', indian: '🪘 भारतीय शास्त्रीय', keyboard: '🎹 कीबोर्ड/कीज़',
+      string: '🎸 तार वाद्य', percussion: '🥁 ताल वाद्य', woodwind: '🪈 फूंकनी वाद्य',
+      brass: '🎺 पीतल वाद्य', utility: '🎯 ट्यूनर/टूल', gesture: '🤚 जेश्चर',
+      playNow: 'बजाएं →', comingSoon: 'जल्द आ रहा है', showing: 'दिखा रहा है',
+      of: 'में से', instruments: 'वाद्य', noResults: '😕 कोई instrument नहीं मिला'
+    },
+    en: {
+      title: '🎵 All Instruments',
+      sub: 'Filter by category — tap any instrument to play',
+      search: 'Search instruments...',
+      all: 'All', indian: '🪘 Indian Classical', keyboard: '🎹 Keyboard/Keys',
+      string: '🎸 String', percussion: '🥁 Percussion', woodwind: '🪈 Woodwind',
+      brass: '🎺 Brass', utility: '🎯 Tuner/Tool', gesture: '🤚 Gesture',
+      playNow: 'Play →', comingSoon: 'Coming Soon', showing: 'Showing',
+      of: 'of', instruments: 'instruments', noResults: '😕 No instruments found'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  // All instruments data
+  const INSTRUMENTS = [
+    // ---- Indian Classical ----
+    { id:'tabla', cat:'indian', icon:'🥁', href:'tabla.html', live:true,
+      name:{gu:'તબલા',hi:'तबला',en:'Tabla'},
+      desc:{gu:'બાયાં અને દાયાં ટેપ કરી વગાડો, 37 તાલ, સિક્વેન્સર',hi:'बायां और दायां टैप करके बजाएं, 37 ताल, सीक्वेंसर',en:'Tap Bayan & Dayan, 37 taals, sequencer'},
+      tags:['37 taals','Sequencer']},
+    { id:'harmonium', cat:'indian', icon:'🎹', href:'harmonium.html', live:false,
+      name:{gu:'હાર્મોનિયમ',hi:'हार्मोनियम',en:'Harmonium'},
+      desc:{gu:'2.5 ઓક્ટેવ, સા ડ્રોન, રાગ હાઇલાઇટ, કીબોર્ડ સપોર્ટ',hi:'2.5 ऑक्टेव, सा ड्रोन, राग हाइलाइट, कीबोर्ड सपोर्ट',en:'2.5 octave, Sa drone, raga highlights, keyboard support'},
+      tags:['Raga','Keyboard']},
+    { id:'santoor', cat:'indian', icon:'🎵', href:'santoor.html', live:false,
+      name:{gu:'સંતૂર',hi:'संतूर',en:'Santoor'},
+      desc:{gu:'કાશ્મીરી હેમર્ડ ડલ્સીમર, 15/25 કોર્સ, 7 રાગ પ્રીસેટ',hi:'कश्मीरी हैमर्ड डल्सीमर, 15/25 कोर्स, 7 राग प्रीसेट',en:'Kashmiri hammered dulcimer, 15/25 course, 7 raga presets'},
+      tags:['7 Ragas','Reverb']},
+    // ---- Keyboard/Keys ----
+    { id:'piano', cat:'keyboard', icon:'🎹', href:'piano.html', live:false,
+      name:{gu:'ગ્રાન્ડ પિયાનો',hi:'ग्रैंड पियानो',en:'Grand Piano'},
+      desc:{gu:'રિયલ સેમ્પલ, વેલોસિટી કીઝ, કીબોર્ડ શોર્ટકટ',hi:'रियल सैंपल, वेलोसिटी कीज़, कीबोर्ड शॉर्टकट',en:'Real samples, velocity keys, keyboard shortcuts'},
+      tags:['Keyboard','Sustain']},
+    { id:'keyboard-piano', cat:'keyboard', icon:'🎹', href:'keyboard-piano.html', live:false,
+      name:{gu:'કીબોર્ડ પિયાનો',hi:'कीबोर्ड पियानो',en:'Keyboard Piano'},
+      desc:{gu:'હળવું 2-ઓક્ટેવ પિયાનો, કીબોર્ડ/માઉસ/ટચ',hi:'हल्का 2-ऑक्टेव पियानो, कीबोर्ड/माउस/टच',en:'Lightweight 2-octave piano, keyboard/mouse/touch'},
+      tags:['Keyboard','Touch']},
+    { id:'organ', cat:'keyboard', icon:'🎹', href:'organ.html', live:false,
+      name:{gu:'ઓર્ગન',hi:'ऑर्गन',en:'Organ'},
+      desc:{gu:'પાઈપ ઓર્ગન, ડ્રોબાર કંટ્રોલ, સસ્ટેન',hi:'पाइप ऑर्गन, ड्रॉबार कंट्रोल, सस्टेन',en:'Pipe organ, drawbar controls, sustain'},
+      tags:['Drawbar','Sustain']},
+    { id:'accordion', cat:'keyboard', icon:'🪗', href:'accordion.html', live:false,
+      name:{gu:'એકોર્ડિયન',hi:'अकॉर्डियन',en:'Accordion'},
+      desc:{gu:'ઓથેન્ટિક બેલોઝ સેમ્પલ, કીબોર્ડ સપોર્ટ',hi:'ऑथेंटिक बेलोज़ सैंपल, कीबोर्ड सपोर्ट',en:'Authentic bellows samples, keyboard support'},
+      tags:['Bellows','Keyboard']},
+    { id:'stylophone', cat:'keyboard', icon:'🎵', href:'stylophone.html', live:false,
+      name:{gu:'સ્ટાઇલોફોન',hi:'स्टाइलोफोन',en:'Stylophone'},
+      desc:{gu:'રેટ્રો બઝી ઇલેક્ટ્રોનિક પોકેટ સિન્થેસાઇઝર',hi:'रेट्रो बज़ी इलेक्ट्रॉनिक पॉकेट सिंथेसाइज़र',en:'Retro buzzy electronic pocket synthesizer'},
+      tags:['Synth','Vibrato']},
+    { id:'synthesizer', cat:'keyboard', icon:'🎛️', href:'synthesizer.html', live:false,
+      name:{gu:'સિન્થેસાઇઝર',hi:'सिंथेसाइज़र',en:'Synthesizer'},
+      desc:{gu:'ઓસિલેટર, ફિલ્ટર, એન્વેલોપ કંટ્રોલ',hi:'ऑसिलेटर, फ़िल्टर, एन्वेलोप कंट्रोल',en:'Oscillators, filters, envelope controls'},
+      tags:['Oscillator','Filter']},
+    // ---- String ----
+    { id:'guitar', cat:'string', icon:'🎸', href:'guitar.html', live:false,
+      name:{gu:'ગિટાર',hi:'गिटार',en:'Guitar'},
+      desc:{gu:'કોર્ડ લાઇબ્રેરી, ફ્રેટબોર્ડ, સ્ટ્રમ',hi:'कॉर्ड लाइब्रेरी, फ्रेटबोर्ड, स्ट्रम',en:'Chord library, fretboard, strum'},
+      tags:['Chords','Fretboard']},
+    { id:'bass-guitar', cat:'string', icon:'🎸', href:'bass-guitar.html', live:false,
+      name:{gu:'બેસ ગિટાર',hi:'बेस गिटार',en:'Bass Guitar'},
+      desc:{gu:'4-સ્ટ્રિંગ, ફિંગરસ્ટાઇલ ડીપ બેસ',hi:'4-स्ट्रिंग, फिंगरस्टाइल डीप बेस',en:'4-string, fingerstyle deep bass'},
+      tags:['4-string','Deep bass']},
+    { id:'ukulele', cat:'string', icon:'🎸', href:'ukulele.html', live:false,
+      name:{gu:'યુકેલેલે',hi:'यूकुलेले',en:'Ukulele'},
+      desc:{gu:'30+ કોર્ડ, કોર્ડ ડાયગ્રામ, કીબોર્ડ સપોર્ટ',hi:'30+ कॉर्ड, कॉर्ड डायग्राम, कीबोर्ड सपोर्ट',en:'30+ chords, chord diagrams, keyboard support'},
+      tags:['30+ Chords','Keyboard']},
+    { id:'banjo', cat:'string', icon:'🪕', href:'banjo.html', live:false,
+      name:{gu:'બેન્જો',hi:'बैंजो',en:'Banjo'},
+      desc:{gu:'4/5 સ્ટ્રિંગ ટ્યૂનિંગ, બ્લૂગ્રાસ રોલ પેટર્ન',hi:'4/5 स्ट्रिंग ट्यूनिंग, ब्लूग्रास रोल पैटर्न',en:'4/5 string tuning, bluegrass roll patterns'},
+      tags:['Bluegrass','Rolls']},
+    { id:'violin', cat:'string', icon:'🎻', href:'violin.html', live:false,
+      name:{gu:'વાયોલિન',hi:'वायलिन',en:'Violin'},
+      desc:{gu:'આર્કો/પિઝિકેટો, સ્કેલ હાઇલાઇટ, રિવર્બ',hi:'आर्को/पिज़्ज़िकाटो, स्केल हाइलाइट, रिवर्ब',en:'Arco/Pizzicato, scale highlight, reverb'},
+      tags:['Arco','Pizzicato']},
+    { id:'cello', cat:'string', icon:'🎻', href:'cello.html', live:false,
+      name:{gu:'ચેલો',hi:'चेलो',en:'Cello'},
+      desc:{gu:'આર્કો/પિઝિકેટો, ડીપ સ્ટ્રિંગ ટોન',hi:'आर्को/पिज़्ज़िकाटो, डीप स्ट्रिंग टोन',en:'Arco/Pizzicato, deep string tone'},
+      tags:['Arco','Deep']},
+    { id:'dulcimer', cat:'string', icon:'🎵', href:'dulcimer.html', live:false,
+      name:{gu:'માઉન્ટન ડલ્સીમર',hi:'माउंटन डल्सीमर',en:'Mountain Dulcimer'},
+      desc:{gu:'DAD/GDG/AEA ફોક ટ્યૂનિંગ, રિવર્બ',hi:'DAD/GDG/AEA फोक ट्यूनिंग, रिवर्ब',en:'DAD/GDG/AEA folk tunings, reverb'},
+      tags:['Folk','Tunings']},
+    { id:'erhu', cat:'string', icon:'🎵', href:'erhu.html', live:false,
+      name:{gu:'અરહુ',hi:'अरहू',en:'Erhu'},
+      desc:{gu:'ચીની 2-તારનું ફિડલ, સતત પિચ સ્લાઇડ',hi:'चीनी 2-तार का फिडल, लगातार पिच स्लाइड',en:'Chinese 2-string fiddle, continuous pitch slide'},
+      tags:['Continuous','Slide']},
+    { id:'koto', cat:'string', icon:'🎵', href:'koto.html', live:false,
+      name:{gu:'કોટો',hi:'कोटो',en:'Koto'},
+      desc:{gu:'જાપાનીઝ 13-તાર, પ્લક એન્ડ સ્ટ્રમ',hi:'जापानी 13-तार, प्लक एंड स्ट्रम',en:'Japanese 13-string, pluck and strum'},
+      tags:['Japanese','13-string']},
+    { id:'oud', cat:'string', icon:'🎵', href:'oud.html', live:false,
+      name:{gu:'ઊદ',hi:'ऊद',en:'Oud'},
+      desc:{gu:'અરબી લ્યૂટ, ફ્રેટલેસ ફિંગરબોર્ડ',hi:'अरबी ल्यूट, फ्रेटलेस फिंगरबोर्ड',en:'Arabic lute, fretless fingerboard'},
+      tags:['Arabic','Fretless']},
+    // ---- Percussion / World ----
+    { id:'xylophone', cat:'percussion', icon:'🎵', href:'xylophone.html', live:false,
+      name:{gu:'ઝાયલોફોન',hi:'ज़ाइलोफोन',en:'Xylophone'},
+      desc:{gu:'લાકડાના બાર, 8/15 બાર મોડ',hi:'लकड़ी के बार, 8/15 बार मोड',en:'Wooden bars, 8/15 bar modes'},
+      tags:['8/15 bars','Wooden']},
+    { id:'glockenspiel', cat:'percussion', icon:'🔔', href:'glockenspiel.html', live:false,
+      name:{gu:'ગ્લોકેનશ્પિલ',hi:'ग्लॉकेनश्पिल',en:'Glockenspiel'},
+      desc:{gu:'મેટલ બાર, પ્રીસેટ ગીતો, કસ્ટમ નોટ્સ',hi:'मेटल बार, प्रीसेट गाने, कस्टम नोट्स',en:'Metal bars, preset songs, custom notes'},
+      tags:['Preset songs','Metal']},
+    { id:'marimba', cat:'percussion', icon:'🎵', href:'marimba.html', live:false,
+      name:{gu:'મેરિમ્બા',hi:'मरिम्बा',en:'Marimba'},
+      desc:{gu:'ગરમ રોઝવુડ ટોન, રેઝોનેટર ટ્યૂબ',hi:'गर्म रोज़वुड टोन, रेज़ोनेटर ट्यूब',en:'Warm rosewood tone, resonator tubes'},
+      tags:['Rosewood','Warm']},
+    { id:'kalimba', cat:'percussion', icon:'🎵', href:'kalimba.html', live:false,
+      name:{gu:'કલિમ્બા (થમ્બ પિયાનો)',hi:'कलिम्बा (थंब पियानो)',en:'Kalimba (Thumb Piano)'},
+      desc:{gu:'10/17 ટાઇન મોડ, રિવર્બ કંટ્રોલ',hi:'10/17 टाइन मोड, रिवर्ब कंट्रोल',en:'10/17 tine modes, reverb control'},
+      tags:['10/17 tines','Reverb']},
+    { id:'handpan', cat:'percussion', icon:'🫕', href:'handpan.html', live:false,
+      name:{gu:'હેન્ડપેન',hi:'हैंडपैन',en:'Handpan'},
+      desc:{gu:'9/12 નોટ, 7 સ્કેલ (D Minor, Celtic...)',hi:'9/12 नोट, 7 स्केल (D Minor, Celtic...)',en:'9/12 note, 7 scales (D Minor, Celtic...)'},
+      tags:['7 Scales','9/12 notes']},
+    { id:'steel-tongue-drum', cat:'percussion', icon:'🥁', href:'steel-tongue-drum.html', live:false,
+      name:{gu:'સ્ટીલ ટંગ ડ્રમ',hi:'स्टील टंग ड्रम',en:'Steel Tongue Drum'},
+      desc:{gu:'8 સ્કેલ, 8/11 ટંગ મોડ, રિવર્બ',hi:'8 स्केल, 8/11 टंग मोड, रिवर्ब',en:'8 scales, 8/11 tongue modes, reverb'},
+      tags:['8 Scales','Reverb']},
+    { id:'drum-kit', cat:'percussion', icon:'🥁', href:'drum-kit.html', live:false,
+      name:{gu:'ડ્રમ કિટ',hi:'ड्रम किट',en:'Drum Kit'},
+      desc:{gu:'12-પેડ કિટ, 3 પ્રીસેટ, કીબોર્ડ સપોર્ટ',hi:'12-पैड किट, 3 प्रीसेट, कीबोर्ड सपोर्ट',en:'12-pad kit, 3 presets, keyboard support'},
+      tags:['12 Pads','Keyboard']},
+    { id:'drum-machine', cat:'percussion', icon:'🎛️', href:'drum-machine.html', live:false,
+      name:{gu:'ડ્રમ મશીન',hi:'ड्रम मशीन',en:'Drum Machine'},
+      desc:{gu:'8-ટ્રેક સિક્વેન્સર, BPM, સ્વિંગ, રિવર્બ',hi:'8-ट्रैक सीक्वेंसर, BPM, स्विंग, रिवर्ब',en:'8-track sequencer, BPM, swing, reverb'},
+      tags:['8-Track','Sequencer']},
+    { id:'music-box', cat:'percussion', icon:'🎶', href:'music-box.html', live:false,
+      name:{gu:'મ્યુઝિક બોક્સ',hi:'म्यूज़िक बॉक्स',en:'Music Box'},
+      desc:{gu:'8 ક્લાસિક મેલોડી, સ્પીડ કંટ્રોલ',hi:'8 क्लासिक मेलोडी, स्पीड कंट्रोल',en:'8 classic melodies, speed control'},
+      tags:['8 Melodies','Speed']},
+    // ---- Woodwind ----
+    { id:'flute', cat:'woodwind', icon:'🪈', href:'flute.html', live:false,
+      name:{gu:'વાંસળી (ફ્લ્યુટ)',hi:'बांसुरी (फ्लूट)',en:'Flute (Bansuri)'},
+      desc:{gu:'કોન્સર્ટ + બાંસુરી મોડ, બ્રેથ ટોન, રિવર્બ',hi:'कॉन्सर्ट + बांसुरी मोड, ब्रेथ टोन, रिवर्ब',en:'Concert + Bansuri modes, breath tone, reverb'},
+      tags:['Bansuri','Breath']},
+    { id:'piccolo', cat:'woodwind', icon:'🪈', href:'piccolo.html', live:false,
+      name:{gu:'પિકોલો',hi:'पिकोलो',en:'Piccolo'},
+      desc:{gu:'ઉચ્ચ-પિચ, તેજ સ્વર, બ્રેથ આર્ટિક્યુલેશન',hi:'उच्च-पिच, तेज़ स्वर, ब्रेथ आर्टिक्यूलेशन',en:'High-pitch, bright tone, breath articulation'},
+      tags:['Bright','High-pitch']},
+    { id:'clarinet', cat:'woodwind', icon:'🪈', href:'clarinet.html', live:false,
+      name:{gu:'ક્લેરિનેટ',hi:'क्लैरिनेट',en:'Clarinet'},
+      desc:{gu:'ગરમ વૂડવિન્ડ ટોન, ઓથેન્ટિક સાઉન્ડ',hi:'गर्म वुडविंड टोन, ऑथेंटिक साउंड',en:'Warm woodwind tone, authentic sound'},
+      tags:['Warm','Authentic']},
+    { id:'oboe', cat:'woodwind', icon:'🪈', href:'oboe.html', live:false,
+      name:{gu:'ઓબો',hi:'ओबो',en:'Oboe'},
+      desc:{gu:'ડબલ-રીડ વાઇબ્રેટો, Bb3–A5 રેન્જ, રિવર્બ',hi:'डबल-रीड वाइब्रेटो, Bb3–A5 रेंज, रिवर्ब',en:'Double-reed vibrato, Bb3–A5 range, reverb'},
+      tags:['Double-reed','Vibrato']},
+    { id:'saxophone', cat:'woodwind', icon:'🎷', href:'saxophone.html', live:false,
+      name:{gu:'સેક્સોફોન',hi:'सैक्सोफोन',en:'Saxophone'},
+      desc:{gu:'આલ્ટો, પૂર્ણ ક્રોમેટિક, વાઇબ્રેટો, ગ્રાઉલ',hi:'ऑल्टो, पूर्ण क्रोमेटिक, वाइब्रेटो, ग्राउल',en:'Alto, full chromatic, vibrato, growl effect'},
+      tags:['32-note','Growl']},
+    { id:'recorder', cat:'woodwind', icon:'🪈', href:'recorder.html', live:false,
+      name:{gu:'રેકોર્ડર',hi:'रिकॉर्डर',en:'Recorder'},
+      desc:{gu:'સોપ્રાનો/આલ્ટો, ફિંગરિંગ ગાઈડ',hi:'सोप्रानो/ऑल्टो, फिंगरिंग गाइड',en:'Soprano/Alto, fingering guide'},
+      tags:['Soprano','Alto']},
+    { id:'ocarina', cat:'woodwind', icon:'🎵', href:'ocarina.html', live:false,
+      name:{gu:'ઓકેરીના',hi:'ओकेरिना',en:'Ocarina'},
+      desc:{gu:'ફિંગરિંગ વિઝ્યુલાઇઝેશન, સિન્થેસાઇઝ્ડ',hi:'फिंगरिंग विज़ुअलाइज़ेशन, सिंथेसाइज़्ड',en:'Fingering visualization, synthesized sound'},
+      tags:['Fingering','Synth']},
+    // ---- Brass ----
+    { id:'trumpet', cat:'brass', icon:'🎺', href:'trumpet.html', live:false,
+      name:{gu:'ટ્રમ્પેટ',hi:'ट्रम्पेट',en:'Trumpet'},
+      desc:{gu:'3 વાલ્વ, રિયલિસ્ટિક બ્રાસ ટોન',hi:'3 वॉल्व, रियलिस्टिक ब्रास टोन',en:'3 valves, realistic brass tone'},
+      tags:['3 Valves','Brass']},
+    { id:'trombone', cat:'brass', icon:'🎺', href:'trombone.html', live:false,
+      name:{gu:'ટ્રોમ્બોન',hi:'ट्रॉम्बोन',en:'Trombone'},
+      desc:{gu:'7 સ્લાઇડ પોઝિશન, પોર્ટામેન્ટો ગ્લાઈડ',hi:'7 स्लाइड पोज़िशन, पोर्टामेंटो ग्लाइड',en:'7 slide positions, portamento glide'},
+      tags:['7 Positions','Glide']},
+    // ---- Tuner / Utility ----
+    { id:'pitch-monitor', cat:'utility', icon:'🎤', href:'pitch-monitor.html', live:true,
+      name:{gu:'વોકલ પિચ મોનિટર',hi:'वोकल पिच मॉनिटर',en:'Vocal Pitch Monitor'},
+      desc:{gu:'રિયલ-ટાઇમ પિચ ડિટેક્શન, સરગમ, Hz',hi:'रियल-टाइम पिच डिटेक्शन, सरगम, Hz',en:'Real-time pitch detection, sargam, Hz'},
+      tags:['Mic','Sargam']},
+    { id:'metronome', cat:'utility', icon:'⏱️', href:'metronome.html', live:true,
+      name:{gu:'મેટ્રોનોમ',hi:'मेट्रोनोम',en:'Metronome'},
+      desc:{gu:'BPM સ્લાઇડર, ટેપ ટેમ્પો, 5 ટાઇમ સિગ્નેચર',hi:'BPM स्लाइडर, टैप टेम्पो, 5 टाइम सिग्नेचर',en:'BPM slider, tap tempo, 5 time signatures'},
+      tags:['Tap tempo','Mobile']},
+    { id:'guitar-tuner', cat:'utility', icon:'🎸', href:'guitar-tuner.html', live:false,
+      name:{gu:'ગિટાર ટ્યૂનર',hi:'गिटार ट्यूनर',en:'Guitar Tuner'},
+      desc:{gu:'માઇક-બેઝ્ડ, 6 સ્ટ્રિંગ, વિઝ્યુઅલ નીડલ',hi:'माइक-बेस्ड, 6 स्ट्रिंग, विज़ुअल नीडल',en:'Mic-based, 6 strings, visual needle'},
+      tags:['Mic','6 strings']},
+    { id:'ukulele-tuner', cat:'utility', icon:'🎵', href:'ukulele-tuner.html', live:false,
+      name:{gu:'યુકેલેલે ટ્યૂનર',hi:'यूकुलेले ट्यूनर',en:'Ukulele Tuner'},
+      desc:{gu:'માઇક-બેઝ્ડ, G-C-E-A સ્ટાન્ડર્ડ ટ્યૂનિંગ',hi:'माइक-बेस्ड, G-C-E-A स्टैंडर्ड ट्यूनिंग',en:'Mic-based, G-C-E-A standard tuning'},
+      tags:['Mic','All uke types']},
+    { id:'circle-of-fifths', cat:'utility', icon:'🎯', href:'circle-of-fifths.html', live:false,
+      name:{gu:'સર્કલ ઓફ ફિફ્થ્સ',hi:'सर्कल ऑफ फिफ्थ्स',en:'Circle of Fifths'},
+      desc:{gu:'ઇન્ટરેક્ટિવ કી એક્સપ્લોરર, કોર્ડ બિલ્ડર',hi:'इंटरैक्टिव की एक्सप्लोरर, कॉर्ड बिल्डर',en:'Interactive key explorer, chord builder'},
+      tags:['Keys','Chords']},
+    { id:'bpm-tapper', cat:'utility', icon:'👆', href:'bpm-tapper.html', live:false,
+      name:{gu:'BPM ટેપર',hi:'BPM टैपर',en:'BPM Tapper'},
+      desc:{gu:'ટેપ ટેમ્પો, ડિલે વેલ્યૂ કેલ્ક્યુલેટર',hi:'टैप टेम्पो, डिले वैल्यू कैलकुलेटर',en:'Tap tempo, delay values calculator'},
+      tags:['Tap','Delay']},
+    // ---- Gesture ----
+    { id:'air-guitar', cat:'gesture', icon:'🎸', href:'air-guitar.html', live:false,
+      name:{gu:'એર ગિટાર',hi:'एयर गिटार',en:'Air Guitar'},
+      desc:{gu:'વેબકેમ હેન્ડ સ્ટ્રમિંગ, કોર્ડ સિલેક્શન',hi:'वेबकैम हैंड स्ट्रमिंग, कॉर्ड सिलेक्शन',en:'Webcam hand strumming, chord selection'},
+      tags:['Webcam','No instrument']},
+    { id:'air-harp', cat:'gesture', icon:'🎵', href:'air-harp.html', live:false,
+      name:{gu:'એર હાર્પ',hi:'एयर हार्प',en:'Air Harp'},
+      desc:{gu:'લેઝર સ્ટ્રિંગ્સ, હેન્ડ ટ્રેકિંગ',hi:'लेज़र स्ट्रिंग्स, हैंड ट्रैकिंग',en:'Laser strings, hand tracking'},
+      tags:['Webcam','Laser']},
+    { id:'air-ukulele', cat:'gesture', icon:'🎸', href:'air-ukulele.html', live:false,
+      name:{gu:'એર યુકેલેલે',hi:'एयर यूकुलेले',en:'Air Ukulele'},
+      desc:{gu:'વેબકેમ કોર્ડ સિલેક્શન, 6 કોર્ડ',hi:'वेबकैम कॉर्ड सिलेक्शन, 6 कॉर्ड',en:'Webcam chord selection, 6 chords'},
+      tags:['Webcam','6 Chords']},
+    { id:'air-theremin', cat:'gesture', icon:'📡', href:'air-theremin.html', live:false,
+      name:{gu:'એર થેરેમિન',hi:'एयर थेरेमिन',en:'Air Theremin'},
+      desc:{gu:'વેબકેમ પિચ/વોલ્યુમ કંટ્રોલ',hi:'वेबकैम पिच/वॉल्यूम कंट्रोल',en:'Webcam pitch/volume control'},
+      tags:['Webcam','Pitch']},
+    { id:'theremin', cat:'gesture', icon:'📡', href:'theremin.html', live:false,
+      name:{gu:'થેરેમિન',hi:'थेरेमिन',en:'Theremin'},
+      desc:{gu:'2D પેડ પિચ ગ્લાઈડ, ડિલે, LFO',hi:'2D पैड पिच ग्लाइड, डिले, LFO',en:'2D pad pitch glide, delay, LFO vibrato'},
+      tags:['2D Pad','LFO']},
+    { id:'sensory-sparkler', cat:'gesture', icon:'✨', href:'sensory-sparkler.html', live:false,
+      name:{gu:'સેન્સરી સ્પાર્કલર',hi:'सेंसरी स्पार्कलर',en:'Sensory Sparkler'},
+      desc:{gu:'ઇન્ટરેક્ટિવ મ્યુઝિકલ સ્પાર્કલ બર્સ્ટ',hi:'इंटरैक्टिव म्यूज़िकल स्पार्कल बर्स्ट',en:'Interactive musical sparkle bursts'},
+      tags:['Sparkle','Interactive']},
+    { id:'air-drum', cat:'gesture', icon:'🥁', href:'air-drum.html', live:false,
+      name:{gu:'એર ડ્રમ',hi:'एयर ड्रम',en:'Air Drum'},
+      desc:{gu:'વેબકેમ ડ્રમ કિટ, હેન્ડ જેશ્ચર',hi:'वेबकैम ड्रम किट, हैंड जेश्चर',en:'Webcam drum kit, hand gestures'},
+      tags:['Webcam','Full kit']}
+  ];
+
+  const CATEGORIES = ['all','indian','keyboard','string','percussion','woodwind','brass','utility','gesture'];
+
+  document.getElementById('instPageTitle').textContent = t.title;
+  document.getElementById('instPageSub').textContent = t.sub;
+  document.getElementById('instSearch').placeholder = t.search;
+
+  // Build filter pills
+  const filtersEl = document.getElementById('instFilters');
+  CATEGORIES.forEach(cat => {
+    const pill = document.createElement('button');
+    pill.className = 'filter-pill' + (cat === 'all' ? ' active' : '');
+    pill.textContent = t[cat] || cat;
+    pill.onclick = () => {
+      filtersEl.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      renderGrid(cat, document.getElementById('instSearch').value.trim().toLowerCase());
+    };
+    filtersEl.appendChild(pill);
+  });
+
+  function renderGrid(activeCat, search) {
+    const grid = document.getElementById('instGrid');
+    grid.innerHTML = '';
+    let count = 0;
+
+    INSTRUMENTS.forEach(inst => {
+      // Filter by category
+      if (activeCat !== 'all' && inst.cat !== activeCat) return;
+      // Filter by search
+      if (search) {
+        const haystack = (
+          (inst.name.en||'') + ' ' + (inst.name.gu||'') + ' ' + (inst.name.hi||'') + ' ' +
+          (inst.desc.en||'') + ' ' + inst.cat + ' ' + inst.tags.join(' ')
+        ).toLowerCase();
+        if (!haystack.includes(search)) return;
+      }
+
+      count++;
+      const card = document.createElement('a');
+      card.className = 'inst-card' + (inst.live ? '' : ' coming-soon');
+      card.href = inst.live ? inst.href : 'javascript:void(0)';
+
+      const catClass = 'cat-' + inst.cat;
+      const iconClass = 'icon-' + inst.cat;
+      const name = inst.name[lang] || inst.name.en;
+      const desc = inst.desc[lang] || inst.desc.en;
+
+      let tagsHtml = inst.tags.map(tag => `<span class="inst-card-tag">${tag}</span>`).join('');
+
+      card.innerHTML = `
+        ${!inst.live ? `<span class="soon-badge">${t.comingSoon}</span>` : ''}
+        <div class="inst-card-top">
+          <div class="inst-card-icon ${iconClass}">${inst.icon}</div>
+          <div class="inst-card-info">
+            <p class="inst-card-name">${name}</p>
+            <span class="inst-card-cat ${catClass}">${t[inst.cat] || inst.cat}</span>
+          </div>
+        </div>
+        <p class="inst-card-desc">${desc}</p>
+        <div class="inst-card-tags">
+          ${tagsHtml}
+          <span class="inst-card-play">${inst.live ? t.playNow : ''}</span>
+        </div>`;
+      grid.appendChild(card);
+    });
+
+    // Update count
+    document.getElementById('instCount').textContent = `${t.showing} ${count} ${t.of} ${INSTRUMENTS.length} ${t.instruments}`;
+    document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none';
+    document.getElementById('noResults').textContent = t.noResults;
+  }
+
+  // Search handler
+  document.getElementById('instSearch').addEventListener('input', function() {
+    const activeCat = document.querySelector('.filter-pill.active');
+    const cat = CATEGORIES.find(c => (t[c] || c) === activeCat?.textContent) || 'all';
+    renderGrid(cat, this.value.trim().toLowerCase());
+  });
+
+  // Initial render
+  renderGrid('all', '');
+
+  // Init app shell
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>
