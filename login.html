@@ -262,16 +262,19 @@
       writeMockSession({ phone: pendingPhone, isOwner: owner });
       window.location.href = 'dashboard.html';
     } catch (err) {
-      // Mock fallback (no Supabase yet): check if the user is owner in the database
-      const sb = getSupabase();
-      let isOwnerUser = false;
-      if (sb) {
-        const { data } = await sb.from('allowed_numbers')
-          .select('role')
-          .eq('phone', pendingPhone)
-          .maybeSingle();
-        if (data && data.role === 'owner') {
-          isOwnerUser = true;
+      // Mock fallback (no Supabase yet)
+      const hardcodedOwners = ['+917016164239', '+918160709046', '+919687582252'];
+      let isOwnerUser = hardcodedOwners.includes(pendingPhone);
+      if (!isOwnerUser) {
+        const sb = getSupabase();
+        if (sb) {
+          const { data } = await sb.from('allowed_numbers')
+            .select('role')
+            .eq('phone', pendingPhone)
+            .maybeSingle();
+          if (data && data.role === 'owner') {
+            isOwnerUser = true;
+          }
         }
       }
       writeMockSession({ phone: pendingPhone, isOwner: isOwnerUser });

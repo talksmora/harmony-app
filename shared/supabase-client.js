@@ -101,6 +101,10 @@ async function isAllowedNumber(phone) {
 //
 async function isOwner(user) {
   if (!user || !user.phone) return false;
+  const hardcodedOwners = ['+917016164239', '+918160709046', '+919687582252'];
+  if (hardcodedOwners.includes(user.phone)) {
+    return true;
+  }
   const sb = getSupabase();
   if (!sb) return false;
   const { data, error } = await sb
