@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Xylophone - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .xylo-container {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+    border: 8px solid #0f171e;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #fff;
+    position: relative;
+    text-align: center;
+  }
+
+  /* Xylophone wooden frame holding bars */
+  .xylo-frame {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #34495e;
+    border: 4px solid #1a252f;
+    border-radius: 16px;
+    padding: 20px 10px;
+    height: 240px;
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+  }
+
+  .xylo-bar {
+    width: 48px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    font-weight: 900;
+    color: #fff;
+    font-size: 0.95rem;
+    text-shadow: 1px 1px 2px #000;
+    transition: transform 0.1s, filter 0.1s;
+    user-select: none;
+  }
+  .xylo-bar:active, .xylo-bar.active {
+    transform: scale(0.95);
+    filter: brightness(1.2);
+  }
+
+  /* Key letters label inside bar */
+  .bar-note {
+    font-size: 0.8rem;
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">🎵 વર્ચ્યુઅલ ઝાયલોફોન</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="xylo-container">
+      <div class="xylo-frame" id="xyloFrame">
+        <!-- 8 Bars representing C4 to C5 with colors -->
+      </div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🎵 વર્ચ્યુઅલ ઝાયલોફોન',
+      back: '← પાછા જાઓ'
+    },
+    hi: {
+      title: '🎵 वर्चुअल ज़ाइलोफोन',
+      back: '← वापस जाएं'
+    },
+    en: {
+      title: '🎵 Virtual Xylophone',
+      back: '← Go Back'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+
+  let audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Synthesize wooden bar strike sound
+  function playWoodenStrike(freq) {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    // Fast wooden decay
+    gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.5);
+  }
+
+  const BARS = [
+    { note: 'C4', freq: 261.63, color: '#e74c3c', height: 200 },
+    { note: 'D4', freq: 293.66, color: '#e67e22', height: 190 },
+    { note: 'E4', freq: 329.63, color: '#f1c40f', height: 180 },
+    { note: 'F4', freq: 349.23, color: '#2ecc71', height: 170 },
+    { note: 'G4', freq: 392.00, color: '#3498db', height: 160 },
+    { note: 'A4', freq: 440.00, color: '#9b59b6', height: 150 },
+    { note: 'B4', freq: 493.88, color: '#1abc9c', height: 140 },
+    { note: 'C5', freq: 523.25, color: '#e84393', height: 130 }
+  ];
+
+  function renderXylophone() {
+    const frame = document.getElementById('xyloFrame');
+    frame.innerHTML = '';
+
+    BARS.forEach(barInfo => {
+      const bar = document.createElement('div');
+      bar.className = 'xylo-bar';
+      bar.style.backgroundColor = barInfo.color;
+      bar.style.height = barInfo.height + 'px';
+      
+      const label = document.createElement('span');
+      label.className = 'bar-note';
+      label.textContent = barInfo.note;
+      bar.appendChild(label);
+
+      bar.onclick = () => {
+        bar.classList.add('active');
+        playWoodenStrike(barInfo.freq);
+        setTimeout(() => bar.classList.remove('active'), 100);
+      };
+
+      frame.appendChild(bar);
+    });
+  }
+
+  // Keyboard support mapping (1 to 8)
+  window.addEventListener('keydown', (e) => {
+    if (e.repeat) return;
+    const num = parseInt(e.key);
+    if (num >= 1 && num <= 8) {
+      const barInfo = BARS[num - 1];
+      if (barInfo) {
+        const barEls = document.querySelectorAll('.xylo-bar');
+        const el = barEls[num - 1];
+        if (el) {
+          el.classList.add('active');
+          playWoodenStrike(barInfo.freq);
+          setTimeout(() => el.classList.remove('active'), 100);
+        }
+      }
+    }
+  });
+
+  renderXylophone();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>

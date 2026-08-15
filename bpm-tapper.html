@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BPM Tapper - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .tapper-container {
+    background: linear-gradient(135deg, #16a085 0%, #107a68 100%);
+    border: 8px solid #0b5345;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #fff;
+    position: relative;
+    text-align: center;
+  }
+
+  .tap-button {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 0%, #bdc3c7 100%);
+    border: 6px solid #1abc9c;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #16a085;
+    text-shadow: 1px 1px 0px #fff;
+    margin: 20px 0;
+    transition: transform 0.08s, box-shadow 0.08s;
+    user-select: none;
+  }
+  .tap-button:active {
+    transform: scale(0.92);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+
+  .bpm-display {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    margin: 10px 0;
+  }
+
+  .reset-btn {
+    background: rgba(0,0,0,0.4);
+    border: 1.5px solid #1abc9c;
+    color: #fff;
+    padding: 8px 24px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover {
+    background: #1abc9c;
+  }
+
+  /* Delay Values Table */
+  .delay-table {
+    width: 100%;
+    max-width: 400px;
+    margin: 30px auto 0;
+    border-collapse: collapse;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 0.85rem;
+  }
+  .delay-table th, .delay-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .delay-table th {
+    background: rgba(0,0,0,0.5);
+    font-weight: 800;
+    color: #1abc9c;
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">👆 BPM ટેપર (Tempo Finder)</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="tapper-container">
+      <div class="bpm-display" id="bpmVal">00</div>
+      <p style="font-size: 0.8rem; color: #a3e4d7; margin:0 0 10px;" id="lblTapSub">Beats Per Minute (BPM)</p>
+
+      <button class="tap-button" id="tapBtn">TAP HERE</button>
+      
+      <div>
+        <button class="reset-btn" id="resetBtn">RESET</button>
+      </div>
+
+      <!-- Delay timing calculators -->
+      <table class="delay-table">
+        <thead>
+          <tr>
+            <th id="lblNoteVal">નોટ વેલ્યૂ (Note Value)</th>
+            <th id="lblDelayTime">ડિલે સમય (Delay MS)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1/4 (Quarter Note)</td>
+            <td id="delay-4">- ms</td>
+          </tr>
+          <tr>
+            <td>1/8 (Eighth Note)</td>
+            <td id="delay-8">- ms</td>
+          </tr>
+          <tr>
+            <td>1/16 (Sixteenth Note)</td>
+            <td id="delay-16">- ms</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '👆 BPM ટેપર (Tempo Finder)',
+      back: '← પાછા જાઓ',
+      tapBtn: 'અહીં ટેપ કરો',
+      resetBtn: 'રીસેટ',
+      noteVal: 'નોટ વેલ્યૂ (Note Value)',
+      delayTime: 'ડિલે સમય (Delay MS)'
+    },
+    hi: {
+      title: '👆 BPM टैपर (Tempo Finder)',
+      back: '← वापस जाएं',
+      tapBtn: 'यहाँ टैप करें',
+      resetBtn: 'रीसेट',
+      noteVal: 'नोट वैल्यू (Note Value)',
+      delayTime: 'डिले समय (Delay MS)'
+    },
+    en: {
+      title: '👆 BPM Tapper (Tempo Finder)',
+      back: '← Go Back',
+      tapBtn: 'TAP HERE',
+      resetBtn: 'RESET',
+      noteVal: 'Note Value',
+      delayTime: 'Delay Time (ms)'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('tapBtn').textContent = t.tapBtn;
+  document.getElementById('resetBtn').textContent = t.resetBtn;
+  document.getElementById('lblNoteVal').textContent = t.noteVal;
+  document.getElementById('lblDelayTime').textContent = t.delayTime;
+
+  let audioCtx = null;
+  let tapTimes = [];
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Play click woodblock feedback sound
+  function playClick() {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+
+    gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.06);
+  }
+
+  function tapBpm() {
+    playClick();
+    const now = performance.now();
+    
+    // Clear history if inactive for more than 2.5 seconds
+    if (tapTimes.length > 0 && (now - tapTimes[tapTimes.length - 1] > 2500)) {
+      tapTimes = [];
+    }
+
+    tapTimes.push(now);
+
+    if (tapTimes.length > 1) {
+      // Calculate intervals
+      let totalInterval = 0;
+      for (let i = 1; i < tapTimes.length; i++) {
+        totalInterval += (tapTimes[i] - tapTimes[i - 1]);
+      }
+      const avgInterval = totalInterval / (tapTimes.length - 1);
+      const bpm = Math.round(60000 / avgInterval);
+
+      // Display BPM
+      document.getElementById('bpmVal').textContent = bpm;
+
+      // Update delays table
+      // 1/4 note delay time in ms = 60000 / bpm
+      const qDelay = 60000 / bpm;
+      document.getElementById('delay-4').textContent = `${Math.round(qDelay)} ms`;
+      document.getElementById('delay-8').textContent = `${Math.round(qDelay / 2)} ms`;
+      document.getElementById('delay-16').textContent = `${Math.round(qDelay / 4)} ms`;
+    }
+  }
+
+  function resetTapper() {
+    tapTimes = [];
+    document.getElementById('bpmVal').textContent = '00';
+    document.getElementById('delay-4').textContent = '- ms';
+    document.getElementById('delay-8').textContent = '- ms';
+    document.getElementById('delay-16').textContent = '- ms';
+  }
+
+  document.getElementById('tapBtn').onclick = tapBpm;
+  document.getElementById('resetBtn').onclick = resetTapper;
+
+  // Spacebar to tap support
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      const btn = document.getElementById('tapBtn');
+      btn.style.transform = 'scale(0.92)';
+      tapBpm();
+    }
+  });
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'Space') {
+      const btn = document.getElementById('tapBtn');
+      btn.style.transform = 'none';
+    }
+  });
+
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>

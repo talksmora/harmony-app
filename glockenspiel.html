@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Glockenspiel - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .glock-container {
+    background: linear-gradient(135deg, #1e3799 0%, #0a3d62 100%);
+    border: 8px solid #0c2461;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #fff;
+    position: relative;
+    text-align: center;
+  }
+
+  .glock-controls {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: rgba(0,0,0,0.4);
+    border: 2px solid #4a69bd;
+    padding: 15px 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+  }
+  .control-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #aaccff;
+  }
+  .control-group select {
+    background: #0c2461;
+    border: 1px solid #4a69bd;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* Glockenspiel metallic frame holding metal bars */
+  .glock-frame {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #4a69bd;
+    border: 4px solid #0c2461;
+    border-radius: 16px;
+    padding: 20px 10px;
+    height: 240px;
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+  }
+
+  .glock-bar {
+    width: 42px;
+    background: linear-gradient(to bottom, #f1f2f6 0%, #ced6e0 50%, #a4b0be 100%);
+    border-radius: 4px;
+    border: 1px solid #747d8c;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    font-weight: 900;
+    color: #2f3542;
+    font-size: 0.85rem;
+    transition: transform 0.1s, background 0.1s;
+    user-select: none;
+  }
+  .glock-bar:active, .glock-bar.active {
+    transform: scale(0.95);
+    background: #f1c40f;
+  }
+  .glock-bar.highlight {
+    box-shadow: 0 0 20px #f1c40f;
+    border-color: #f1c40f;
+    animation: pulse 1s infinite alternate;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+  }
+
+  .bar-note {
+    font-size: 0.75rem;
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">🎵 વર્ચ્યુઅલ ગ્લોકેનશ્પિલ</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="glock-container">
+      <div class="glock-controls">
+        <div class="control-group">
+          <label id="lblSongs">ગીત શીખો (Play along Song)</label>
+          <select id="songSelect">
+            <option value="none" selected>None (Free Play)</option>
+            <option value="twinkle">Twinkle Twinkle Little Star</option>
+            <option value="mary">Mary Had a Little Lamb</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="glock-frame" id="glockFrame">
+        <!-- 8 Metal Bars representing C5 to C6 -->
+      </div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🎵 વર્ચ્યુઅલ ગ્લોકેનશ્પિલ',
+      back: '← પાછા જાઓ',
+      songs: 'ગીત શીખો (Play along Song)'
+    },
+    hi: {
+      title: '🎵 वर्चुअल ग्लॉकेनश्पिल',
+      back: '← वापस जाएं',
+      songs: 'गीत सीखें (Play along Song)'
+    },
+    en: {
+      title: '🎵 Virtual Glockenspiel',
+      back: '← Go Back',
+      songs: 'Learn a Song (Follow light)'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('lblSongs').textContent = t.songs;
+
+  let audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Synthesize bright metallic Glockenspiel ring
+  function playMetalStrike(freq) {
+    initAudio();
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    // High overtone ring
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(freq * 3.01, audioCtx.currentTime);
+
+    gainNode.gain.setValueAtTime(0.35, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5); // long ring
+
+    osc1.connect(gainNode);
+    osc2.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    osc1.start();
+    osc2.start();
+    osc1.stop(audioCtx.currentTime + 1.6);
+    osc2.stop(audioCtx.currentTime + 1.6);
+  }
+
+  const BARS = [
+    { note: 'C5', freq: 523.25, height: 200 },
+    { note: 'D5', freq: 587.33, height: 190 },
+    { note: 'E5', freq: 659.25, height: 180 },
+    { note: 'F5', freq: 698.46, height: 170 },
+    { note: 'G5', freq: 783.99, height: 160 },
+    { note: 'A5', freq: 880.00, height: 150 },
+    { note: 'B5', freq: 987.77, height: 140 },
+    { note: 'C6', freq: 1046.50, height: 130 }
+  ];
+
+  // Preset song sequences (notes indices)
+  const SONGS = {
+    twinkle: [0, 0, 4, 4, 5, 5, 4, 3, 3, 2, 2, 1, 1, 0], // C C G G A A G, F F E E D D C
+    mary: [2, 1, 0, 1, 2, 2, 2, 1, 1, 1, 2, 4, 4]       // E D C D E E E, D D D, E G G
+  };
+
+  let songStep = 0;
+  let activeSong = 'none';
+
+  function renderGlockenspiel() {
+    const frame = document.getElementById('glockFrame');
+    frame.innerHTML = '';
+
+    BARS.forEach((barInfo, index) => {
+      const bar = document.createElement('div');
+      bar.className = 'glock-bar';
+      bar.id = 'bar-' + index;
+      bar.style.height = barInfo.height + 'px';
+      
+      const label = document.createElement('span');
+      label.className = 'bar-note';
+      label.textContent = barInfo.note;
+      bar.appendChild(label);
+
+      bar.onclick = () => {
+        bar.classList.add('active');
+        playMetalStrike(barInfo.freq);
+        setTimeout(() => bar.classList.remove('active'), 100);
+        checkSongStep(index);
+      };
+
+      frame.appendChild(bar);
+    });
+
+    highlightNextSongNote();
+  }
+
+  function highlightNextSongNote() {
+    // Clear all highlights
+    document.querySelectorAll('.glock-bar').forEach(b => b.classList.remove('highlight'));
+
+    if (activeSong === 'none') return;
+    const sequence = SONGS[activeSong];
+    if (!sequence) return;
+
+    const nextNoteIdx = sequence[songStep];
+    if (nextNoteIdx !== undefined) {
+      const el = document.getElementById('bar-' + nextNoteIdx);
+      if (el) el.classList.add('highlight');
+    } else {
+      // Song completed!
+      songStep = 0;
+      highlightNextSongNote();
+    }
+  }
+
+  function checkSongStep(clickedIdx) {
+    if (activeSong === 'none') return;
+    const sequence = SONGS[activeSong];
+    if (!sequence) return;
+
+    if (clickedIdx === sequence[songStep]) {
+      songStep++;
+      highlightNextSongNote();
+    }
+  }
+
+  document.getElementById('songSelect').onchange = function() {
+    activeSong = this.value;
+    songStep = 0;
+    highlightNextSongNote();
+  };
+
+  // Keyboard support mapping (1 to 8)
+  window.addEventListener('keydown', (e) => {
+    if (e.repeat) return;
+    const num = parseInt(e.key);
+    if (num >= 1 && num <= 8) {
+      const idx = num - 1;
+      const barInfo = BARS[idx];
+      if (barInfo) {
+        const el = document.getElementById('bar-' + idx);
+        if (el) {
+          el.classList.add('active');
+          playMetalStrike(barInfo.freq);
+          setTimeout(() => el.classList.remove('active'), 100);
+          checkSongStep(idx);
+        }
+      }
+    }
+  });
+
+  renderGlockenspiel();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>

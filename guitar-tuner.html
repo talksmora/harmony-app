@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guitar Tuner - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .tuner-container {
+    background: linear-gradient(135deg, #1e272c 0%, #0f1315 100%);
+    border: 8px solid #07090a;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+    position: relative;
+    text-align: center;
+  }
+
+  .tuner-controls {
+    margin-bottom: 24px;
+  }
+
+  .mic-btn {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    color: #fff;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(46,204,113,0.3);
+    transition: all 0.2s;
+  }
+  .mic-btn.listening {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    box-shadow: 0 6px 20px rgba(231,76,60,0.3);
+  }
+
+  /* Tuning Gauge */
+  .gauge-wrapper {
+    position: relative;
+    width: 260px;
+    height: 140px;
+    margin: 20px auto;
+    overflow: hidden;
+  }
+  .gauge-bg {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    border: 8px solid #333;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    transform: rotate(-45deg);
+    position: absolute;
+    top: 0; left: 0;
+    box-sizing: border-box;
+  }
+  .gauge-center-line {
+    position: absolute;
+    bottom: 0; left: 50%;
+    width: 4px; height: 100px;
+    background: #2ecc71;
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+  .gauge-needle {
+    position: absolute;
+    bottom: 0; left: 50%;
+    width: 4px; height: 110px;
+    background: #e74c3c;
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(0deg);
+    transition: transform 0.15s ease-out;
+    z-index: 2;
+  }
+
+  .target-string-display {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--accent);
+    margin: 10px 0;
+  }
+
+  .cents-display {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2ecc71;
+  }
+  .cents-display.flat { color: #e74c3c; }
+  .cents-display.sharp { color: #f39c12; }
+
+  .hz-display {
+    font-size: 0.85rem;
+    color: var(--subtitle);
+    margin-top: 5px;
+  }
+
+  /* Active/Target string highlight cards */
+  .strings-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+  }
+  .string-card {
+    background: #111;
+    border: 2px solid #333;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #888;
+  }
+  .string-card.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(230,126,34,0.4);
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">🎸 ગિટાર ટ્યૂનર</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="tuner-container">
+      <div class="tuner-controls">
+        <button class="mic-btn" id="micBtn">🎙️ માઇક ચાલુ કરો (START TUNER)</button>
+      </div>
+
+      <!-- Target String Big View -->
+      <div class="target-string-display" id="targetString">-</div>
+
+      <!-- Needle Gauge -->
+      <div class="gauge-wrapper">
+        <div class="gauge-bg"></div>
+        <div class="gauge-center-line"></div>
+        <div class="gauge-needle" id="gaugeNeedle"></div>
+      </div>
+
+      <!-- Cents status -->
+      <div class="cents-display" id="centsDisplay">-</div>
+      <div class="hz-display" id="hzDisplay">0.00 Hz</div>
+
+      <!-- Guitar strings cards -->
+      <div class="strings-row">
+        <div class="string-card" id="card-E2">E2 (82.4Hz)</div>
+        <div class="string-card" id="card-A2">A2 (110.0Hz)</div>
+        <div class="string-card" id="card-D3">D3 (146.8Hz)</div>
+        <div class="string-card" id="card-G3">G3 (196.0Hz)</div>
+        <div class="string-card" id="card-B3">B3 (246.9Hz)</div>
+        <div class="string-card" id="card-E4">E4 (329.6Hz)</div>
+      </div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🎸 ગિટાર ટ્યૂનર',
+      back: '← પાછા જાઓ',
+      startBtn: '🎙️ માઇક ચાલુ કરો (START TUNER)',
+      stopBtn: '🛑 બંધ કરો (STOP TUNER)',
+      inTune: 'પરફેક્ટ ટ્યૂન! (IN TUNE)',
+      flat: 'ખૂબ નીચું (TOO FLAT)',
+      sharp: 'ખૂબ ઊંચું (TOO SHARP)'
+    },
+    hi: {
+      title: '🎸 गिटार ट्यूनर',
+      back: '← वापस जाएं',
+      startBtn: '🎙️ माइक चालू करें (START TUNER)',
+      stopBtn: '🛑 बंद करें (STOP TUNER)',
+      inTune: 'परफेक्ट ट्यून! (IN TUNE)',
+      flat: 'बहुत नीचा (TOO FLAT)',
+      sharp: 'बहुत ऊंचा (TOO SHARP)'
+    },
+    en: {
+      title: '🎸 Guitar Tuner',
+      back: '← Go Back',
+      startBtn: 'START MIC TUNER',
+      stopBtn: 'STOP TUNER',
+      inTune: 'IN TUNE',
+      flat: 'TOO FLAT',
+      sharp: 'TOO SHARP'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('micBtn').textContent = t.startBtn;
+
+  // Guitar strings frequencies
+  const STRINGS = [
+    { name: 'E2', freq: 82.41 },
+    { name: 'A2', freq: 110.00 },
+    { name: 'D3', freq: 146.83 },
+    { name: 'G3', freq: 196.00 },
+    { note: 'B3', name: 'B3', freq: 246.94 },
+    { name: 'E4', freq: 329.63 }
+  ];
+
+  let audioCtx = null;
+  let stream = null;
+  let analyser = null;
+  let isListening = false;
+  let rafId = null;
+
+  function toggleListening() {
+    if (isListening) {
+      stopTuner();
+    } else {
+      startTuner();
+    }
+  }
+
+  async function startTuner() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(stream);
+      
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      
+      source.connect(analyser);
+      
+      isListening = true;
+      const btn = document.getElementById('micBtn');
+      btn.textContent = t.stopBtn;
+      btn.classList.add('listening');
+
+      updatePitch();
+    } catch(err) {
+      alert("Mic permission denied or error accessing audio devices.");
+      console.error(err);
+    }
+  }
+
+  function stopTuner() {
+    isListening = false;
+    const btn = document.getElementById('micBtn');
+    btn.textContent = t.startBtn;
+    btn.classList.remove('listening');
+
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+    }
+    
+    // Clear displays
+    document.getElementById('targetString').textContent = '-';
+    document.getElementById('centsDisplay').textContent = '-';
+    document.getElementById('centsDisplay').className = 'cents-display';
+    document.getElementById('hzDisplay').textContent = '0.00 Hz';
+    document.getElementById('gaugeNeedle').style.transform = 'translateX(-50%) rotate(0deg)';
+    document.querySelectorAll('.string-card').forEach(c => c.classList.remove('active'));
+  }
+
+  // Autocorrelation Pitch Detection Algorithm
+  function autoCorrelate(buffer, sampleRate) {
+    let SIZE = buffer.length;
+    let rms = 0;
+
+    for (let i = 0; i < SIZE; i++) {
+      let val = buffer[i];
+      rms += val * val;
+    }
+    rms = Math.sqrt(rms / SIZE);
+    if (rms < 0.015) return -1; // signal too weak
+
+    let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+    for (let i = 0; i < SIZE / 2; i++) {
+      if (Math.abs(buffer[i]) < thres) { r1 = i; break; }
+    }
+    for (let i = SIZE - 1; i >= SIZE / 2; i--) {
+      if (Math.abs(buffer[i]) < thres) { r2 = i; break; }
+    }
+
+    buffer = buffer.slice(r1, r2);
+    SIZE = buffer.length;
+
+    let c = new Float32Array(SIZE);
+    for (let i = 0; i < SIZE; i++) {
+      for (let j = 0; j < SIZE - i; j++) {
+        c[i] = c[i] + buffer[j] * buffer[j + i];
+      }
+    }
+
+    let d = 0;
+    while (c[d] > c[d + 1]) d++;
+    let maxval = -1, maxpos = -1;
+    for (let i = d; i < SIZE; i++) {
+      if (c[i] > maxval) {
+        maxval = c[i];
+        maxpos = i;
+      }
+    }
+    let T0 = maxpos;
+
+    let x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
+    let a = (x1 + x3 - 2 * x2) / 2;
+    let b = (x3 - x1) / 2;
+    if (a) T0 = T0 - b / (2 * a);
+
+    return sampleRate / T0;
+  }
+
+  function updatePitch() {
+    if (!isListening) return;
+
+    const buffer = new Float32Array(2048);
+    analyser.getFloatTimeDomainData(buffer);
+    
+    const freq = autoCorrelate(buffer, audioCtx.sampleRate);
+    
+    if (freq !== -1 && freq > 50 && freq < 600) {
+      document.getElementById('hzDisplay').textContent = `${freq.toFixed(2)} Hz`;
+
+      // Find closest guitar string
+      let closest = STRINGS[0];
+      let minDist = Math.abs(freq - STRINGS[0].freq);
+
+      STRINGS.forEach(str => {
+        let dist = Math.abs(freq - str.freq);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = str;
+        }
+      });
+
+      // Calculate cents deviation: 1200 * log2(f / f_target)
+      const cents = Math.round(1200 * Math.log2(freq / closest.freq));
+
+      // Update displays
+      document.getElementById('targetString').textContent = closest.name;
+      
+      // Update string cards highlights
+      document.querySelectorAll('.string-card').forEach(c => c.classList.remove('active'));
+      const card = document.getElementById('card-' + closest.name);
+      if (card) card.classList.add('active');
+
+      const centsEl = document.getElementById('centsDisplay');
+      if (Math.abs(cents) <= 4) {
+        centsEl.textContent = t.inTune;
+        centsEl.className = 'cents-display';
+      } else if (cents < 0) {
+        centsEl.textContent = `${Math.abs(cents)} cents flat (${t.flat})`;
+        centsEl.className = 'cents-display flat';
+      } else {
+        centsEl.textContent = `${cents} cents sharp (${t.sharp})`;
+        centsEl.className = 'cents-display sharp';
+      }
+
+      // Rotate needle: map -50 to +50 cents to -50 to +50 degrees
+      const deg = Math.min(50, Math.max(-50, cents));
+      document.getElementById('gaugeNeedle').style.transform = `translateX(-50%) rotate(${deg}deg)`;
+    }
+
+    rafId = requestAnimationFrame(updatePitch);
+  }
+
+  document.getElementById('micBtn').onclick = toggleListening;
+
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>
