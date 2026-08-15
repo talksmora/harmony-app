@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Harmonium - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .harmonium-container {
+    background: linear-gradient(135deg, #4e2213 0%, #2f1207 100%);
+    border: 8px solid #1a0802;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+    position: relative;
+  }
+  
+  /* Bellows display styling */
+  .bellows-wrapper {
+    height: 60px;
+    background: #110502;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border: 2px solid #5a2e1e;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+  }
+  .bellows-stripe {
+    flex: 1;
+    height: 100%;
+    background: #36160b;
+    border-right: 1px solid #110502;
+    transform-origin: left;
+    transition: transform 0.1s ease;
+  }
+  .bellows-stripe:nth-child(even) {
+    background: #4a2113;
+  }
+  .bellows-indicator {
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.75);
+    border: 1px solid #8e4c32;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    pointer-events: none;
+    color: #e67e22;
+    letter-spacing: 0.05em;
+  }
+
+  .harmonium-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+    background: rgba(0,0,0,0.3);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .control-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #d5b395;
+  }
+  .control-group select, .control-group button {
+    background: #250f07;
+    border: 1px solid #5a2e1e;
+    color: #f7e6d5;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .control-group select:focus { border-color: var(--accent); }
+  .control-group button:hover { background: #3d1b0f; }
+  .control-group button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* Keyboard styling */
+  .keys-wrapper {
+    background: #110502;
+    padding: 20px 10px 10px;
+    border-radius: 16px;
+    border: 3px solid #36160b;
+    position: relative;
+    overflow-x: auto;
+  }
+  .keyboard-scroll {
+    display: flex;
+    position: relative;
+    min-width: 900px;
+    height: 220px;
+  }
+  .key {
+    position: relative;
+    flex-shrink: 0;
+    height: 100%;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s, transform 0.1s;
+  }
+  .key.white {
+    width: 42px;
+    background: linear-gradient(to bottom, #fff 0%, #e0e0e0 100%);
+    border-right: 1px solid #aaa;
+    border-bottom: 5px solid #bbb;
+    border-radius: 0 0 6px 6px;
+    z-index: 1;
+  }
+  .key.white:active, .key.white.pressed {
+    background: linear-gradient(to bottom, #e0e0e0 0%, #c8c8c8 100%);
+    border-bottom-width: 2px;
+    transform: translateY(3px);
+  }
+  .key.black {
+    width: 26px;
+    height: 60%;
+    background: linear-gradient(to bottom, #333 0%, #000 100%);
+    border-radius: 0 0 4px 4px;
+    border: 1px solid #111;
+    z-index: 2;
+    margin-left: -13px;
+    margin-right: -13px;
+  }
+  .key.black:active, .key.black.pressed {
+    background: linear-gradient(to bottom, #111 0%, #000 100%);
+    height: 59%;
+    transform: translateY(2px);
+  }
+
+  /* Scale highlights */
+  .key.highlight-sa::after {
+    content: "Sa";
+    position: absolute;
+    bottom: 12px; left: 50%; transform: translateX(-50%);
+    background: #e74c3c; color: #fff;
+    font-size: 0.65rem; font-weight: 800;
+    padding: 2px 5px; border-radius: 4px;
+  }
+  .key.highlight-active::after {
+    content: "•";
+    position: absolute;
+    bottom: 12px; left: 50%; transform: translateX(-50%);
+    color: #27ae60; font-size: 1.2rem; font-weight: 800;
+  }
+  .key.black.highlight-sa::after { bottom: 6px; }
+  .key.black.highlight-active::after { bottom: 6px; }
+
+  /* Key labeling on hover or option */
+  .key-label {
+    position: absolute;
+    top: 10px; left: 50%; transform: translateX(-50%);
+    font-size: 0.6rem; color: #888;
+    pointer-events: none;
+    font-weight: 700;
+  }
+  .key.black .key-label { color: #aaa; }
+
+  .bellows-btn-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .pump-button {
+    background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+    color: #fff; border: none;
+    padding: 14px 40px; border-radius: 30px;
+    font-size: 0.95rem; font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(230,126,34,0.4);
+    transition: all 0.2s;
+  }
+  .pump-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 3px 10px rgba(230,126,34,0.3);
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblHarmTitle" style="margin:0;">🎹 વર્ચ્યુઅલ હાર્મોનિયમ</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="harmonium-container">
+      <!-- Bellows animation view -->
+      <div class="bellows-wrapper" id="bellowsWrapper">
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-indicator" id="bellowsIndicator">પંપ કરો હવા ભરવા માટે (PUMP BELLOWS)</div>
+      </div>
+
+      <!-- Controls row -->
+      <div class="harmonium-controls">
+        <div class="control-group">
+          <label id="lblSaKey">સા ની પિચ (Sa Pitch)</label>
+          <select id="saSelect">
+            <option value="C3">C (પહેલી કાળી / C)</option>
+            <option value="C#3" selected>C# (પહેલી કાળી / C#)</option>
+            <option value="D3">D (બીજી સફેદ / D)</option>
+            <option value="D#3">D# (બીજી કાળી / D#)</option>
+            <option value="E3">E (ત્રીજી સફેદ / E)</option>
+            <option value="F3">F (ચોથી સફેદ / F)</option>
+            <option value="F#3">F# (ત્રીજી કાળી / F#)</option>
+            <option value="G3">G (પાંચમી સફેદ / G)</option>
+            <option value="G#3">G# (ચોથી કાળી / G#)</option>
+            <option value="A3">A (છઠ્ઠી સફેદ / A)</option>
+            <option value="A#3">A# (પાંચમી કાળી / A#)</option>
+            <option value="B3">B (સાતમી સફેદ / B)</option>
+            <option value="C4">C4 (આઠમી સફેદ / C4)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label id="lblRagaHighlight">રાગ હાઇલાઇટ (Raga Scale)</label>
+          <select id="ragaSelect">
+            <option value="none" selected>કોઈ નહિ (None)</option>
+            <option value="bilawal">બિલાવલ (Bilawal - All Shuddha)</option>
+            <option value="bhairav">ભૈરવ (Bhairav - Komal re, dha)</option>
+            <option value="bhairavi">ભૈરવી (Bhairavi - Komal re, ga, dha, ni)</option>
+            <option value="yaman">યમન (Yaman - Teevra Ma)</option>
+            <option value="kafi">કાફી (Kafi - Komal ga, ni)</option>
+            <option value="asavari">આસાવરી (Asavari - Komal ga, dha, ni)</option>
+            <option value="bhupali">ભૂપાલી (Bhupali - Sa Re Ga Pa Dha)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label id="lblDrone">તાનપુરા સા ડ્રોન (Sa Drone)</label>
+          <button id="droneBtn">ચાલુ કરો (Start Drone)</button>
+        </div>
+      </div>
+
+      <!-- Keyboard section -->
+      <div class="keys-wrapper">
+        <div class="keyboard-scroll" id="keyboard"></div>
+      </div>
+
+      <!-- Pump bellows button -->
+      <div class="bellows-btn-wrap">
+        <button class="pump-button" id="pumpBtn">💨 પંપ કરો (PUMP)</button>
+      </div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+  
+  const TEXT = {
+    gu: {
+      title: '🎹 વર્ચ્યુઅલ હાર્મોનિયમ',
+      back: '← પાછા જાઓ',
+      bellowsHint: 'હવા પ્રેશર: ',
+      pumpBtn: '💨 પંપ કરો (PUMP)',
+      saPitch: 'સા ની પિચ (Sa Pitch)',
+      ragaHighlight: 'રાગ હાઇલાઇટ (Raga Scale)',
+      saDrone: 'તાનપુરા સા ડ્રોન (Sa Drone)',
+      droneOn: 'બંધ કરો (Stop Drone)',
+      droneOff: 'ચાલુ કરો (Start Drone)',
+      pumpText: 'પંપ કરો હવા ભરવા માટે (PUMP BELLOWS)'
+    },
+    hi: {
+      title: '🎹 वर्चुअल हारमोनियम',
+      back: '← वापस जाएं',
+      bellowsHint: 'हवा दबाव: ',
+      pumpBtn: '💨 पंप करें (PUMP)',
+      saPitch: 'सा की पिच (Sa Pitch)',
+      ragaHighlight: 'राग हाइलाइट (Raga Scale)',
+      saDrone: 'तानपुरा सा ड्रोन (Sa Drone)',
+      droneOn: 'बंद करें (Stop Drone)',
+      droneOff: 'शुरू करें (Start Drone)',
+      pumpText: 'पंप करें हवा भरने के लिए (PUMP BELLOWS)'
+    },
+    en: {
+      title: '🎹 Virtual Harmonium',
+      back: '← Go Back',
+      bellowsHint: 'Air Pressure: ',
+      pumpBtn: '💨 PUMP',
+      saPitch: 'Sa Pitch Key',
+      ragaHighlight: 'Raga Scale Highlight',
+      saDrone: 'Sa Drone Helper',
+      droneOn: 'Stop Drone',
+      droneOff: 'Start Drone',
+      pumpText: 'PUMP BELLOWS FOR AIR'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblHarmTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('pumpBtn').textContent = t.pumpBtn;
+  document.getElementById('lblSaKey').textContent = t.saPitch;
+  document.getElementById('lblRagaHighlight').textContent = t.ragaHighlight;
+  document.getElementById('lblDrone').textContent = t.saDrone;
+  document.getElementById('droneBtn').textContent = t.droneOff;
+
+  // Initialize Audio
+  let audioCtx = null;
+  let activeNodes = {}; // map of noteName -> array of oscillator nodes
+  let droneNodes = null;
+  let isDronePlaying = false;
+  let bellowsPressure = 0.5; // Starts with half pressure
+
+  const NOTES = [
+    { note: 'C3', type: 'white', freq: 130.81, label: 'Sa' },
+    { note: 'C#3', type: 'black', freq: 138.59, label: 're' },
+    { note: 'D3', type: 'white', freq: 146.83, label: 'Re' },
+    { note: 'D#3', type: 'black', freq: 154.34, label: 'ga' },
+    { note: 'E3', type: 'white', freq: 164.81, label: 'Ga' },
+    { note: 'F3', type: 'white', freq: 174.61, label: 'ma' },
+    { note: 'F#3', type: 'black', freq: 185.00, label: 'Ma' },
+    { note: 'G3', type: 'white', freq: 196.00, label: 'Pa' },
+    { note: 'G#3', type: 'black', freq: 207.65, label: 'dha' },
+    { note: 'A3', type: 'white', freq: 220.00, label: 'Dha' },
+    { note: 'A#3', type: 'black', freq: 233.08, label: 'ni' },
+    { note: 'B3', type: 'white', freq: 246.94, label: 'Ni' },
+    { note: 'C4', type: 'white', freq: 261.63, label: 'Sa\'' },
+    { note: 'C#4', type: 'black', freq: 277.18, label: 're\'' },
+    { note: 'D4', type: 'white', freq: 293.66, label: 'Re\'' },
+    { note: 'D#4', type: 'black', freq: 311.13, label: 'ga\'' },
+    { note: 'E4', type: 'white', freq: 329.63, label: 'Ga\'' },
+    { note: 'F4', type: 'white', freq: 349.23, label: 'ma\'' },
+    { note: 'F#4', type: 'black', freq: 369.99, label: 'Ma\'' },
+    { note: 'G4', type: 'white', freq: 392.00, label: 'Pa\'' },
+    { note: 'G#4', type: 'black', freq: 415.30, label: 'dha\'' },
+    { note: 'A4', type: 'white', freq: 440.00, label: 'Dha\'' },
+    { note: 'A#4', type: 'black', freq: 466.16, label: 'ni\'' },
+    { note: 'B4', type: 'white', freq: 493.88, label: 'Ni\'' },
+    { note: 'C5', type: 'white', freq: 523.25, label: 'Sa\'\'' },
+    { note: 'C#5', type: 'black', freq: 554.37, label: 're\'\'' },
+    { note: 'D5', type: 'white', freq: 587.33, label: 'Re\'\'' },
+    { note: 'D#5', type: 'black', freq: 622.25, label: 'ga\'\'' },
+    { note: 'E5', type: 'white', freq: 659.25, label: 'Ga\'\'' },
+    { note: 'F5', type: 'white', freq: 698.46, label: 'ma\'\'' },
+    { note: 'F#5', type: 'black', freq: 739.99, label: 'Ma\'\'' },
+    { note: 'G5', type: 'white', freq: 783.99, label: 'Pa\'\'' }
+  ];
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Bellows pumping logic
+  function pumpBellows() {
+    initAudio();
+    bellowsPressure = Math.min(1.0, bellowsPressure + 0.25);
+    updateBellowsUI();
+  }
+
+  function updateBellowsUI() {
+    const stripes = document.querySelectorAll('.bellows-stripe');
+    const scaleX = 0.6 + bellowsPressure * 0.4;
+    stripes.forEach(str => {
+      str.style.transform = `scaleX(${scaleX})`;
+    });
+    document.getElementById('bellowsIndicator').textContent = `${t.bellowsHint}${Math.round(bellowsPressure * 100)}%`;
+  }
+
+  // Gradually deplete bellows air pressure
+  setInterval(() => {
+    if (bellowsPressure > 0.05) {
+      // If notes are playing, air drains faster
+      const activeCount = Object.keys(activeNodes).length + (isDronePlaying ? 1 : 0);
+      const depletionRate = 0.02 + (activeCount * 0.015);
+      bellowsPressure = Math.max(0.0, bellowsPressure - depletionRate);
+      updateBellowsUI();
+    }
+  }, 150);
+
+  // Play harmonium sound helper (detuned double oscillators for classic chorus effect)
+  function playNote(freq, noteName) {
+    initAudio();
+    if (activeNodes[noteName]) return; // already playing
+    
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    osc1.type = 'triangle'; // Male Reed
+    osc1.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    osc2.type = 'sawtooth'; // Female reed
+    osc2.frequency.setValueAtTime(freq * 2, audioCtx.currentTime); // 1 Octave higher
+    osc2.detune.setValueAtTime(5, audioCtx.currentTime); // detuned for chorus
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1200, audioCtx.currentTime);
+    filter.Q.setValueAtTime(1, audioCtx.currentTime);
+
+    gainNode.gain.setValueAtTime(0.0, audioCtx.currentTime);
+    
+    // Connect together
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    osc1.start();
+    osc2.start();
+
+    // Map pressure to volume
+    const volume = 0.25 * bellowsPressure;
+    gainNode.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + 0.05);
+
+    activeNodes[noteName] = { osc1, osc2, gain: gainNode, baseVol: 0.25 };
+  }
+
+  function stopNote(noteName) {
+    const node = activeNodes[noteName];
+    if (!node) return;
+
+    node.gain.gain.setValueAtTime(node.gain.gain.value, audioCtx.currentTime);
+    node.gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+    
+    setTimeout(() => {
+      try {
+        node.osc1.stop();
+        node.osc2.stop();
+        node.osc1.disconnect();
+        node.osc2.disconnect();
+        node.gain.disconnect();
+      } catch(e) {}
+    }, 200);
+
+    delete activeNodes[noteName];
+  }
+
+  // Sa Drone helper logic
+  function toggleDrone() {
+    initAudio();
+    const saNote = document.getElementById('saSelect').value;
+    const saInfo = NOTES.find(n => n.note === saNote);
+    if (!saInfo) return;
+
+    const btn = document.getElementById('droneBtn');
+
+    if (isDronePlaying) {
+      // Stop drone
+      if (droneNodes) {
+        droneNodes.gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        const ref = droneNodes;
+        setTimeout(() => {
+          try {
+            ref.osc1.stop();
+            ref.osc2.stop();
+            ref.osc3.stop();
+          } catch(e) {}
+        }, 400);
+      }
+      isDronePlaying = false;
+      btn.textContent = t.droneOff;
+      btn.classList.remove('active');
+    } else {
+      // Start drone (Bass reed + Male reed combined)
+      const freq = saInfo.freq;
+
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const osc3 = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+
+      osc1.type = 'triangle';
+      osc1.frequency.setValueAtTime(freq / 2, audioCtx.currentTime); // Low Octave Bass
+
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(freq, audioCtx.currentTime); // Normal
+
+      osc3.type = 'sawtooth';
+      osc3.frequency.setValueAtTime(freq * 1.5, audioCtx.currentTime); // Pancham (Fifth)
+      osc3.detune.setValueAtTime(-5, audioCtx.currentTime);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(800, audioCtx.currentTime);
+
+      gainNode.gain.setValueAtTime(0.0, audioCtx.currentTime);
+
+      osc1.connect(filter);
+      osc2.connect(filter);
+      osc3.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      osc1.start();
+      osc2.start();
+      osc3.start();
+
+      gainNode.gain.linearRampToValueAtTime(0.12 * bellowsPressure, audioCtx.currentTime + 0.3);
+
+      droneNodes = { osc1, osc2, osc3, gain: gainNode };
+      isDronePlaying = true;
+      btn.textContent = t.droneOn;
+      btn.classList.add('active');
+    }
+  }
+
+  // Adjust output gains dynamically as bellows pressure changes
+  setInterval(() => {
+    if (!audioCtx) return;
+    Object.keys(activeNodes).forEach(noteName => {
+      const node = activeNodes[noteName];
+      const targetVol = node.baseVol * bellowsPressure;
+      node.gain.gain.setTargetAtTime(targetVol, audioCtx.currentTime, 0.1);
+    });
+    if (isDronePlaying && droneNodes) {
+      const targetDroneVol = 0.12 * bellowsPressure;
+      droneNodes.gain.gain.setTargetAtTime(targetDroneVol, audioCtx.currentTime, 0.1);
+    }
+  }, 100);
+
+  // Raga scale notes index helper (relative to Sa index)
+  const RAGA_SCALES = {
+    bilawal: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24],
+    bhairav: [0, 1, 4, 5, 7, 8, 11, 12, 13, 16, 17, 19, 20, 23, 24],
+    bhairavi: [0, 1, 3, 5, 7, 8, 10, 12, 13, 15, 17, 19, 20, 22, 24],
+    yaman: [0, 2, 4, 6, 7, 9, 11, 12, 14, 16, 18, 19, 21, 23, 24],
+    kafi: [0, 2, 3, 5, 7, 9, 10, 12, 14, 15, 17, 19, 21, 22, 24],
+    asavari: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15, 17, 19, 20, 22, 24],
+    bhupali: [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24]
+  };
+
+  function updateRagaHighlights() {
+    const saNote = document.getElementById('saSelect').value;
+    const raga = document.getElementById('ragaSelect').value;
+    
+    // Find Sa Index in NOTES
+    const saIdx = NOTES.findIndex(n => n.note === saNote);
+    
+    // Clear highlights
+    document.querySelectorAll('.key').forEach(k => {
+      k.classList.remove('highlight-sa');
+      k.classList.remove('highlight-active');
+    });
+
+    if (saIdx === -1) return;
+
+    // Mark Sa key
+    const saKeyEl = document.getElementById('key-' + saNote);
+    if (saKeyEl) saKeyEl.classList.add('highlight-sa');
+
+    if (raga === 'none') return;
+    const scaleOffsets = RAGA_SCALES[raga] || [];
+
+    scaleOffsets.forEach(offset => {
+      const activeIdx = saIdx + offset;
+      if (activeIdx < NOTES.length) {
+        const activeNote = NOTES[activeIdx].note;
+        const keyEl = document.getElementById('key-' + activeNote);
+        if (keyEl && activeNote !== saNote) {
+          keyEl.classList.add('highlight-active');
+        }
+      }
+    });
+  }
+
+  // Draw Keyboard DOM
+  function renderKeyboard() {
+    const keyboardEl = document.getElementById('keyboard');
+    keyboardEl.innerHTML = '';
+
+    NOTES.forEach(noteInfo => {
+      const key = document.createElement('div');
+      key.className = `key ${noteInfo.type}`;
+      key.id = 'key-' + noteInfo.note;
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'key-label';
+      labelEl.textContent = noteInfo.note;
+      key.appendChild(labelEl);
+
+      // Touch / Mouse trigger
+      const startTrigger = (e) => {
+        e.preventDefault();
+        key.classList.add('pressed');
+        playNote(noteInfo.freq, noteInfo.note);
+      };
+
+      const endTrigger = (e) => {
+        e.preventDefault();
+        key.classList.remove('pressed');
+        stopNote(noteInfo.note);
+      };
+
+      key.addEventListener('mousedown', startTrigger);
+      key.addEventListener('mouseup', endTrigger);
+      key.addEventListener('mouseleave', endTrigger);
+
+      key.addEventListener('touchstart', startTrigger);
+      key.addEventListener('touchend', endTrigger);
+
+      keyboardEl.appendChild(key);
+    });
+
+    updateRagaHighlights();
+  }
+
+  // Event Listeners
+  document.getElementById('pumpBtn').onclick = pumpBellows;
+  document.getElementById('droneBtn').onclick = toggleDrone;
+  document.getElementById('saSelect').onchange = () => {
+    updateRagaHighlights();
+    // Restart drone on new Sa note if already playing
+    if (isDronePlaying) {
+      toggleDrone(); // Stop
+      toggleDrone(); // Restart
+    }
+  };
+  document.getElementById('ragaSelect').onchange = updateRagaHighlights;
+
+  // Render & App Shell Init
+  renderKeyboard();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>

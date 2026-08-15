@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Santoor - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .santoor-container {
+    background: linear-gradient(135deg, #3d1b0f 0%, #1e0903 100%);
+    border: 8px solid #150602;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+    position: relative;
+    text-align: center;
+  }
+
+  .santoor-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+    background: rgba(0,0,0,0.3);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    text-align: left;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .control-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #d5b395;
+  }
+  .control-group select, .control-group button {
+    background: #250f07;
+    border: 1px solid #5a2e1e;
+    color: #f7e6d5;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .control-group select:focus { border-color: var(--accent); }
+
+  /* Santoor Board layout (Trapezoidal shape) */
+  .santoor-board-wrapper {
+    background: #110502;
+    padding: 30px;
+    border-radius: 16px;
+    border: 3px solid #36160b;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+  }
+  .santoor-board {
+    width: 600px;
+    height: 380px;
+    background: radial-gradient(circle, #7e3e26 0%, #3e1b0f 100%);
+    border: 6px solid #e67e22;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+    position: relative;
+    clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%);
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 40px;
+  }
+
+  /* Left and Right Bridges */
+  .bridge-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 100%;
+    z-index: 10;
+  }
+  .santoor-peg {
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle, #f1c40f 0%, #d35400 100%);
+    border-radius: 50%;
+    border: 2px solid #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: #110502;
+    transition: all 0.1s;
+    user-select: none;
+  }
+  .santoor-peg:active, .santoor-peg.striking {
+    transform: scale(1.2);
+    box-shadow: 0 0 15px #f1c40f;
+  }
+
+  /* String wires spanning across bridges */
+  .santoor-string {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+    pointer-events: none;
+    z-index: 5;
+    width: 100%;
+    left: 0;
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblSantTitle" style="margin:0;">🎵 વર્ચ્યુઅલ સંતૂર</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="santoor-container">
+      <div class="santoor-controls">
+        <div class="control-group">
+          <label id="lblSaKey">સા ની પિચ (Sa Pitch)</label>
+          <select id="saSelect">
+            <option value="C3">C</option>
+            <option value="C#3" selected>C#</option>
+            <option value="D3">D</option>
+            <option value="D#3">D#</option>
+            <option value="E3">E</option>
+            <option value="F3">F</option>
+            <option value="F#3">F#</option>
+            <option value="G3">G</option>
+            <option value="G#3">G#</option>
+            <option value="A3">A</option>
+            <option value="A#3">A#</option>
+            <option value="B3">B</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label id="lblRagaHighlight">રાગ ટ્યૂનિંગ (Raga Tuning)</label>
+          <select id="ragaSelect">
+            <option value="bilawal" selected>બિલાવલ (Bilawal - Shuddha)</option>
+            <option value="bhairav">ભૈરવ (Bhairav)</option>
+            <option value="bhairavi">ભૈરવી (Bhairavi)</option>
+            <option value="yaman">યમન (Yaman)</option>
+            <option value="kafi">કાફી (Kafi)</option>
+            <option value="asavari">આસાવરી (Asavari)</option>
+            <option value="bhupali">ભૂપાલી (Bhupali - Audav)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="santoor-board-wrapper">
+        <div class="santoor-board">
+          <!-- Left Bridge (9 pegs representing Left bridge notes) -->
+          <div class="bridge-column" id="leftBridge"></div>
+
+          <!-- Right Bridge (9 pegs representing Right bridge notes) -->
+          <div class="bridge-column" id="rightBridge"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🎵 વર્ચ્યુઅલ સંતૂર',
+      back: '← પાછા જાઓ',
+      saPitch: 'સા ની પિચ (Sa Pitch)',
+      ragaHighlight: 'રાગ ટ્યૂનિંગ (Raga Tuning)'
+    },
+    hi: {
+      title: '🎵 वर्चुअल संतूर',
+      back: '← वापस जाएं',
+      saPitch: 'सा की पिच (Sa Pitch)',
+      ragaHighlight: 'राग ट्यूनिंग (Raga Tuning)'
+    },
+    en: {
+      title: '🎵 Virtual Santoor',
+      back: '← Go Back',
+      saPitch: 'Sa Pitch Key',
+      ragaHighlight: 'Raga Scale Tuning'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblSantTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('lblSaKey').textContent = t.saPitch;
+  document.getElementById('lblRagaHighlight').textContent = t.ragaHighlight;
+
+  // Web Audio API Santoor Synthesizer
+  let audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Santoor physical strike sound logic
+  function strikeString(freq) {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const oscHarmonic = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    // Noise burst for mallet strike click
+    const bufferSize = audioCtx.sampleRate * 0.01; // 10ms burst
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.01);
+    noise.connect(noiseGain);
+    noiseGain.connect(audioCtx.destination);
+    noise.start();
+
+    // Metallic main tone
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    // High harmonic upper partial ring
+    oscHarmonic.type = 'triangle';
+    oscHarmonic.frequency.setValueAtTime(freq * 3.01, audioCtx.currentTime); // slightly detuned third harmonic
+    
+    filter.type = 'peaking';
+    filter.frequency.setValueAtTime(freq * 2, audioCtx.currentTime);
+    filter.Q.setValueAtTime(2, audioCtx.currentTime);
+    filter.gain.setValueAtTime(10, audioCtx.currentTime);
+
+    gainNode.gain.setValueAtTime(0.35, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.8); // Long ring
+
+    osc.connect(filter);
+    oscHarmonic.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    osc.start();
+    oscHarmonic.start();
+    osc.stop(audioCtx.currentTime + 2.0);
+    oscHarmonic.stop(audioCtx.currentTime + 2.0);
+  }
+
+  // Notes map relative to base Sa
+  const RAGA_MAPS = {
+    bilawal:  [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24],
+    bhairav:  [0, 1, 4, 5, 7, 8, 11, 12, 13, 16, 17, 19, 20, 23, 24],
+    bhairavi: [0, 1, 3, 5, 7, 8, 10, 12, 13, 15, 17, 19, 20, 22, 24],
+    yaman:    [0, 2, 4, 6, 7, 9, 11, 12, 14, 16, 18, 19, 21, 23, 24],
+    kafi:     [0, 2, 3, 5, 7, 9, 10, 12, 14, 15, 17, 19, 21, 22, 24],
+    asavari:  [0, 2, 3, 5, 7, 8, 10, 12, 14, 15, 17, 19, 20, 22, 24],
+    bhupali:  [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31, 33]
+  };
+
+  const BASE_FREQS = {
+    'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 154.34, 'E3': 164.81,
+    'F3': 174.61, 'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65, 'A3': 220.00,
+    'A#3': 233.08, 'B3': 246.94
+  };
+
+  const SARGAM = ['Sa', 're', 'Re', 'ga', 'Ga', 'ma', 'Ma', 'Pa', 'dha', 'Dha', 'ni', 'Ni', 'Sa\''];
+
+  function getFreqForOffset(baseFreq, semitones) {
+    return baseFreq * Math.pow(2, semitones / 12);
+  }
+
+  function getSargamName(semitones) {
+    const idx = semitones % 12;
+    const baseName = SARGAM[idx] || 'Sa';
+    const octave = Math.floor(semitones / 12);
+    return baseName + (octave > 0 ? '\''.repeat(octave) : '');
+  }
+
+  function renderSantoor() {
+    const leftEl = document.getElementById('leftBridge');
+    const rightEl = document.getElementById('rightBridge');
+    leftEl.innerHTML = '';
+    rightEl.innerHTML = '';
+
+    const saKey = document.getElementById('saSelect').value;
+    const baseFreq = BASE_FREQS[saKey];
+    const raga = document.getElementById('ragaSelect').value;
+    const offsets = RAGA_MAPS[raga] || RAGA_MAPS.bilawal;
+
+    // Left Bridge: first 9 notes of raga scale
+    for (let i = 0; i < 9; i++) {
+      const offset = offsets[i] || i * 2;
+      const freq = getFreqForOffset(baseFreq, offset);
+      const name = getSargamName(offset);
+
+      const peg = document.createElement('div');
+      peg.className = 'santoor-peg';
+      peg.textContent = name;
+      peg.onclick = () => {
+        peg.classList.add('striking');
+        strikeString(freq);
+        setTimeout(() => peg.classList.remove('striking'), 150);
+      };
+      leftEl.appendChild(peg);
+    }
+
+    // Right Bridge: next 9 notes of raga scale
+    for (let i = 0; i < 9; i++) {
+      const offsetIdx = i + 5; // overlapping/higher register notes
+      const offset = offsets[offsetIdx] || (offsetIdx) * 2;
+      const freq = getFreqForOffset(baseFreq, offset);
+      const name = getSargamName(offset);
+
+      const peg = document.createElement('div');
+      peg.className = 'santoor-peg';
+      peg.textContent = name;
+      peg.onclick = () => {
+        peg.classList.add('striking');
+        strikeString(freq);
+        setTimeout(() => peg.classList.remove('striking'), 150);
+      };
+      rightEl.appendChild(peg);
+    }
+  }
+
+  document.getElementById('saSelect').onchange = renderSantoor;
+  document.getElementById('ragaSelect').onchange = renderSantoor;
+
+  renderSantoor();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>
