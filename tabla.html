@@ -424,7 +424,7 @@
   // 1. Dayan Strike: Ta/Na (Sharp metallic rim stroke)
   function playTa(time = 0) {
     if (!audioCtx) return;
-    const now = time || audioCtx.currentTime;
+    const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     
@@ -439,7 +439,7 @@
     gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
 
     // Add snap/noise component for metal rim strike
-    const bufferSize = audioCtx.sampleRate * 0.02; // very short click
+    const bufferSize = Math.floor(audioCtx.sampleRate * 0.02); // very short click
     const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
@@ -472,7 +472,7 @@
   // 2. Dayan Open: Tin (Resonant middle ring stroke)
   function playTin(time = 0) {
     if (!audioCtx) return;
-    const now = time || audioCtx.currentTime;
+    const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     
@@ -495,7 +495,7 @@
   // 3. Bayan Bass: Ghe (Resonant bass with frequency slide)
   function playGhe(time = 0) {
     if (!audioCtx) return;
-    const now = time || audioCtx.currentTime;
+    const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     
@@ -509,7 +509,7 @@
     gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
 
     // Low rumble noise component
-    const bufferSize = audioCtx.sampleRate * 0.05;
+    const bufferSize = Math.floor(audioCtx.sampleRate * 0.05);
     const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
@@ -542,7 +542,7 @@
   // 4. Bayan Slap: Ka/Ke (Flat, completely damp strike)
   function playKa(time = 0) {
     if (!audioCtx) return;
-    const now = time || audioCtx.currentTime;
+    const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     
@@ -561,14 +561,14 @@
 
   // Combined Bols
   function playDha(time = 0) {
-    const now = time || audioCtx.currentTime;
+    const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
     playTa(now);
     playGhe(now);
   }
 
   // Combined Dhin
   function playDhin(time = 0) {
-    const now = time || audioCtx.currentTime;
+    const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
     playTin(now);
     playGhe(now);
   }
@@ -703,6 +703,11 @@
   }
 
   function scheduler() {
+    if (!isPlaying) return;
+    // Reset nextNoteTime if it lags behind significantly
+    if (nextNoteTime < audioCtx.currentTime) {
+      nextNoteTime = audioCtx.currentTime;
+    }
     while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
       scheduleNote(currentBeat, nextNoteTime);
       nextNoteTime += getStepDuration();
