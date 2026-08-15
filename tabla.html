@@ -420,7 +420,7 @@
 
   async function loadBolBuffer(bol) {
     if (BOL_AUDIO_BUFFERS[bol]) return BOL_AUDIO_BUFFERS[bol];
-    const url = `https://12notez.in/tabla-app/audio/bols/${bol}/${bol}01.mp3?v=3`;
+    const url = `./shared/audio/bols/${bol}.mp3`;
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP status ${response.status}`);
@@ -444,7 +444,7 @@
   async function loadTanpuraSample() {
     if (!audioCtx) return;
     const scaleName = SCALES[currentScaleIndex].toLowerCase().replace('#', 's');
-    const url = `https://12notez.in/audio/octave3/${scaleName}3.mp3`;
+    const url = `./shared/audio/tanpura/${scaleName}3.mp3`;
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP status ${response.status}`);
