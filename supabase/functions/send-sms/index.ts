@@ -1,9 +1,12 @@
+// @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
+// @ts-ignore
 const MSG91_AUTH_KEY = Deno.env.get("MSG91_AUTH_KEY")
+// @ts-ignore
 const MSG91_TEMPLATE_ID = Deno.env.get("MSG91_TEMPLATE_ID")
 
-serve(async (req) => {
+serve(async (req: Request) => {
   try {
     const { phone, message } = await req.json()
     // Supabase OTP message format: "Your code is 123456"
@@ -36,7 +39,7 @@ serve(async (req) => {
 
     const result = await response.json()
     return new Response(JSON.stringify(result), { status: response.status })
-  } catch (error) {
+  } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 })
   }
 })
