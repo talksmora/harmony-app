@@ -422,6 +422,154 @@
     background: rgba(255,255,255,0.05);
     box-shadow: 0 0 12px currentColor;
   }
+
+  /* Rhythm Pattern Builder CSS */
+  .pattern-builder-section {
+    margin-top: 30px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 20px;
+    border-radius: 16px;
+    text-align: left;
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .pattern-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  .pattern-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .bpm-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .seq-input {
+    width: 60px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-weight: 700;
+    text-align: center;
+  }
+  .seq-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .seq-btn.play {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .seq-btn.playing {
+    background: #2ecc71;
+    border-color: #2ecc71;
+  }
+  
+  .sequencer-container {
+    overflow-x: auto;
+    margin-top: 10px;
+    padding-bottom: 5px;
+  }
+  .seq-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .seq-label {
+    width: 60px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    text-align: right;
+    padding-right: 15px;
+    user-select: none;
+  }
+  
+  /* Color row labels matching buttons */
+  .seq-row[data-row="Na"] .seq-label { color: #2ecc71; }
+  .seq-row[data-row="Tin"] .seq-label { color: #3498db; }
+  .seq-row[data-row="Te"] .seq-label { color: #f1c40f; }
+  .seq-row[data-row="Ti"] .seq-label { color: #9b59b6; }
+  .seq-row[data-row="Ge"] .seq-label { color: #e74c3c; }
+  .seq-row[data-row="Ka"] .seq-label { color: #e67e22; }
+  .seq-row[data-row="Dha"] .seq-label { color: #1abc9c; }
+  .seq-row[data-row="Dhin"] .seq-label { color: #e84393; }
+
+  .seq-grid-row {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 5px;
+    flex: 1;
+    min-width: 480px;
+  }
+  .seq-cell {
+    aspect-ratio: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: transparent;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .seq-cell:hover {
+    border-color: rgba(255,255,255,0.2);
+  }
+  
+  /* Active states for cell classes matching row colors */
+  .seq-row[data-row="Na"] .seq-cell.active { background: #2ecc71; color: #fff; border-color: #2ecc71; }
+  .seq-row[data-row="Tin"] .seq-cell.active { background: #3498db; color: #fff; border-color: #3498db; }
+  .seq-row[data-row="Te"] .seq-cell.active { background: #f1c40f; color: #fff; border-color: #f1c40f; }
+  .seq-row[data-row="Ti"] .seq-cell.active { background: #9b59b6; color: #fff; border-color: #9b59b6; }
+  .seq-row[data-row="Ge"] .seq-cell.active { background: #e74c3c; color: #fff; border-color: #e74c3c; }
+  .seq-row[data-row="Ka"] .seq-cell.active { background: #e67e22; color: #fff; border-color: #e67e22; }
+  .seq-row[data-row="Dha"] .seq-cell.active { background: #1abc9c; color: #fff; border-color: #1abc9c; }
+  .seq-row[data-row="Dhin"] .seq-cell.active { background: #e84393; color: #fff; border-color: #e84393; }
+
+  /* Column indicators and highlight during loop */
+  .seq-col-indicators {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  .seq-col-indicators-grid {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 5px;
+    flex: 1;
+    min-width: 480px;
+  }
+  .seq-col-dot {
+    height: 6px;
+    background: transparent;
+    border-radius: 3px;
+    transition: background-color 0.1s;
+  }
+  .seq-col-dot.active-step {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
 </style>
 </head>
 <body data-page="tabla">
@@ -501,6 +649,26 @@
       <!-- Visual Beat Dots -->
       <div class="beat-indicator-container">
         <div class="beat-grid" id="beatGrid"></div>
+      </div>
+
+      <!-- Rhythm Pattern Builder Section -->
+      <div class="pattern-builder-section">
+        <div class="pattern-header">
+          <h3 id="lblPatternTitle" style="margin:0; font-size:1.25rem;">🥁 રધમ પેટર્ન બિલ્ડર (Rhythm Pattern Builder)</h3>
+          <div class="pattern-controls">
+            <div class="bpm-control">
+              <label for="seqBpmInput" style="font-size:0.85rem; font-weight:700;">BPM</label>
+              <input type="number" id="seqBpmInput" value="80" min="40" max="240" class="seq-input">
+            </div>
+            <button id="btnSeqPlay" class="seq-btn play">▶ Play</button>
+            <button id="btnSeqClear" class="seq-btn">Clear</button>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:var(--subtitle); margin-top:5px; margin-bottom:15px;" id="lblPatternSub">ખાનાઓ પર ક્લિક કરી બોલ ગોઠવો, અને લૂપ સાંભળવા પ્લે દબાવો (Click cells to assign bols, then press Play to loop):</p>
+        
+        <div class="sequencer-container">
+          <div id="sequencerGridContainer"></div>
+        </div>
       </div>
 
       <!-- Settings and Controls -->
@@ -1586,6 +1754,9 @@
     } else {
       // Start Playback
       isPlaying = true;
+      if (sequencerPlaying) {
+        btnSeqPlay.click();
+      }
       playBtn.classList.add('playing');
       playBtn.textContent = '⏸';
       currentBeat = 0;
@@ -1594,6 +1765,163 @@
       startTanpura();
     }
   });
+
+  // Rhythm Pattern Builder implementation
+  const SEQUENCER_ROWS = ['Na', 'Tin', 'Te', 'Ti', 'Ge', 'Ka', 'Dha', 'Dhin'];
+  const SEQUENCER_STEPS = 16;
+  const sequencerGrid = Array(SEQUENCER_ROWS.length).fill(null).map(() => Array(SEQUENCER_STEPS).fill(false));
+  
+  let sequencerPlaying = false;
+  let sequencerBeat = 0;
+  let sequencerNextTime = 0.0;
+  let sequencerTimerID = null;
+  let sequencerBpm = 80;
+
+  function getSequencerStepDuration() {
+    return 60.0 / (sequencerBpm * 4); // 16th notes
+  }
+
+  function scheduleSequencerNote(stepNumber, time) {
+    let playedAny = false;
+    for (let r = 0; r < SEQUENCER_ROWS.length; r++) {
+      if (sequencerGrid[r][stepNumber]) {
+        const bol = SEQUENCER_ROWS[r];
+        playSpecificBol(bol, time);
+        playedAny = true;
+      }
+    }
+
+    // Schedule UI updates
+    const delay = (time - audioCtx.currentTime) * 1000;
+    setTimeout(() => {
+      if (!sequencerPlaying) return;
+      
+      // Update active column indicator
+      document.querySelectorAll('.seq-col-dot').forEach(dot => dot.classList.remove('active-step'));
+      const activeDot = document.getElementById('seq-dot-' + stepNumber);
+      if (activeDot) activeDot.classList.add('active-step');
+    }, Math.max(0, delay));
+  }
+
+  function sequencerScheduler() {
+    if (!sequencerPlaying) return;
+    if (sequencerNextTime < audioCtx.currentTime) {
+      sequencerNextTime = audioCtx.currentTime;
+    }
+    while (sequencerNextTime < audioCtx.currentTime + 0.1) {
+      scheduleSequencerNote(sequencerBeat, sequencerNextTime);
+      sequencerNextTime += getSequencerStepDuration();
+      sequencerBeat = (sequencerBeat + 1) % SEQUENCER_STEPS;
+    }
+    sequencerTimerID = setTimeout(sequencerScheduler, 25);
+  }
+
+  function buildSequencerDOM() {
+    const gridContainer = document.getElementById('sequencerGridContainer');
+    gridContainer.innerHTML = '';
+    
+    // Add step indicator dots row
+    const indicatorRow = document.createElement('div');
+    indicatorRow.className = 'seq-col-indicators';
+    
+    const labelSpacer = document.createElement('div');
+    labelSpacer.className = 'seq-label';
+    indicatorRow.appendChild(labelSpacer);
+    
+    const indicatorGrid = document.createElement('div');
+    indicatorGrid.className = 'seq-col-indicators-grid';
+    for (let c = 0; c < SEQUENCER_STEPS; c++) {
+      const dot = document.createElement('div');
+      dot.className = 'seq-col-dot';
+      dot.id = 'seq-dot-' + c;
+      indicatorGrid.appendChild(dot);
+    }
+    indicatorRow.appendChild(indicatorGrid);
+    gridContainer.appendChild(indicatorRow);
+
+    // Create rows for each bol
+    for (let r = 0; r < SEQUENCER_ROWS.length; r++) {
+      const bol = SEQUENCER_ROWS[r];
+      
+      const row = document.createElement('div');
+      row.className = 'seq-row';
+      row.setAttribute('data-row', bol);
+      
+      const label = document.createElement('div');
+      label.className = 'seq-label';
+      label.textContent = bol;
+      row.appendChild(label);
+      
+      const grid = document.createElement('div');
+      grid.className = 'seq-grid-row';
+      
+      for (let c = 0; c < SEQUENCER_STEPS; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'seq-cell';
+        cell.id = `cell-${r}-${c}`;
+        cell.textContent = bol;
+        
+        // Click to toggle step active
+        cell.addEventListener('click', () => {
+          sequencerGrid[r][c] = !sequencerGrid[r][c];
+          if (sequencerGrid[r][c]) {
+            cell.classList.add('active');
+            initAudio();
+            playSpecificBol(bol, audioCtx.currentTime);
+          } else {
+            cell.classList.remove('active');
+          }
+        });
+        
+        grid.appendChild(cell);
+      }
+      row.appendChild(grid);
+      gridContainer.appendChild(row);
+    }
+  }
+
+  // Sequencer Event Listeners
+  const btnSeqPlay = document.getElementById('btnSeqPlay');
+  const btnSeqClear = document.getElementById('btnSeqClear');
+  const seqBpmInput = document.getElementById('seqBpmInput');
+
+  btnSeqPlay.addEventListener('click', () => {
+    initAudio();
+    if (sequencerPlaying) {
+      sequencerPlaying = false;
+      btnSeqPlay.textContent = '▶ Play';
+      btnSeqPlay.classList.remove('playing');
+      clearTimeout(sequencerTimerID);
+      document.querySelectorAll('.seq-col-dot').forEach(dot => dot.classList.remove('active-step'));
+    } else {
+      if (isPlaying) {
+        playBtn.click();
+      }
+      sequencerPlaying = true;
+      btnSeqPlay.textContent = '⏸ Stop';
+      btnSeqPlay.classList.add('playing');
+      sequencerBeat = 0;
+      sequencerNextTime = audioCtx.currentTime + 0.05;
+      sequencerScheduler();
+    }
+  });
+
+  btnSeqClear.addEventListener('click', () => {
+    for (let r = 0; r < SEQUENCER_ROWS.length; r++) {
+      for (let c = 0; c < SEQUENCER_STEPS; c++) {
+        sequencerGrid[r][c] = false;
+        const cell = document.getElementById(`cell-${r}-${c}`);
+        if (cell) cell.classList.remove('active');
+      }
+    }
+  });
+
+  seqBpmInput.addEventListener('change', (e) => {
+    sequencerBpm = Math.max(40, Math.min(240, Number(e.target.value)));
+  });
+
+  // Initialize Sequencer DOM
+  buildSequencerDOM();
 </script>
 </body>
 </html>
