@@ -222,7 +222,10 @@
 
   document.getElementById('lblTitle').textContent = t.title;
   document.getElementById('btnBack').textContent = t.back;
-  document.getElementById('valPlanName').textContent = t.plan;
+  const session = (typeof readMockSession === 'function') ? readMockSession() : null;
+  const isOwner = !!(session && (session.isOwner || session.role === 'owner' || session.role === 'admin'));
+
+  document.getElementById('valPlanName').textContent = t.plan + (isOwner ? ` (${lang === 'en' ? 'Owner Account' : lang === 'hi' ? 'ओनर खाता' : 'ઓનર ખાતું'})` : '');
   document.getElementById('lblDueDate').textContent = t.dueDate;
   document.getElementById('lblPaymentHistory').textContent = t.history;
   document.getElementById('thDate').textContent = t.thDate;
@@ -232,7 +235,7 @@
   document.getElementById('thAction').textContent = t.thAction;
 
   // Read dynamic status
-  let feeStatus = localStorage.getItem('harmony_fee_status');
+  let feeStatus = isOwner ? 'Paid' : localStorage.getItem('harmony_fee_status');
   let dueDateStr = localStorage.getItem('harmony_fee_due_date') || '2026-08-10';
 
   const valDueDate = document.getElementById('valDueDate');
@@ -241,7 +244,7 @@
   const feePlanSelect = document.getElementById('feePlanSelect');
   const valAmountText = document.getElementById('valAmountText');
 
-  valDueDate.textContent = dueDateStr;
+  valDueDate.textContent = isOwner ? '--' : dueDateStr;
 
   if (feeStatus === 'Paid') {
     valStatus.textContent = t.paid;

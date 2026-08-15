@@ -292,7 +292,7 @@ async function initAppShell(options) {
 
   // ---- Global Fee Lock Check ----
   (function checkGlobalFeeLock() {
-    if (!isLoggedIn || currentPage === 'login' || currentPage === 'index') return;
+    if (!isLoggedIn || currentPage === 'login' || currentPage === 'index' || ownerUnlocked) return;
 
     let feeStatus = localStorage.getItem('harmony_fee_status');
     let dueDateStr = localStorage.getItem('harmony_fee_due_date');
