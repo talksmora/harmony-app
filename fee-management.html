@@ -175,6 +175,7 @@
     </div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="shared/utils.js"></script>
 <script src="shared/supabase-client.js"></script>
 <script src="shared/app-shell.js"></script>
@@ -243,75 +244,150 @@
   const planSelectContainer = document.getElementById('planSelectContainer');
   const feePlanSelect = document.getElementById('feePlanSelect');
   const valAmountText = document.getElementById('valAmountText');
+  const body = document.getElementById('paymentHistoryBody');
 
-  let remainingText = '';
-  if (!isOwner) {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const dDate = new Date(dueDateStr);
-    dDate.setHours(0,0,0,0);
-
-    const timeDiff = dDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-
-    if (diffDays > 0) {
-      remainingText = lang === 'en' 
-        ? ` (${diffDays} Days Remaining)` 
-        : lang === 'hi' 
-          ? ` (${diffDays} दिन शेष)` 
-          : ` (${diffDays} દિવસો બાકી)`;
-    } else if (diffDays === 0) {
-      remainingText = lang === 'en' 
-        ? ` (Due Today)` 
-        : lang === 'hi' 
-          ? ` (आज देय तिथि है)` 
-          : ` (આજે છેલ્લી તારીખ છે)`;
-    } else {
-      remainingText = lang === 'en' 
-        ? ` (Overdue by ${Math.abs(diffDays)} Days)` 
-        : lang === 'hi' 
-          ? ` (${Math.abs(diffDays)} दिनों की देरी)` 
-          : ` (${Math.abs(diffDays)} દિવસ મોડું)`;
-    }
-  }
-
-  valDueDate.textContent = (isOwner ? '--' : dueDateStr) + remainingText;
-
-  if (feeStatus === 'Paid') {
-    valStatus.textContent = t.paid;
-    valStatus.className = 'status-badge';
-    valStatus.style.cursor = 'default';
-    planSelectContainer.style.display = 'none';
-    const paidAmount = localStorage.getItem('harmony_last_paid_amount') || '2,000';
-    valAmountText.textContent = `₹${paidAmount}`;
-  } else {
-    planSelectContainer.style.display = 'block';
-    const updateAmountText = () => {
-      const amt = feePlanSelect.options[feePlanSelect.selectedIndex].getAttribute('data-amount');
-      valAmountText.textContent = `₹${parseInt(amt).toLocaleString()}`;
-      valStatus.textContent = lang === 'en' 
-        ? `💳 Pay Now (₹${parseInt(amt).toLocaleString()})` 
-        : lang === 'hi' 
-          ? `💳 भुगतान करें (₹${parseInt(amt).toLocaleString()})` 
-          : `💳 ચૂકવણી કરો (₹${parseInt(amt).toLocaleString()})`;
-    };
+  async function loadFeeData() {
+    body.innerHTML = '';
     
-    feePlanSelect.onchange = updateAmountText;
-    updateAmountText();
+    // Sync with database
+    const sb = getSupabase();
+    let dbPayments = [];
+    if (sb && session && session.phone) {
+      try {
+        const { data, error } = await sb
+          .from('fee_payments')
+          .select('*')
+          .eq('phone', session.phone)
+          .order('payment_date', { ascending: false });
+        if (!error && data) {
+          dbPayments = data;
+          if (dbPayments.length > 0) {
+            const latest = dbPayments[0];
+            feeStatus = isOwner ? 'Paid' : latest.status;
+            dueDateStr = latest.due_date;
+            localStorage.setItem('harmony_fee_status', feeStatus);
+            localStorage.setItem('harmony_fee_due_date', dueDateStr);
+            localStorage.setItem('harmony_last_paid_amount', latest.amount.toLocaleString());
+          }
+        }
+      } catch(e) {}
+    }
 
-    valStatus.className = 'status-badge pending';
-    valStatus.style.cursor = 'pointer';
+    valDueDate.textContent = isOwner ? '--' : dueDateStr;
 
-    valStatus.onclick = () => {
-      if (!window.Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = startRazorpay;
-        document.head.appendChild(script);
+    // Calculate days remaining
+    let remainingText = '';
+    if (!isOwner) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const dDate = new Date(dueDateStr);
+      dDate.setHours(0,0,0,0);
+
+      const timeDiff = dDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+      if (diffDays > 0) {
+        remainingText = lang === 'en' 
+          ? ` (${diffDays} Days Remaining)` 
+          : lang === 'hi' 
+            ? ` (${diffDays} दिन शेष)` 
+            : ` (${diffDays} દિવસો બાકી)`;
+      } else if (diffDays === 0) {
+        remainingText = lang === 'en' 
+          ? ` (Due Today)` 
+          : lang === 'hi' 
+            ? ` (आज देय तिथि है)` 
+            : ` (આજે છેલ્લી તારીખ છે)`;
       } else {
-        startRazorpay();
+        remainingText = lang === 'en' 
+          ? ` (Overdue by ${Math.abs(diffDays)} Days)` 
+          : lang === 'hi' 
+            ? ` (${Math.abs(diffDays)} दिनों की देरी)` 
+            : ` (${Math.abs(diffDays)} દિવસ મોડું)`;
       }
-    };
+      valDueDate.textContent = dueDateStr + remainingText;
+    }
+
+    // Set Status display
+    if (feeStatus === 'Paid') {
+      valStatus.textContent = t.paid;
+      valStatus.className = 'status-badge';
+      valStatus.style.cursor = 'default';
+      valStatus.onclick = null;
+      planSelectContainer.style.display = 'none';
+      const paidAmount = localStorage.getItem('harmony_last_paid_amount') || '2,000';
+      valAmountText.textContent = `₹${paidAmount}`;
+    } else {
+      planSelectContainer.style.display = 'block';
+      const updateAmountText = () => {
+        const amt = feePlanSelect.options[feePlanSelect.selectedIndex].getAttribute('data-amount');
+        valAmountText.textContent = `₹${parseInt(amt).toLocaleString()}`;
+        valStatus.textContent = lang === 'en' 
+          ? `💳 Pay Now (₹${parseInt(amt).toLocaleString()})` 
+          : lang === 'hi' 
+            ? `💳 भुगतान करें (₹${parseInt(amt).toLocaleString()})` 
+            : `💳 ચૂકવણી કરો (₹${parseInt(amt).toLocaleString()})`;
+      };
+      
+      feePlanSelect.onchange = updateAmountText;
+      updateAmountText();
+
+      valStatus.className = 'status-badge pending';
+      valStatus.style.cursor = 'pointer';
+
+      valStatus.onclick = () => {
+        if (!window.Razorpay) {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = startRazorpay;
+          document.head.appendChild(script);
+        } else {
+          startRazorpay();
+        }
+      };
+    }
+
+    // Combine database payments with default mock history
+    const defaultPayments = [
+      { date: '10 Aug 2026', amount: '₹2,000', method: 'UPI (GPay)', status: 'Paid', receiptNo: '#HM-9844' },
+      { date: '10 Jul 2026', amount: '₹2,000', method: 'UPI (PhonePe)', status: 'Paid', receiptNo: '#HM-8421' },
+      { date: '10 Jun 2026', amount: '₹2,000', method: 'Cash', status: 'Paid', receiptNo: '#HM-7512' }
+    ];
+
+    const mappedDbPayments = dbPayments.map(p => {
+      const pDate = new Date(p.payment_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      return {
+        date: pDate,
+        amount: `₹${p.amount.toLocaleString()}`,
+        method: p.method,
+        status: p.status,
+        receiptNo: p.receipt_no
+      };
+    });
+
+    const allPayments = [...mappedDbPayments, ...defaultPayments];
+
+    allPayments.forEach(p => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${p.date}</td>
+        <td style="font-weight:700;">${p.amount}</td>
+        <td>${p.method}</td>
+        <td><span class="status-badge">${t.paid}</span></td>
+        <td><button class="view-receipt-btn">${t.view}</button></td>
+      `;
+
+      row.querySelector('.view-receipt-btn').onclick = () => {
+        document.getElementById('recNo').textContent = p.receiptNo;
+        document.getElementById('recDate').textContent = p.date;
+        document.getElementById('recAmount').textContent = p.amount;
+        document.getElementById('recMethod').textContent = p.method;
+        document.getElementById('recCourse').textContent = t.courses;
+        document.getElementById('receiptModalOverlay').style.display = 'flex';
+      };
+
+      body.appendChild(row);
+    });
   }
 
   function startRazorpay() {
@@ -325,27 +401,33 @@
       currency: 'INR',
       name: 'Harmony Music Class',
       description: `${monthsCount} Month Tuition Fees`,
-      handler: function(response) {
-        localStorage.setItem('harmony_fee_status', 'Paid');
-        localStorage.setItem('harmony_last_paid_amount', amountRs.toLocaleString());
-        
-        // Push a new payment to list
-        const todayStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-        const newPayment = {
-          date: todayStr,
-          amount: `₹${amountRs.toLocaleString()}`,
-          method: 'UPI (Razorpay)',
-          status: 'Paid',
-          receiptNo: '#HM-' + Math.floor(1000 + Math.random() * 9000)
-        };
-        const localPay = JSON.parse(localStorage.getItem('harmony_payments_list') || '[]');
-        localPay.unshift(newPayment);
-        localStorage.setItem('harmony_payments_list', JSON.stringify(localPay));
-
+      handler: async function(response) {
         // Advance due date by selected months count
         const dDate = new Date(dueDateStr);
         dDate.setMonth(dDate.getMonth() + monthsCount);
-        localStorage.setItem('harmony_fee_due_date', dDate.toISOString().split('T')[0]);
+        const nextDueStr = dDate.toISOString().split('T')[0];
+
+        const sb = getSupabase();
+        if (sb && session && session.phone) {
+          try {
+            const { error } = await sb.from('fee_payments').insert([{
+              phone: session.phone,
+              amount: amountRs,
+              plan_months: monthsCount,
+              method: 'UPI (Razorpay)',
+              status: 'Paid',
+              due_date: nextDueStr,
+              receipt_no: '#HM-' + Math.floor(1000 + Math.random() * 9000)
+            }]);
+            if (error) throw error;
+          } catch(e) {
+            console.warn('DB payment save failed, fallback to local', e);
+          }
+        }
+
+        localStorage.setItem('harmony_fee_status', 'Paid');
+        localStorage.setItem('harmony_last_paid_amount', amountRs.toLocaleString());
+        localStorage.setItem('harmony_fee_due_date', nextDueStr);
 
         alert(lang === 'en' ? 'Payment Successful! App Unlocked.' : lang === 'hi' ? 'भुगतान सफल! ऐप अनलॉक हो गया।' : 'ચુકવણી સફળ! એપ અનલોક થઈ ગઈ છે.');
         window.location.reload();
@@ -356,39 +438,6 @@
     rzp.open();
   }
 
-  // Payments History List
-  const defaultPayments = [
-    { date: '10 Aug 2026', amount: '₹2,000', method: 'UPI (GPay)', status: 'Paid', receiptNo: '#HM-9844' },
-    { date: '10 Jul 2026', amount: '₹2,000', method: 'UPI (PhonePe)', status: 'Paid', receiptNo: '#HM-8421' },
-    { date: '10 Jun 2026', amount: '₹2,000', method: 'Cash', status: 'Paid', receiptNo: '#HM-7512' }
-  ];
-
-  const localPay = JSON.parse(localStorage.getItem('harmony_payments_list') || '[]');
-  const allPayments = [...localPay, ...defaultPayments];
-
-  const body = document.getElementById('paymentHistoryBody');
-  allPayments.forEach(p => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${p.date}</td>
-      <td style="font-weight:700;">${p.amount}</td>
-      <td>${p.method}</td>
-      <td><span class="status-badge">${t.paid}</span></td>
-      <td><button class="view-receipt-btn">${t.view}</button></td>
-    `;
-
-    row.querySelector('.view-receipt-btn').onclick = () => {
-      document.getElementById('recNo').textContent = p.receiptNo;
-      document.getElementById('recDate').textContent = p.date;
-      document.getElementById('recAmount').textContent = p.amount;
-      document.getElementById('recMethod').textContent = p.method;
-      document.getElementById('recCourse').textContent = t.courses;
-      document.getElementById('receiptModalOverlay').style.display = 'flex';
-    };
-
-    body.appendChild(row);
-  });
-
   // Modal actions
   document.getElementById('btnCloseModal').onclick = () => {
     document.getElementById('receiptModalOverlay').style.display = 'none';
@@ -398,6 +447,8 @@
       document.getElementById('receiptModalOverlay').style.display = 'none';
     }
   };
+
+  loadFeeData();
 
   initAppShell({ title: t.title });
 })();

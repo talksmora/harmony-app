@@ -171,12 +171,14 @@
     </div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="shared/utils.js"></script>
 <script src="shared/supabase-client.js"></script>
 <script src="shared/app-shell.js"></script>
 <script>
 (function(){
   const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+  const session = (typeof readMockSession === 'function') ? readMockSession() : null;
 
   const TEXT = {
     gu: {
@@ -230,31 +232,73 @@
   document.getElementById('lblAttendanceRate').textContent = t.rate;
   document.getElementById('lblActiveStreak').textContent = t.streak;
 
-  // Local storage state keys
-  const STORAGE_KEY = 'harmony_student_attendance';
   let attendanceDates = [];
-  try {
-    attendanceDates = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch(e) {
-    attendanceDates = [];
-  }
-
   const todayStr = new Date().toISOString().split('T')[0];
   const checkinBtn = document.getElementById('btnCheckin');
 
-  if (attendanceDates.includes(todayStr)) {
-    checkinBtn.textContent = t.alreadyMarked;
-    checkinBtn.disabled = true;
-  }
+  async function loadAttendanceData() {
+    const sb = getSupabase();
+    if (sb && session && session.phone) {
+      try {
+        const { data, error } = await sb
+          .from('attendance')
+          .select('date')
+          .eq('phone', session.phone);
+        
+        if (!error && data) {
+          attendanceDates = data.map(row => row.date);
+        }
+      } catch(e) {}
+    } else {
+      // Local fallback
+      try {
+        attendanceDates = JSON.parse(localStorage.getItem('harmony_student_attendance')) || [];
+      } catch(e) {
+        attendanceDates = [];
+      }
+    }
 
-  checkinBtn.onclick = () => {
-    if (!attendanceDates.includes(todayStr)) {
-      attendanceDates.push(todayStr);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(attendanceDates));
+    if (attendanceDates.includes(todayStr)) {
       checkinBtn.textContent = t.alreadyMarked;
       checkinBtn.disabled = true;
-      renderAll();
+    } else {
+      checkinBtn.textContent = t.markBtn;
+      checkinBtn.disabled = false;
     }
+
+    renderAll();
+  }
+
+  checkinBtn.onclick = async () => {
+    if (attendanceDates.includes(todayStr)) return;
+
+    checkinBtn.disabled = true;
+    checkinBtn.textContent = '...';
+
+    const sb = getSupabase();
+    if (sb && session && session.phone) {
+      try {
+        const { error } = await sb
+          .from('attendance')
+          .insert([{ phone: session.phone, date: todayStr }]);
+        if (error) {
+          alert(error.message);
+          checkinBtn.disabled = false;
+          checkinBtn.textContent = t.markBtn;
+          return;
+        }
+      } catch(e) {
+        alert(e.message);
+        checkinBtn.disabled = false;
+        checkinBtn.textContent = t.markBtn;
+        return;
+      }
+    } else {
+      attendanceDates.push(todayStr);
+      try { localStorage.setItem('harmony_student_attendance', JSON.stringify(attendanceDates)); } catch(e) {}
+    }
+
+    await loadAttendanceData();
   };
 
   function renderAll() {
@@ -262,18 +306,14 @@
     const curYear = now.getFullYear();
     const curMonth = now.getMonth();
 
-    // Month Title
     document.getElementById('valMonthYear').textContent = `${t.months[curMonth]} ${curYear}`;
 
-    // Stats calculations
     const presentCount = attendanceDates.length;
     document.getElementById('valPresent').textContent = presentCount;
 
-    // Attendance percentage (assume 24 active classes/month scale)
     const rate = Math.min(100, Math.round((presentCount / 24) * 100));
     document.getElementById('valRatio').textContent = `${rate}%`;
 
-    // Streak calculation (consecutive days)
     let streak = 0;
     let tempDate = new Date();
     while (true) {
@@ -287,11 +327,9 @@
     }
     document.getElementById('valStreak').textContent = streak;
 
-    // Render Calendar
     const grid = document.getElementById('calendarGrid');
     grid.innerHTML = '';
 
-    // Day headers
     t.days.forEach(d => {
       const header = document.createElement('div');
       header.className = 'day-name';
@@ -302,14 +340,12 @@
     const firstDayIndex = new Date(curYear, curMonth, 1).getDay();
     const totalDays = new Date(curYear, curMonth + 1, 0).getDate();
 
-    // Padding empty cells
     for (let i = 0; i < firstDayIndex; i++) {
       const empty = document.createElement('div');
       empty.className = 'day-cell empty';
       grid.appendChild(empty);
     }
 
-    // Days cells
     for (let d = 1; d <= totalDays; d++) {
       const cell = document.createElement('div');
       cell.className = 'day-cell';
@@ -329,7 +365,8 @@
     }
   }
 
-  renderAll();
+  loadAttendanceData();
+
   initAppShell({ title: t.title });
 })();
 </script>

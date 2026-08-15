@@ -120,6 +120,7 @@
     </div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="shared/utils.js"></script>
 <script src="shared/supabase-client.js"></script>
 <script src="shared/app-shell.js"></script>
@@ -163,33 +164,59 @@
   document.getElementById('btnBack').textContent = t.back;
 
   // Timetable schedule database
-  const SCHEDULE = {
-    'Monday': [
-      { time: '09:00 AM - 10:30 AM', batch: 'Harmonium Basics Batch', teacher: 'Guru Shastri Ji', link: '#' },
-      { time: '04:00 PM - 05:30 PM', batch: 'Classical Vocal Riyaz', teacher: 'Amit Mehta', link: '#' }
-    ],
-    'Tuesday': [
-      { time: '10:00 AM - 11:30 AM', batch: 'Tabla Beat & Taal Study', teacher: 'Pt. Rahul Vyas', link: '#' },
-      { time: '05:00 PM - 06:30 PM', batch: 'Vocal Advanced Training', teacher: 'Pt. Rahul Vyas', link: '#' }
-    ],
-    'Wednesday': [
-      { time: '09:00 AM - 10:30 AM', batch: 'Harmonium Basics Batch', teacher: 'Guru Shastri Ji', link: '#' }
-    ],
-    'Thursday': [
-      { time: '10:00 AM - 11:30 AM', batch: 'Tabla Beat & Taal Study', teacher: 'Pt. Rahul Vyas', link: '#' },
-      { time: '06:00 PM - 07:30 PM', batch: 'Guitar & String Chords', teacher: 'Vikram Sen', link: '#' }
-    ],
-    'Friday': [
-      { time: '11:00 AM - 12:30 PM', batch: 'Keyboard Melodies', teacher: 'Amit Mehta', link: '#' },
-      { time: '04:00 PM - 05:30 PM', batch: 'Classical Vocal Riyaz', teacher: 'Pt. Rahul Vyas', link: '#' }
-    ],
-    'Saturday': [
-      { time: '10:00 AM - 12:00 PM', batch: 'Weekend Riyaz Masterclass', teacher: 'Pt. Rahul Vyas', link: '#' }
-    ],
-    'Sunday': [] // Holiday
+  let SCHEDULE = {
+    'Monday': [], 'Tuesday': [], 'Wednesday': [], 'Thursday': [], 'Friday': [], 'Saturday': [], 'Sunday': []
   };
 
   let activeDayIndex = (new Date().getDay() + 6) % 7; // Convert 0-6 (Sun-Sat) to 0-6 (Mon-Sun)
+
+  async function loadScheduleData() {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { data, error } = await sb
+          .from('class_schedule')
+          .select('*');
+        
+        if (!error && data && data.length > 0) {
+          // Reset SCHEDULE
+          SCHEDULE = {
+            'Monday': [], 'Tuesday': [], 'Wednesday': [], 'Thursday': [], 'Friday': [], 'Saturday': [], 'Sunday': []
+          };
+          data.forEach(row => {
+            if (SCHEDULE[row.day]) {
+              SCHEDULE[row.day].push({
+                time: row.time,
+                batch: row.batch_name,
+                teacher: row.instructor,
+                link: row.link
+              });
+            }
+          });
+        }
+      } catch(e) {}
+    } else {
+      // Offline default fallback
+      SCHEDULE = {
+        'Monday': [
+          { time: '05:00 PM - 06:00 PM', batch: 'Evening Vocal Raga Class', teacher: 'Sandip Barad', link: 'https://meet.google.com/abc-defg-hij' }
+        ],
+        'Tuesday': [],
+        'Wednesday': [
+          { time: '06:00 PM - 07:00 PM', batch: 'Tabla & Rhythm Mastery', teacher: 'Sandip Barad', link: 'https://meet.google.com/abc-defg-hij' }
+        ],
+        'Thursday': [],
+        'Friday': [
+          { time: '05:00 PM - 06:00 PM', batch: 'Vocal Theory & Sargam Class', teacher: 'Sandip Barad', link: 'https://meet.google.com/abc-defg-hij' }
+        ],
+        'Saturday': [],
+        'Sunday': []
+      };
+    }
+
+    renderTabs();
+    renderClasses();
+  }
 
   function renderTabs() {
     const tabs = document.getElementById('weekTabs');
@@ -233,15 +260,15 @@
           <div class="class-instructor">${t.instructor} <strong>${c.teacher}</strong></div>
         </div>
         <div>
-          <a href="${c.link}" class="join-btn">${t.join}</a>
+          <a href="${c.link}" target="_blank" class="join-btn">${t.join}</a>
         </div>
       `;
       list.appendChild(card);
     });
   }
 
-  renderTabs();
-  renderClasses();
+  loadScheduleData();
+
   initAppShell({ title: t.title });
 })();
 </script>
