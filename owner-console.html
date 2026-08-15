@@ -921,6 +921,7 @@
     reader.readAsText(file);
   });
 
+  const session = (typeof readMockSession === 'function') ? readMockSession() : null;
   const userRole = session ? session.role : 'student';
   const userPerms = session ? session.permissions : {};
   const isOwnerUser = (userRole === 'owner') || (session && session.isOwner);
