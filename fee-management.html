@@ -110,7 +110,7 @@
   }
 </style>
 </head>
-<body data-page="attendance">
+<body data-page="fees">
   <div id="appShellRoot"></div>
   <div id="pageBody" style="display:none;">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
@@ -347,13 +347,6 @@
       };
     }
 
-    // Combine database payments with default mock history
-    const defaultPayments = [
-      { date: '10 Aug 2026', amount: '₹2,000', method: 'UPI (GPay)', status: 'Paid', receiptNo: '#HM-9844' },
-      { date: '10 Jul 2026', amount: '₹2,000', method: 'UPI (PhonePe)', status: 'Paid', receiptNo: '#HM-8421' },
-      { date: '10 Jun 2026', amount: '₹2,000', method: 'Cash', status: 'Paid', receiptNo: '#HM-7512' }
-    ];
-
     const mappedDbPayments = dbPayments.map(p => {
       const pDate = new Date(p.payment_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
       return {
@@ -365,9 +358,18 @@
       };
     });
 
-    const allPayments = [...mappedDbPayments, ...defaultPayments];
+    if (mappedDbPayments.length === 0) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td colspan="5" style="text-align:center; padding:30px; color:var(--subtitle); font-style:italic;">
+          ${lang === 'en' ? 'No payment history found' : lang === 'hi' ? 'कोई भुगतान इतिहास नहीं मिला' : 'કોઈ ચુકવણીનો ઇતિહાસ મળ્યો નથી'}
+        </td>
+      `;
+      body.appendChild(row);
+      return;
+    }
 
-    allPayments.forEach(p => {
+    mappedDbPayments.forEach(p => {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${p.date}</td>
