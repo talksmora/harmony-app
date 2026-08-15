@@ -93,14 +93,14 @@ async function initAppShell(options) {
   //   const user = await getCurrentUser();
   const session = (typeof readMockSession === 'function') ? readMockSession() : null;
   const isLoggedIn = !!session;
-  const ownerUnlocked = !!(session && session.isOwner);
+  const ownerUnlocked = !!(session && (session.isOwner || session.role === 'owner' || session.role === 'admin'));
 
   if (!isLoggedIn && currentPage !== 'login') {
     window.location.href = 'login.html';
     return;
   }
   if (currentPage === 'owner-console' && !ownerUnlocked) {
-    alert(SHELL_LANG === 'en' ? 'Owner access only.' : SHELL_LANG === 'hi' ? 'सिर्फ़ Owner के लिए।' : 'ફક્ત Owner માટે.');
+    alert(SHELL_LANG === 'en' ? 'Management access only.' : SHELL_LANG === 'hi' ? 'केवल प्रबंधन पहुंच।' : 'ફક્ત મેનેજમેન્ટ એક્સેસ.');
     window.location.href = 'dashboard.html';
     return;
   }

@@ -83,7 +83,7 @@
     <h2 id="consoleTitle" style="margin:0 0 4px;">🛡️ Owner Console</h2>
     <p id="consoleSub" style="color:var(--subtitle); font-size:0.9rem; margin:0 0 16px;">Access-control &amp; app management (owner only)</p>
  
-    <div class="owner-box">
+    <div class="owner-box" id="allowedNumbersBox">
       <h3 id="allowedTitle">📱 મંજૂર મોબાઈલ નંબર (Allowed Numbers)</h3>
       <p id="allowedDesc">અહીં તમે જેટલા numbers add કરશો, ફક્ત એ j numbers app માં login કરી શકશે.</p>
       <div class="allow-row">
@@ -101,7 +101,7 @@
       <ul class="allow-list" id="allowList">      </ul>
     </div>
 
-    <div class="owner-box">
+    <div class="owner-box" id="progressReportBox">
       <h3 id="progressReportTitle">🧑‍🎓 વિદ્યાર્થી પ્રોગ્રેસ રિપોર્ટ (Student Progress Report)</h3>
       <p id="progressReportDesc">બધા નોંધાયેલા વિદ્યાર્થીઓનો લાઈવ પ્રોગ્રેસ અને સ્કોર અહીં જુઓ.</p>
       
@@ -123,8 +123,32 @@
         </table>
       </div>
     </div>
+
+    <div class="owner-box" id="adminMgmtBox" style="display:none;">
+      <h3 id="adminMgmtTitle">🔑 એડમિન મેનેજમેન્ટ (Admin Management)</h3>
+      <p id="adminMgmtDesc">નવા એડમિન ઉમેરો અને તેમની પરવાનગીઓ (permissions) સેટ કરો.</p>
+      
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:15px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input id="adminNameInput" type="text" placeholder="એડમિનનું નામ" style="flex:1; min-width:150px; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size:0.9rem;">
+          <input id="adminPhoneInput" type="tel" placeholder="+91 9XXXXXXXXX" style="flex:1; min-width:150px; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size:0.9rem;">
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; font-size:0.88rem; margin:5px 0;">
+          <strong id="adminPermsLabel" style="margin-bottom:2px;">પરવાનગીઓ (Permissions):</strong>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" id="permAllowedNumbers" checked> <span id="lblPermAllowedNumbers">નંબર્સ મેનેજ કરવા (Manage Allowed Numbers)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" id="permViewProgress" checked> <span id="lblPermViewProgress">પ્રોગ્રેસ અને રિયાઝ લોગ જોવા (View Progress & Riyaz Logs)</span>
+          </label>
+        </div>
+        <button id="addAdminBtn" style="background:var(--accent); color:#fff; border:none; padding:10px 12px; border-radius:10px; font-weight:600; cursor:pointer; font-size:0.9rem;">એડમિન ઉમેરો (Add Admin)</button>
+      </div>
+      
+      <ul class="allow-list" id="adminList"></ul>
+    </div>
  
-    <div class="owner-box">
+    <div class="owner-box" id="ownerInfoBox">
       <h3 id="infoTitle">⚙️ Owner Info</h3>
       <p id="infoDesc" style="font-weight: 700; font-size: 1rem; color: var(--accent); margin: 0;">Owner Sandip Barad : 7016164239</p>
     </div>
@@ -224,7 +248,17 @@
       detailNoRatings: 'કોઈ રેટિંગ્સ હજુ સુધી સેટ કરેલ નથી.',
       errorLoadingProgress: 'વિદ્યાર્થી પ્રોગ્રેસ લોડ કરવામાં ભૂલ આવી.',
       loadingRiyaz: 'લોડ થઈ રહ્યું છે...',
-      errorRiyazPrefix: 'રિયાઝ લોગ લોડ કરવામાં ભૂલ: '
+      errorRiyazPrefix: 'રિયાઝ લોગ લોડ કરવામાં ભૂલ: ',
+      adminMgmtTitle: '🔑 એડમિન મેનેજમેન્ટ (Admin Management)',
+      adminMgmtDesc: 'નવા એડમિન ઉમેરો અને તેમની પરવાનગીઓ (permissions) સેટ કરો.',
+      adminNamePlaceholder: 'એડમિનનું નામ',
+      addAdminBtnText: 'એડમિન ઉમેરો (Add Admin)',
+      permAllowedNumbersText: 'નંબર્સ મેનેજ કરવા (Manage Allowed Numbers)',
+      permViewProgressText: 'પ્રોગ્રેસ અને રિયાઝ લોગ જોવા (View Progress & Riyaz Logs)',
+      noAdminsText: 'કોઈ એડમિન હજુ સુધી ઉમેરેલ નથી',
+      adminRemoveSuccess: 'એડમિન સફળતાપૂર્વક હટાવી દેવામાં આવ્યા છે.',
+      adminAddSuccess: 'એડમિન સફળતાપૂર્વક ઉમેરવામાં આવ્યા છે.',
+      adminPermsLabel: 'પરવાનગીઓ (Permissions):'
     },
     hi: {
       title: '🛡️ ओनर कंसोल',
@@ -272,7 +306,17 @@
       detailNoRatings: 'अभी तक कोई रेटिंग सेट नहीं की गई है।',
       errorLoadingProgress: 'छात्र प्रगति लोड करने में त्रुटि।',
       loadingRiyaz: 'लोड हो रहा है...',
-      errorRiyazPrefix: 'रियाज़ लॉग लोड करने में त्रुटि: '
+      errorRiyazPrefix: 'रियाज़ लॉग लोड करने में त्रुटि: ',
+      adminMgmtTitle: '🔑 एडमिन प्रबंधन (Admin Management)',
+      adminMgmtDesc: 'नए एडमिन जोड़ें और उनकी अनुमतियाँ (permissions) सेट करें।',
+      adminNamePlaceholder: 'एडमिन का नाम',
+      addAdminBtnText: 'एडमिन जोड़ें (Add Admin)',
+      permAllowedNumbersText: 'नंबर प्रबंधित करना (Manage Allowed Numbers)',
+      permViewProgressText: 'प्रगति और रियाज़ लॉग देखना (View Progress & Riyaz Logs)',
+      noAdminsText: 'अभी तक कोई एडमिन नहीं जोड़ा गया है',
+      adminRemoveSuccess: 'एडमिन को सफलतापूर्वक हटा दिया गया है।',
+      adminAddSuccess: 'एडमिन को सफलतापूर्वक जोड़ दिया गया है।',
+      adminPermsLabel: 'अनुमतियाँ (Permissions):'
     },
     en: {
       title: '🛡️ Owner Console',
@@ -320,7 +364,17 @@
       detailNoRatings: 'No ratings set yet.',
       errorLoadingProgress: 'Error loading student progress.',
       loadingRiyaz: 'Loading...',
-      errorRiyazPrefix: 'Error loading Riyaz logs: '
+      errorRiyazPrefix: 'Error loading Riyaz logs: ',
+      adminMgmtTitle: '🔑 Admin Management',
+      adminMgmtDesc: 'Add new admins and configure their access permissions.',
+      adminNamePlaceholder: 'Admin Name',
+      addAdminBtnText: 'Add Admin',
+      permAllowedNumbersText: 'Manage Allowed Numbers',
+      permViewProgressText: 'View Progress & Riyaz Logs',
+      noAdminsText: 'No admins added yet',
+      adminRemoveSuccess: 'Admin successfully removed.',
+      adminAddSuccess: 'Admin successfully added.',
+      adminPermsLabel: 'Permissions:'
     }
   };
 
@@ -362,6 +416,22 @@
     if (detailRagaLabel) detailRagaLabel.textContent = t.detailRagaLabel;
     const detailRatingsTitle = document.getElementById('detailRatingsTitle');
     if (detailRatingsTitle) detailRatingsTitle.textContent = t.detailRatingsTitle;
+
+    // Admin translation targets
+    const adminMgmtTitle = document.getElementById('adminMgmtTitle');
+    if (adminMgmtTitle) adminMgmtTitle.textContent = t.adminMgmtTitle;
+    const adminMgmtDesc = document.getElementById('adminMgmtDesc');
+    if (adminMgmtDesc) adminMgmtDesc.textContent = t.adminMgmtDesc;
+    const adminNameInput = document.getElementById('adminNameInput');
+    if (adminNameInput) adminNameInput.placeholder = t.adminNamePlaceholder;
+    const addAdminBtn = document.getElementById('addAdminBtn');
+    if (addAdminBtn) addAdminBtn.textContent = t.addAdminBtnText;
+    const adminPermsLabel = document.getElementById('adminPermsLabel');
+    if (adminPermsLabel) adminPermsLabel.textContent = t.adminPermsLabel;
+    const lblPermAllowedNumbers = document.getElementById('lblPermAllowedNumbers');
+    if (lblPermAllowedNumbers) lblPermAllowedNumbers.textContent = t.permAllowedNumbersText;
+    const lblPermViewProgress = document.getElementById('lblPermViewProgress');
+    if (lblPermViewProgress) lblPermViewProgress.textContent = t.permViewProgressText;
   }
 
   // ---- Supabase-backed allowed-numbers list ----
@@ -851,7 +921,188 @@
     reader.readAsText(file);
   });
 
+  const userRole = session ? session.role : 'student';
+  const userPerms = session ? session.permissions : {};
+  const isOwnerUser = (userRole === 'owner') || (session && session.isOwner);
+
+  function applyPermissionAccess() {
+    // 1. Allowed Numbers box: show if owner OR admin with allowed_numbers permission
+    const allowedNumbersBox = document.getElementById('allowedNumbersBox');
+    if (allowedNumbersBox) {
+      if (isOwnerUser || (userRole === 'admin' && userPerms.allowed_numbers)) {
+        allowedNumbersBox.style.display = 'block';
+      } else {
+        allowedNumbersBox.style.display = 'none';
+      }
+    }
+    
+    // 2. Student Progress Report box: show if owner OR admin with view_progress permission
+    const progressReportBox = document.getElementById('progressReportBox');
+    if (progressReportBox) {
+      if (isOwnerUser || (userRole === 'admin' && userPerms.view_progress)) {
+        progressReportBox.style.display = 'block';
+      } else {
+        progressReportBox.style.display = 'none';
+      }
+    }
+    
+    // 3. Admin Management box: show only for owners
+    const adminMgmtBox = document.getElementById('adminMgmtBox');
+    if (adminMgmtBox) {
+      if (isOwnerUser) {
+        adminMgmtBox.style.display = 'block';
+        renderAdmins();
+      } else {
+        adminMgmtBox.style.display = 'none';
+      }
+    }
+    
+    // 4. Owner Info box: show only for owners
+    const ownerInfoBox = document.getElementById('ownerInfoBox');
+    if (ownerInfoBox) {
+      if (isOwnerUser) {
+        ownerInfoBox.style.display = 'block';
+      } else {
+        ownerInfoBox.style.display = 'none';
+      }
+    }
+  }
+
+  async function loadAdmins() {
+    const sb = getSupabase();
+    if (!sb) return [];
+    const { data, error } = await sb
+      .from('allowed_numbers')
+      .select('phone, full_name, permissions')
+      .eq('role', 'admin')
+      .order('created_at', { ascending: true });
+    if (error) {
+      console.error('Error loading admins:', error);
+      return [];
+    }
+    return data || [];
+  }
+
+  async function renderAdmins() {
+    const list = await loadAdmins();
+    const ul = document.getElementById('adminList');
+    if (!ul) return;
+    ul.innerHTML = '';
+    if (list.length === 0) {
+      ul.innerHTML = `<li style="justify-content:center;color:var(--subtitle);">${t.noAdminsText}</li>`;
+      return;
+    }
+    list.forEach((admin) => {
+      const li = document.createElement('li');
+      li.style.flexDirection = 'column';
+      li.style.alignItems = 'stretch';
+      li.style.gap = '6px';
+      
+      const headerDiv = document.createElement('div');
+      headerDiv.style.display = 'flex';
+      headerDiv.style.justifyContent = 'space-between';
+      headerDiv.style.alignItems = 'center';
+      
+      const infoSpan = document.createElement('span');
+      infoSpan.style.fontWeight = '700';
+      infoSpan.textContent = `${admin.full_name || 'Admin'} (${admin.phone})`;
+      
+      const btn = document.createElement('button');
+      btn.textContent = t.removeBtn;
+      btn.dataset.phone = admin.phone;
+      
+      headerDiv.appendChild(infoSpan);
+      headerDiv.appendChild(btn);
+      
+      const permsDiv = document.createElement('div');
+      permsDiv.style.fontSize = '0.78rem';
+      permsDiv.style.color = 'var(--subtitle)';
+      
+      const perms = admin.permissions || {};
+      const activePerms = [];
+      if (perms.allowed_numbers) activePerms.push(t.permAllowedNumbersText);
+      if (perms.view_progress) activePerms.push(t.permViewProgressText);
+      permsDiv.textContent = 'Perms: ' + (activePerms.length > 0 ? activePerms.join(', ') : 'None');
+      
+      li.appendChild(headerDiv);
+      li.appendChild(permsDiv);
+      ul.appendChild(li);
+    });
+    
+    ul.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const phoneToRemove = btn.dataset.phone;
+        const sb = getSupabase();
+        if (sb) {
+          const { error } = await sb
+            .from('allowed_numbers')
+            .delete()
+            .eq('phone', phoneToRemove);
+          if (error) {
+            alert('Error removing admin: ' + error.message);
+          } else {
+            alert(t.adminRemoveSuccess);
+            await renderAdmins();
+          }
+        }
+      });
+    });
+  }
+
+  document.getElementById('addAdminBtn').addEventListener('click', async () => {
+    const nameInput = document.getElementById('adminNameInput');
+    const phoneInput = document.getElementById('adminPhoneInput');
+    const name = nameInput.value.trim();
+    const phone = phoneInput.value.trim();
+    
+    if (!name || !phone) return;
+    
+    // Validate phone number
+    const cleaned = phone.replace(/\s/g, '');
+    const phoneRegex = /^\+?[1-9]\d{6,14}$/;
+    if (!phoneRegex.test(cleaned)) {
+      alert(t.alertValidPhone);
+      return;
+    }
+    
+    // Normalize phone number
+    let normalized = cleaned;
+    if (!normalized.startsWith('+')) {
+      if (normalized.length === 10) {
+        normalized = '+91' + normalized;
+      } else {
+        normalized = '+' + normalized;
+      }
+    }
+    
+    const perms = {
+      allowed_numbers: document.getElementById('permAllowedNumbers').checked,
+      view_progress: document.getElementById('permViewProgress').checked
+    };
+    
+    const sb = getSupabase();
+    if (sb) {
+      const { error } = await sb
+        .from('allowed_numbers')
+        .insert([{
+          phone: normalized,
+          full_name: name,
+          role: 'admin',
+          permissions: perms
+        }]);
+      if (error) {
+        alert('Error adding admin: ' + error.message);
+      } else {
+        alert(t.adminAddSuccess);
+        nameInput.value = '';
+        phoneInput.value = '';
+        await renderAdmins();
+      }
+    }
+  });
+
   applyPageTranslations();
+  applyPermissionAccess();
   renderNumbers();
   renderStudentProgress();
 

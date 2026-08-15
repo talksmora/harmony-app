@@ -116,6 +116,36 @@ async function isOwner(user) {
   return data.role === 'owner';
 }
 
+async function getUserSessionDetails(phone) {
+  const hardcodedOwners = ['+917016164239', '+918160709046', '+919687582252'];
+  if (hardcodedOwners.includes(phone)) {
+    return {
+      role: 'owner',
+      permissions: {
+        allowed_numbers: true,
+        view_progress: true,
+        view_riyaz: true
+      }
+    };
+  }
+  const sb = getSupabase();
+  if (!sb) {
+    return { role: 'student', permissions: {} };
+  }
+  const { data, error } = await sb
+    .from('allowed_numbers')
+    .select('role, permissions')
+    .eq('phone', phone)
+    .maybeSingle();
+  if (error || !data) {
+    return { role: 'student', permissions: {} };
+  }
+  return {
+    role: data.role || 'student',
+    permissions: data.permissions || {}
+  };
+}
+
 /* ---------- TEMPORARY mock session (until Supabase is wired up) ----------
    This lets the app shell + pages work today without a backend.
    Once Supabase is connected, app-shell.js should be switched to call

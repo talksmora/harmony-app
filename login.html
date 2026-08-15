@@ -257,27 +257,23 @@
     if (!/^\d{6}$/.test(otp)) { setMsg(t.errOtpFormat, 'error'); return; }
     try {
       const session = await verifyOtp(pendingPhone, otp); // real Supabase call once configured
-      const user = await getCurrentUser();
-      const owner = await isOwner(user);
-      writeMockSession({ phone: pendingPhone, isOwner: owner });
+      const details = await getUserSessionDetails(pendingPhone);
+      writeMockSession({
+        phone: pendingPhone,
+        isOwner: details.role === 'owner',
+        role: details.role,
+        permissions: details.permissions
+      });
       window.location.href = 'dashboard.html';
     } catch (err) {
       // Mock fallback (no Supabase yet)
-      const hardcodedOwners = ['+917016164239', '+918160709046', '+919687582252'];
-      let isOwnerUser = hardcodedOwners.includes(pendingPhone);
-      if (!isOwnerUser) {
-        const sb = getSupabase();
-        if (sb) {
-          const { data } = await sb.from('allowed_numbers')
-            .select('role')
-            .eq('phone', pendingPhone)
-            .maybeSingle();
-          if (data && data.role === 'owner') {
-            isOwnerUser = true;
-          }
-        }
-      }
-      writeMockSession({ phone: pendingPhone, isOwner: isOwnerUser });
+      const details = await getUserSessionDetails(pendingPhone);
+      writeMockSession({
+        phone: pendingPhone,
+        isOwner: details.role === 'owner',
+        role: details.role,
+        permissions: details.permissions
+      });
       window.location.href = 'dashboard.html';
     }
   });
