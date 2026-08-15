@@ -387,6 +387,63 @@
   const SCALES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   let currentScaleIndex = 0; // C default
 
+  // Authentic audio samples cache from 12Notez
+  const BOL_AUDIO_BUFFERS = {};
+  const BOLS_LIST = [
+    'Dha', 'Dhi', 'Dhin', 'Dhit', 'Dhun', 'Di', 'Ga', 'Ge', 'Ghe', 'Gi', 
+    'Ka', 'Kat', 'Ke', 'Ki', 'Na', 'Ra', 'Re', 'Ta', 'Te', 'Ti', 
+    'Tin', 'Tit', 'Tra', 'Tu', 'Tun'
+  ];
+
+  let tanpuraBuffer = null;
+  let tanpuraSource = null;
+  let tanpuraGain = null;
+
+  async function loadBolBuffer(bol) {
+    if (BOL_AUDIO_BUFFERS[bol]) return BOL_AUDIO_BUFFERS[bol];
+    const url = `https://12notez.in/tabla-app/audio/bols/${bol}/${bol}01.mp3?v=3`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP status ${response.status}`);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      BOL_AUDIO_BUFFERS[bol] = audioBuffer;
+      console.log(`Loaded authentic sample for: ${bol}`);
+      return audioBuffer;
+    } catch (e) {
+      console.warn(`Failed to load authentic sample for ${bol}, using synth fallback.`, e);
+      return null;
+    }
+  }
+
+  function preLoadCommonBols() {
+    BOLS_LIST.forEach(bol => {
+      loadBolBuffer(bol).catch(() => {});
+    });
+  }
+
+  async function loadTanpuraSample() {
+    if (!audioCtx) return;
+    const scaleName = SCALES[currentScaleIndex].toLowerCase().replace('#', 's');
+    const url = `https://12notez.in/audio/octave3/${scaleName}3.mp3`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP status ${response.status}`);
+      const arrayBuffer = await response.arrayBuffer();
+      tanpuraBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      console.log(`Loaded authentic Tanpura sample for: ${scaleName}`);
+      if (document.getElementById('tanpuraCheckbox').checked && isPlaying) {
+        startTanpura();
+      }
+    } catch (e) {
+      console.warn(`Failed to load authentic Tanpura sample for ${scaleName}, using synth fallback.`, e);
+      tanpuraBuffer = null;
+      if (document.getElementById('tanpuraCheckbox').checked && isPlaying) {
+        startTanpura();
+      }
+    }
+  }
+
   // Setup Scale Buttons Grid
   const scaleGrid = document.getElementById('scaleGrid');
   SCALES.forEach((sc, idx) => {
@@ -397,7 +454,9 @@
       document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentScaleIndex = idx;
-      if (audioCtx) restartTanpuraIfRunning();
+      if (audioCtx) {
+        loadTanpuraSample();
+      }
     });
     scaleGrid.appendChild(btn);
   });
@@ -409,9 +468,34 @@
       masterGain = audioCtx.createGain();
       masterGain.gain.value = 0.8;
       masterGain.connect(audioCtx.destination);
+      preLoadCommonBols();
+      loadTanpuraSample();
     }
     if (audioCtx.state === 'suspended') {
       audioCtx.resume();
+    }
+  }
+
+  // Helper to play any sample
+  function playSample(buffer, time, pitchShift = 1.0) {
+    if (!audioCtx || !buffer) return false;
+    try {
+      const source = audioCtx.createBufferSource();
+      source.buffer = buffer;
+      
+      const gainNode = audioCtx.createGain();
+      gainNode.gain.setValueAtTime(1.0, time);
+      
+      source.playbackRate.setValueAtTime(pitchShift, time);
+      
+      source.connect(gainNode);
+      gainNode.connect(masterGain);
+      
+      source.start(time);
+      return true;
+    } catch (e) {
+      console.error("Error playing sample:", e);
+      return false;
     }
   }
 
@@ -426,6 +510,12 @@
     try {
       if (!audioCtx) return;
       const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
+      const pitchShift = Math.pow(2, currentScaleIndex / 12);
+      
+      if (BOL_AUDIO_BUFFERS['Ta'] && playSample(BOL_AUDIO_BUFFERS['Ta'], now, pitchShift)) {
+        return;
+      }
+      
       const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
       
@@ -478,6 +568,12 @@
     try {
       if (!audioCtx) return;
       const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
+      const pitchShift = Math.pow(2, currentScaleIndex / 12);
+      
+      if (BOL_AUDIO_BUFFERS['Tin'] && playSample(BOL_AUDIO_BUFFERS['Tin'], now, pitchShift)) {
+        return;
+      }
+      
       const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
       
@@ -505,6 +601,11 @@
     try {
       if (!audioCtx) return;
       const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
+      
+      if (BOL_AUDIO_BUFFERS['Ghe'] && playSample(BOL_AUDIO_BUFFERS['Ghe'], now, 1.0)) {
+        return;
+      }
+      
       const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
       
@@ -556,6 +657,11 @@
     try {
       if (!audioCtx) return;
       const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
+      
+      if (BOL_AUDIO_BUFFERS['Ka'] && playSample(BOL_AUDIO_BUFFERS['Ka'], now, 1.0)) {
+        return;
+      }
+      
       const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
       
@@ -578,6 +684,9 @@
   // Combined Bols
   function playDha(time = 0) {
     const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
+    if (BOL_AUDIO_BUFFERS['Dha'] && playSample(BOL_AUDIO_BUFFERS['Dha'], now, 1.0)) {
+      return;
+    }
     playTa(now);
     playGhe(now);
   }
@@ -585,8 +694,35 @@
   // Combined Dhin
   function playDhin(time = 0) {
     const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
+    if (BOL_AUDIO_BUFFERS['Dhin'] && playSample(BOL_AUDIO_BUFFERS['Dhin'], now, 1.0)) {
+      return;
+    }
     playTin(now);
     playGhe(now);
+  }
+
+  // Play specific bol (sample-first with synth fallbacks)
+  function playSpecificBol(bol, time) {
+    const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
+    const pitchShift = Math.pow(2, currentScaleIndex / 12);
+    
+    // Check if we have the exact sample for this bol
+    if (BOL_AUDIO_BUFFERS[bol]) {
+      const isDayan = ['Ta', 'Na', 'Tin', 'Ti', 'Tu', 'Te', 'Re'].includes(bol);
+      const shift = isDayan ? pitchShift : 1.0;
+      if (playSample(BOL_AUDIO_BUFFERS[bol], now, shift)) return;
+    }
+    
+    // Otherwise fallback to our synth equivalents or composite bols
+    switch(bol) {
+      case 'Dha': playDha(now); break;
+      case 'Dhin': playDhin(now); break;
+      case 'Ta': case 'Na': playTa(now); break;
+      case 'Tin': case 'Ti': case 'Tu': playTin(now); break;
+      case 'Ghe': case 'Ge': case 'Dhi': playGhe(now); break;
+      case 'Ke': case 'Ka': case 'Kat': playKa(now); break;
+      default: playDha(now);
+    }
   }
 
   // Interactive UI clicks
@@ -685,15 +821,7 @@
     const bol = currentSequence.bols[beatNumber];
     
     // Play sound based on Bol
-    switch(bol) {
-      case 'Dha': playDha(time); break;
-      case 'Dhin': playDhin(time); break;
-      case 'Ta': case 'Na': playTa(time); break;
-      case 'Tin': case 'Ti': case 'Tu': playTin(time); break;
-      case 'Ghe': case 'Ge': case 'Dhi': playGhe(time); break;
-      case 'Ke': case 'Ka': case 'Kat': playKa(time); break;
-      default: playDha(time);
-    }
+    playSpecificBol(bol, time);
 
     // Schedule UI updates
     const delay = (time - audioCtx.currentTime) * 1000;
@@ -765,13 +893,31 @@
   // Tanpura Drone Synth (Continuous background drone)
   let tanpuraNode1 = null;
   let tanpuraNode2 = null;
-  let tanpuraGain = null;
 
   function startTanpura() {
     if (!audioCtx || !document.getElementById('tanpuraCheckbox').checked) return;
     
     // Stop previous if running
     stopTanpura();
+
+    // If authentic sample is loaded, play it as a loop
+    if (tanpuraBuffer) {
+      try {
+        tanpuraSource = audioCtx.createBufferSource();
+        tanpuraSource.buffer = tanpuraBuffer;
+        tanpuraSource.loop = true;
+        
+        tanpuraGain = audioCtx.createGain();
+        tanpuraGain.gain.value = 0.5; // Good balance for loop
+        tanpuraGain.connect(masterGain);
+        
+        tanpuraSource.connect(tanpuraGain);
+        tanpuraSource.start(0);
+        return;
+      } catch (e) {
+        console.error("Error playing Tanpura sample:", e);
+      }
+    }
 
     tanpuraGain = audioCtx.createGain();
     tanpuraGain.gain.setValueAtTime(0.08, audioCtx.currentTime); // Low background drone volume
@@ -827,6 +973,10 @@
   }
 
   function stopTanpura() {
+    if (tanpuraSource) {
+      try { tanpuraSource.stop(); } catch(e) {}
+      tanpuraSource = null;
+    }
     if (tanpuraNode1) {
       try { tanpuraNode1.stop(); } catch(e) {}
       tanpuraNode1 = null;
