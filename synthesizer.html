@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Synthesizer - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .synth-container {
+    background: linear-gradient(135deg, #1e272e 0%, #0f1418 100%);
+    border: 8px solid #0a0e10;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+    position: relative;
+  }
+
+  /* Synthesizer Control Panel Layout */
+  .synth-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    background: rgba(0,0,0,0.4);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 24px;
+    text-align: left;
+  }
+
+  .synth-section-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin: 0 0 14px;
+    border-bottom: 1.5px solid rgba(255,255,255,0.08);
+    padding-bottom: 6px;
+  }
+
+  .control-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .control-row label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #bbb;
+    display: flex;
+    justify-content: space-between;
+  }
+  .control-row label span {
+    color: var(--accent);
+    font-weight: 800;
+  }
+  .control-row select, .control-row input[type="range"] {
+    background: #0f1418;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 8px;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+  }
+  .control-row input[type="range"] {
+    padding: 0;
+  }
+
+  /* Keyboard styling */
+  .keys-wrapper {
+    background: #000;
+    padding: 15px 5px 5px;
+    border-radius: 16px;
+    border: 3px solid #111;
+    position: relative;
+    overflow-x: auto;
+  }
+  .keyboard-scroll {
+    display: flex;
+    position: relative;
+    min-width: 780px;
+    height: 220px;
+  }
+  .key {
+    position: relative;
+    flex-shrink: 0;
+    height: 100%;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s, transform 0.1s;
+  }
+  .key.white {
+    width: 44px;
+    background: linear-gradient(to bottom, #fff 0%, #f0f0f0 100%);
+    border-right: 1px solid #ccc;
+    border-bottom: 6px solid #d5d5d5;
+    border-radius: 0 0 6px 6px;
+    z-index: 1;
+  }
+  .key.white:active, .key.white.pressed {
+    background: linear-gradient(to bottom, #eaeaea 0%, #d8d8d8 100%);
+    border-bottom-width: 2px;
+    transform: translateY(4px);
+  }
+  .key.black {
+    width: 28px;
+    height: 60%;
+    background: linear-gradient(to bottom, #444 0%, #111 100%);
+    border-radius: 0 0 5px 5px;
+    border: 1px solid #000;
+    z-index: 2;
+    margin-left: -14px;
+    margin-right: -14px;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+  }
+  .key.black:active, .key.black.pressed {
+    background: linear-gradient(to bottom, #222 0%, #000 100%);
+    height: 59%;
+    transform: translateY(2px);
+  }
+
+  .key-label {
+    position: absolute;
+    bottom: 12px; left: 50%; transform: translateX(-50%);
+    font-size: 0.65rem; color: #888;
+    pointer-events: none;
+    font-weight: 700;
+  }
+  .key.black .key-label { color: #aaa; bottom: 8px; }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">🎛️ વર્ચ્યુઅલ સિન્થેસાઇઝર</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="synth-container">
+      <div class="synth-panel">
+        <!-- Oscillator configuration -->
+        <div>
+          <h4 class="synth-section-title" id="lblOscSec">ઓસિલેટર (OSCILLATOR)</h4>
+          <div class="control-row">
+            <label id="lblWaveType">તરંગ પ્રકાર (Waveform)</label>
+            <select id="waveSelect">
+              <option value="sine">Sine (શાંત / શુદ્ધ)</option>
+              <option value="triangle" selected>Triangle (હૂંફાળું / સોફ્ટ)</option>
+              <option value="sawtooth">Sawtooth (તીક્ષ્ણ / બઝી)</option>
+              <option value="square">Square (રેટ્રો ગેમિંગ સાઉન્ડ)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Filter configuration -->
+        <div>
+          <h4 class="synth-section-title" id="lblFilterSec">ફિલ્ટર (FILTER)</h4>
+          <div class="control-row">
+            <label>કટઓફ ફ્રીક્વન્સી (Cutoff) <span id="cutoffVal">1200 Hz</span></label>
+            <input type="range" id="cutoffSlider" min="100" max="5000" value="1200" step="50">
+          </div>
+          <div class="control-row">
+            <label>રેઝોનન્સ (Resonance Q) <span id="qVal">1.0</span></label>
+            <input type="range" id="qSlider" min="0.1" max="15" value="1.0" step="0.1">
+          </div>
+        </div>
+
+        <!-- Envelope configuration -->
+        <div>
+          <h4 class="synth-section-title" id="lblEnvSec">એન્વેલોપ (ADSR ENVELOPE)</h4>
+          <div class="control-row">
+            <label>એટેક (Attack) <span id="attackVal">0.05s</span></label>
+            <input type="range" id="attackSlider" min="0" max="2" value="0.05" step="0.01">
+          </div>
+          <div class="control-row">
+            <label>ડીકે (Decay) <span id="decayVal">0.2s</span></label>
+            <input type="range" id="decaySlider" min="0" max="2" value="0.2" step="0.01">
+          </div>
+          <div class="control-row">
+            <label>સસ્ટેન (Sustain) <span id="sustainVal">0.5</span></label>
+            <input type="range" id="sustainSlider" min="0" max="1" value="0.5" step="0.05">
+          </div>
+          <div class="control-row">
+            <label>રીલીઝ (Release) <span id="releaseVal">0.3s</span></label>
+            <input type="range" id="releaseSlider" min="0" max="3" value="0.3" step="0.05">
+          </div>
+        </div>
+      </div>
+
+      <div class="keys-wrapper">
+        <div class="keyboard-scroll" id="keyboard"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🎛️ વર્ચ્યુઅલ સિન્થેસાઇઝર',
+      back: '← પાછા જાઓ',
+      oscSec: 'ઓસિલેટર (OSCILLATOR)',
+      waveType: 'તરંગ પ્રકાર (Waveform)',
+      filterSec: 'ફિલ્ટર (FILTER)',
+      envSec: 'એન્વેલોપ (ADSR ENVELOPE)'
+    },
+    hi: {
+      title: '🎛️ वर्चुअल सिंथेसाइज़र',
+      back: '← वापस जाएं',
+      oscSec: 'ऑसिलेटर (OSCILLATOR)',
+      waveType: 'तरंग प्रकार (Waveform)',
+      filterSec: 'फ़िल्टर (FILTER)',
+      envSec: 'एन्वेलोप (ADSR ENVELOPE)'
+    },
+    en: {
+      title: '🎛️ Virtual Synthesizer',
+      back: '← Go Back',
+      oscSec: 'OSCILLATOR SECTION',
+      waveType: 'Waveform select',
+      filterSec: 'BIQUAD FILTER CONTROL',
+      envSec: 'ADSR VOLUME ENVELOPE'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('lblOscSec').textContent = t.oscSec;
+  document.getElementById('lblWaveType').textContent = t.waveType;
+  document.getElementById('lblFilterSec').textContent = t.filterSec;
+  document.getElementById('lblEnvSec').textContent = t.envSec;
+
+  let audioCtx = null;
+  let activeNotes = {};
+
+  const NOTES = [
+    { note: 'C3', type: 'white', freq: 130.81 },
+    { note: 'C#3', type: 'black', freq: 138.59 },
+    { note: 'D3', type: 'white', freq: 146.83 },
+    { note: 'D#3', type: 'black', freq: 154.34 },
+    { note: 'E3', type: 'white', freq: 164.81 },
+    { note: 'F3', type: 'white', freq: 174.61 },
+    { note: 'F#3', type: 'black', freq: 185.00 },
+    { note: 'G3', type: 'white', freq: 196.00 },
+    { note: 'G#3', type: 'black', freq: 207.65 },
+    { note: 'A3', type: 'white', freq: 220.00 },
+    { note: 'A#3', type: 'black', freq: 233.08 },
+    { note: 'B3', type: 'white', freq: 246.94 },
+    { note: 'C4', type: 'white', freq: 261.63 },
+    { note: 'C#4', type: 'black', freq: 277.18 },
+    { note: 'D4', type: 'white', freq: 293.66 },
+    { note: 'D#4', type: 'black', freq: 311.13 },
+    { note: 'E4', type: 'white', freq: 329.63 },
+    { note: 'F4', type: 'white', freq: 349.23 },
+    { note: 'F#4', type: 'black', freq: 369.99 },
+    { note: 'G4', type: 'white', freq: 392.00 },
+    { note: 'G#4', type: 'black', freq: 415.30 },
+    { note: 'A4', type: 'white', freq: 440.00 },
+    { note: 'A#4', type: 'black', freq: 466.16 },
+    { note: 'B4', type: 'white', freq: 493.88 },
+    { note: 'C5', type: 'white', freq: 523.25 }
+  ];
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Play ADSR polyphonic synthesizer note
+  function playSynthNote(freq, noteName) {
+    initAudio();
+    if (activeNotes[noteName]) {
+      stopSynthNote(noteName);
+    }
+
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    // Read panel states
+    const wave = document.getElementById('waveSelect').value;
+    const cutoff = parseFloat(document.getElementById('cutoffSlider').value);
+    const Q = parseFloat(document.getElementById('qSlider').value);
+    const A = parseFloat(document.getElementById('attackSlider').value);
+    const D = parseFloat(document.getElementById('decaySlider').value);
+    const S = parseFloat(document.getElementById('sustainSlider').value);
+
+    osc.type = wave;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(cutoff, audioCtx.currentTime);
+    filter.Q.setValueAtTime(Q, audioCtx.currentTime);
+
+    // ADSR Envelope trigger
+    gainNode.gain.setValueAtTime(0.0, audioCtx.currentTime);
+    // Attack
+    gainNode.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + A);
+    // Decay -> Sustain
+    gainNode.gain.setTargetAtTime(S * 0.35, audioCtx.currentTime + A, D);
+
+    osc.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    osc.start();
+
+    activeNotes[noteName] = { osc, gain: gainNode, filter };
+  }
+
+  function stopSynthNote(noteName) {
+    const node = activeNotes[noteName];
+    if (!node) return;
+
+    const R = parseFloat(document.getElementById('releaseSlider').value);
+
+    node.gain.gain.setValueAtTime(node.gain.gain.value, audioCtx.currentTime);
+    node.gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + R);
+
+    setTimeout(() => {
+      try {
+        node.osc.stop();
+        node.osc.disconnect();
+        node.filter.disconnect();
+        node.gain.disconnect();
+      } catch(e) {}
+    }, (R * 1000) + 100);
+
+    delete activeNotes[noteName];
+  }
+
+  function renderKeyboard() {
+    const keyboardEl = document.getElementById('keyboard');
+    keyboardEl.innerHTML = '';
+
+    NOTES.forEach(noteInfo => {
+      const key = document.createElement('div');
+      key.className = `key ${noteInfo.type}`;
+      key.id = 'key-' + noteInfo.note;
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'key-label';
+      labelEl.textContent = noteInfo.note;
+      key.appendChild(labelEl);
+
+      const startTrigger = (e) => {
+        e.preventDefault();
+        key.classList.add('pressed');
+        playSynthNote(noteInfo.freq, noteInfo.note);
+      };
+
+      const endTrigger = (e) => {
+        e.preventDefault();
+        key.classList.remove('pressed');
+        stopSynthNote(noteInfo.note);
+      };
+
+      key.addEventListener('mousedown', startTrigger);
+      key.addEventListener('mouseup', endTrigger);
+      key.addEventListener('mouseleave', endTrigger);
+
+      key.addEventListener('touchstart', startTrigger);
+      key.addEventListener('touchend', endTrigger);
+
+      keyboardEl.appendChild(key);
+    });
+  }
+
+  // Bind slider displays
+  const sliders = [
+    { id: 'cutoffSlider', displayId: 'cutoffVal', suffix: ' Hz' },
+    { id: 'qSlider', displayId: 'qVal', suffix: '' },
+    { id: 'attackSlider', displayId: 'attackVal', suffix: 's' },
+    { id: 'decaySlider', displayId: 'decayVal', suffix: 's' },
+    { id: 'sustainSlider', displayId: 'sustainVal', suffix: '' },
+    { id: 'releaseSlider', displayId: 'releaseVal', suffix: 's' }
+  ];
+
+  sliders.forEach(sl => {
+    const slider = document.getElementById(sl.id);
+    slider.oninput = function() {
+      document.getElementById(sl.displayId).textContent = this.value + sl.suffix;
+    };
+  });
+
+  renderKeyboard();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Stylophone - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .stylo-container {
+    background: linear-gradient(135deg, #222 0%, #111 100%);
+    border: 8px solid #333;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    margin-top: 10px;
+    color: #ddd;
+    position: relative;
+    text-align: center;
+  }
+
+  .stylo-panel {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #080808;
+    border: 2px solid #222;
+    padding: 15px 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .panel-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-control label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #888;
+  }
+
+  /* Stylophone metallic contact pad keyboard */
+  .metal-keyboard {
+    background: #050505;
+    border: 4px solid #d4af37;
+    border-radius: 16px;
+    padding: 20px 10px 10px;
+    position: relative;
+    overflow-x: auto;
+  }
+  .metal-scroll {
+    display: flex;
+    position: relative;
+    height: 180px;
+    min-width: 650px;
+  }
+  .metal-key {
+    position: relative;
+    flex-shrink: 0;
+    height: 100%;
+    cursor: crosshair;
+    user-select: none;
+    border: 1px solid #222;
+    background: linear-gradient(to bottom, #d4af37 0%, #aa8c2c 100%);
+    border-bottom: 5px solid #8c7324;
+    transition: background 0.15s;
+  }
+  .metal-key.white {
+    width: 32px;
+    border-radius: 0 0 4px 4px;
+  }
+  .metal-key.black {
+    width: 20px;
+    height: 60%;
+    background: linear-gradient(to bottom, #333 0%, #111 100%);
+    border-bottom: 3px solid #000;
+    z-index: 2;
+    margin-left: -10px;
+    margin-right: -10px;
+    border-radius: 0 0 3px 3px;
+  }
+  .metal-key.white.active {
+    background: #fff;
+    border-bottom-color: #ccc;
+  }
+  .metal-key.black.active {
+    background: #f1c40f;
+    border-bottom-color: #d55400;
+  }
+  
+  .key-label {
+    position: absolute;
+    bottom: 8px; left: 50%; transform: translateX(-50%);
+    font-size: 0.55rem; color: #111;
+    pointer-events: none;
+    font-weight: 800;
+  }
+  .metal-key.black .key-label { color: #fff; }
+
+  /* Switch styling */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #333;
+    transition: .4s;
+    border-radius: 24px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px; width: 16px;
+    left: 4px; bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  input:checked + .slider { background-color: var(--accent); }
+  input:checked + .slider:before { transform: translateX(26px); }
+
+  .stylus-cable {
+    font-size: 0.75rem;
+    color: var(--subtitle);
+    margin-top: 15px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">🎵 વર્ચ્યુઅલ સ્ટાઇલોફોન</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="stylo-container">
+      <div class="stylo-panel">
+        <div class="panel-control">
+          <label id="lblVibrato">વાઇબ્રેટો (VIBRATO)</label>
+          <label class="switch">
+            <input type="checkbox" id="vibratoToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="panel-control">
+          <label id="lblPitch">પીચ ટ્યુનિંગ (PITCH)</label>
+          <input type="range" id="tuningSlider" min="-100" max="100" value="0" style="cursor:pointer; width:120px;">
+        </div>
+      </div>
+
+      <div class="metal-keyboard" id="metalKeyboard">
+        <div class="metal-scroll" id="keyboard"></div>
+      </div>
+
+      <div class="stylus-cable" id="lblStylusHint">ટિપ: કી પર ક્રોસહર ડ્રેગ/સ્લાઇડ કરીને રેટ્રો સિન્થ સાઉન્ડ વગાડો. (Slide or drag across the keys to play)</div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🎵 વર્ચ્યુઅલ સ્ટાઇલોફોન',
+      back: '← પાછા જાઓ',
+      vibrato: 'વાઇબ્રેટો (VIBRATO)',
+      pitch: 'પીચ ટ્યુનિંગ (PITCH)',
+      hint: 'ટિપ: કી પર માઉસ/ટચ સ્લાઇડ કરીને રેટ્રો સિન્થ સાઉન્ડ વગાડો.'
+    },
+    hi: {
+      title: '🎵 वर्चुअल स्टाइलोफोन',
+      back: '← वापस जाएं',
+      vibrato: 'वाइब्रेटो (VIBRATO)',
+      pitch: 'पिच ट्यूनिंग (PITCH)',
+      hint: 'टिप: कुंजियों पर माउस/टच स्लाइड करके रेट्रो सिंथ साउंड बजाएं।'
+    },
+    en: {
+      title: '🎵 Virtual Retro Stylophone',
+      back: '← Go Back',
+      vibrato: 'VIBRATO EFFECT',
+      pitch: 'FINE PITCH TUNING',
+      hint: 'Tip: Slide or drag your mouse/touch across the metallic pads to play.'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('lblVibrato').textContent = t.vibrato;
+  document.getElementById('lblPitch').textContent = t.pitch;
+  document.getElementById('lblStylusHint').textContent = t.hint;
+
+  let audioCtx = null;
+  let activeOsc = null;
+  let activeGain = null;
+  let vibratoLfo = null;
+  let vibratoGain = null;
+  let currentFreq = 0;
+  let isPointerDown = false;
+
+  const NOTES = [
+    { note: 'A3', type: 'white', freq: 220.00 },
+    { note: 'A#3', type: 'black', freq: 233.08 },
+    { note: 'B3', type: 'white', freq: 246.94 },
+    { note: 'C4', type: 'white', freq: 261.63 },
+    { note: 'C#4', type: 'black', freq: 277.18 },
+    { note: 'D4', type: 'white', freq: 293.66 },
+    { note: 'D#4', type: 'black', freq: 311.13 },
+    { note: 'E4', type: 'white', freq: 329.63 },
+    { note: 'F4', type: 'white', freq: 349.23 },
+    { note: 'F#4', type: 'black', freq: 369.99 },
+    { note: 'G4', type: 'white', freq: 392.00 },
+    { note: 'G#4', type: 'black', freq: 415.30 },
+    { note: 'A4', type: 'white', freq: 440.00 },
+    { note: 'A#4', type: 'black', freq: 466.16 },
+    { note: 'B4', type: 'white', freq: 493.88 },
+    { note: 'C5', type: 'white', freq: 523.25 },
+    { note: 'C#5', type: 'black', freq: 554.37 },
+    { note: 'D5', type: 'white', freq: 587.33 },
+    { note: 'D#5', type: 'black', freq: 622.25 },
+    { note: 'E5', type: 'white', freq: 659.25 }
+  ];
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  function startStylophone(freq) {
+    initAudio();
+    if (activeOsc) return;
+
+    activeOsc = audioCtx.createOscillator();
+    activeGain = audioCtx.createGain();
+
+    // Stylophone uses raw buzzy sawtooth waves
+    activeOsc.type = 'sawtooth';
+    
+    // Read coarse tuning value
+    const detuneVal = parseFloat(document.getElementById('tuningSlider').value);
+    activeOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    activeOsc.detune.setValueAtTime(detuneVal, audioCtx.currentTime);
+
+    // Setup Vibrato LFO if checked
+    const hasVibrato = document.getElementById('vibratoToggle').checked;
+    if (hasVibrato) {
+      vibratoLfo = audioCtx.createOscillator();
+      vibratoGain = audioCtx.createGain();
+      
+      vibratoLfo.type = 'sine';
+      vibratoLfo.frequency.setValueAtTime(6, audioCtx.currentTime); // 6Hz speed
+      vibratoGain.gain.setValueAtTime(15, audioCtx.currentTime); // Pitch detune depth
+
+      vibratoLfo.connect(vibratoGain);
+      vibratoGain.connect(activeOsc.frequency);
+      
+      vibratoLfo.start();
+    }
+
+    activeGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+    activeGain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.01);
+
+    activeOsc.connect(activeGain);
+    activeGain.connect(audioCtx.destination);
+
+    activeOsc.start();
+    currentFreq = freq;
+  }
+
+  function changeFreq(freq) {
+    if (!activeOsc) return;
+    activeOsc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.02);
+    currentFreq = freq;
+  }
+
+  function stopStylophone() {
+    if (!activeOsc) return;
+
+    const refOsc = activeOsc;
+    const refGain = activeGain;
+    const refLfo = vibratoLfo;
+
+    refGain.gain.setValueAtTime(refGain.gain.value, audioCtx.currentTime);
+    refGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+
+    setTimeout(() => {
+      try {
+        refOsc.stop();
+        if (refLfo) refLfo.stop();
+        refOsc.disconnect();
+        refGain.disconnect();
+      } catch(e) {}
+    }, 80);
+
+    activeOsc = null;
+    activeGain = null;
+    vibratoLfo = null;
+    vibratoGain = null;
+  }
+
+  function renderKeyboard() {
+    const keyboardEl = document.getElementById('keyboard');
+    keyboardEl.innerHTML = '';
+
+    NOTES.forEach(noteInfo => {
+      const key = document.createElement('div');
+      key.className = `metal-key ${noteInfo.type}`;
+      key.id = 'key-' + noteInfo.note;
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'key-label';
+      labelEl.textContent = noteInfo.note;
+      key.appendChild(labelEl);
+
+      // Slide to play event triggers
+      const playTrigger = () => {
+        document.querySelectorAll('.metal-key').forEach(k => k.classList.remove('active'));
+        key.classList.add('active');
+        if (!activeOsc) {
+          startStylophone(noteInfo.freq);
+        } else {
+          changeFreq(noteInfo.freq);
+        }
+      };
+
+      key.addEventListener('pointerdown', (e) => {
+        key.releasePointerCapture(e.pointerId); // enables sliding to other keys
+        isPointerDown = true;
+        playTrigger();
+      });
+
+      key.addEventListener('pointerenter', () => {
+        if (isPointerDown) {
+          playTrigger();
+        }
+      });
+
+      key.addEventListener('pointerleave', () => {
+        key.classList.remove('active');
+      });
+
+      keyboardEl.appendChild(key);
+    });
+  }
+
+  // Pointer up listener
+  window.addEventListener('pointerup', () => {
+    isPointerDown = false;
+    document.querySelectorAll('.metal-key').forEach(k => k.classList.remove('active'));
+    stopStylophone();
+  });
+
+  // Hot-rebuild vibrato or tuning while playing
+  document.getElementById('vibratoToggle').onchange = function() {
+    if (activeOsc) {
+      const current = currentFreq;
+      stopStylophone();
+      startStylophone(current);
+    }
+  };
+  document.getElementById('tuningSlider').oninput = function() {
+    if (activeOsc) {
+      activeOsc.detune.setValueAtTime(parseFloat(this.value), audioCtx.currentTime);
+    }
+  };
+
+  renderKeyboard();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>

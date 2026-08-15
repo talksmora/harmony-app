@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bass Guitar - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .bass-container {
+    background: linear-gradient(135deg, #2c3e50 0%, #0f171e 100%);
+    border: 8px solid #0b1116;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+    position: relative;
+    text-align: center;
+  }
+
+  /* Fretboard layout */
+  .fretboard {
+    background: #2b1d17;
+    border: 4px solid #1a0f0a;
+    border-radius: 12px;
+    position: relative;
+    padding: 10px 0;
+    overflow-x: auto;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+  }
+  .fretboard-scroll {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 180px;
+    min-width: 800px;
+    position: relative;
+  }
+
+  /* Fret lines */
+  .fret-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(to right, #ccc, #888);
+    z-index: 1;
+  }
+
+  /* 4 strings spanning across the fretboard */
+  .bass-string-row {
+    position: relative;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    z-index: 2;
+  }
+  .bass-wire {
+    width: 100%;
+    background: linear-gradient(to bottom, #d4af37 0%, #aa8c2c 100%);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.6);
+    pointer-events: none;
+    transition: background 0.1s;
+  }
+  .bass-string-row:nth-child(1) .bass-wire { height: 2px; }
+  .bass-string-row:nth-child(2) .bass-wire { height: 2.8px; }
+  .bass-string-row:nth-child(3) .bass-wire { height: 3.5px; }
+  .bass-string-row:nth-child(4) .bass-wire { height: 4.5px; }
+
+  /* Interactive fret notes inside string rows */
+  .fret-note-trigger {
+    position: absolute;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: background 0.1s;
+  }
+  .fret-note-trigger:hover {
+    background: rgba(241,196,15,0.25);
+  }
+  .fret-note-trigger:active, .fret-note-trigger.active {
+    background: rgba(241,196,15,0.5);
+  }
+
+  .peg-marker {
+    width: 12px;
+    height: 12px;
+    background: #bbb;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  .label-string {
+    position: absolute;
+    left: 10px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: #f1c40f;
+    z-index: 10;
+    background: rgba(0,0,0,0.5);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">🎸 વર્ચ્યુઅલ બેસ ગિટાર</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="bass-container">
+      <div class="fretboard">
+        <div class="fretboard-scroll" id="fretboardScroll">
+          <!-- Strings will be rendered dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🎸 વર્ચ્યુઅલ બેસ ગિટાર',
+      back: '← પાછા જાઓ'
+    },
+    hi: {
+      title: '🎸 वर्चुअल बेस गिटार',
+      back: '← वापस जाएं'
+    },
+    en: {
+      title: '🎸 Virtual Bass Guitar (4 String)',
+      back: '← Go Back'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+
+  let audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Deep Bass plucking synthesizer sound logic
+  function playBassPluck(freq) {
+    initAudio();
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc2.detune.setValueAtTime(4, audioCtx.currentTime);
+
+    // Keep it clean sub-bass
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(280, audioCtx.currentTime);
+
+    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.8);
+
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    osc1.start();
+    osc2.start();
+    osc1.stop(audioCtx.currentTime + 2.0);
+    osc2.stop(audioCtx.currentTime + 2.0);
+  }
+
+  // 4 Bass strings: G2, D2, A1, E1
+  const STRINGS = [
+    { name: 'G2', freq: 98.00 },
+    { name: 'D2', freq: 73.42 },
+    { name: 'A1', freq: 55.00 },
+    { name: 'E1', freq: 41.20 }
+  ];
+
+  const FRETS_COUNT = 13; // 0 to 12 (1 octave per string)
+
+  function getFreqForFret(baseFreq, fret) {
+    return baseFreq * Math.pow(2, fret / 12);
+  }
+
+  function renderFretboard() {
+    const scrollEl = document.getElementById('fretboardScroll');
+    scrollEl.innerHTML = '';
+
+    const widthFret = 70; // width of each fret in px
+
+    // Draw fret lines
+    for (let f = 1; f < FRETS_COUNT; f++) {
+      const line = document.createElement('div');
+      line.className = 'fret-line';
+      line.style.left = (f * widthFret) + 'px';
+      scrollEl.appendChild(line);
+
+      // Draw dot markers at fret 3, 5, 7, 9, 12
+      if ([3, 5, 7, 9, 12].includes(f)) {
+        const marker = document.createElement('div');
+        marker.className = 'peg-marker';
+        marker.style.left = ((f - 0.5) * widthFret - 6) + 'px';
+        scrollEl.appendChild(marker);
+      }
+    }
+
+    // Draw strings and note triggers
+    STRINGS.forEach(stringInfo => {
+      const row = document.createElement('div');
+      row.className = 'bass-string-row';
+
+      const wire = document.createElement('div');
+      wire.className = 'bass-wire';
+      row.appendChild(wire);
+
+      const label = document.createElement('span');
+      label.className = 'label-string';
+      label.textContent = stringInfo.name;
+      row.appendChild(label);
+
+      // Add fret triggers
+      for (let f = 0; f < FRETS_COUNT; f++) {
+        const trigger = document.createElement('div');
+        trigger.className = 'fret-note-trigger';
+        trigger.style.left = (f * widthFret) + 'px';
+        trigger.style.width = widthFret + 'px';
+
+        const freq = getFreqForFret(stringInfo.freq, f);
+
+        trigger.onclick = () => {
+          trigger.classList.add('active');
+          playBassPluck(freq);
+          setTimeout(() => trigger.classList.remove('active'), 150);
+        };
+
+        row.appendChild(trigger);
+      }
+
+      scrollEl.appendChild(row);
+    });
+  }
+
+  renderFretboard();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>

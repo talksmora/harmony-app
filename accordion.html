@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Accordion - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .accordion-container {
+    background: linear-gradient(135deg, #7f0f0d 0%, #3a0000 100%);
+    border: 8px solid #200000;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #fff;
+    position: relative;
+    text-align: center;
+  }
+
+  .bellows-wrapper {
+    height: 70px;
+    background: #110000;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border: 2px solid #5a0000;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+  }
+  .bellows-stripe {
+    flex: 1;
+    height: 100%;
+    background: #4a0000;
+    border-right: 2px solid #110000;
+    transform-origin: left;
+    transition: transform 0.1s ease;
+  }
+  .bellows-stripe:nth-child(even) {
+    background: #800000;
+  }
+  .bellows-indicator {
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.8);
+    border: 1px solid #d35400;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    pointer-events: none;
+    color: #e67e22;
+  }
+
+  .accordion-layout {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  /* Left-side Bass Buttons */
+  .bass-section {
+    background: rgba(0,0,0,0.4);
+    border: 2px solid #5a0000;
+    border-radius: 16px;
+    padding: 15px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-width: 180px;
+  }
+  .bass-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #eee 0%, #999 100%);
+    border: 2px solid #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s;
+    user-select: none;
+  }
+  .bass-btn:active {
+    transform: scale(0.9);
+    background: radial-gradient(circle, #fff 0%, #ccc 100%);
+  }
+
+  /* Right-side Keyboard */
+  .keys-wrapper {
+    background: #000;
+    padding: 15px 5px 5px;
+    border-radius: 16px;
+    border: 3px solid #111;
+    position: relative;
+    overflow-x: auto;
+    flex: 1;
+    min-width: 400px;
+  }
+  .keyboard-scroll {
+    display: flex;
+    position: relative;
+    height: 200px;
+  }
+  .key {
+    position: relative;
+    flex-shrink: 0;
+    height: 100%;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s, transform 0.1s;
+  }
+  .key.white {
+    width: 38px;
+    background: linear-gradient(to bottom, #fff 0%, #f0f0f0 100%);
+    border-right: 1px solid #ccc;
+    border-bottom: 5px solid #d5d5d5;
+    border-radius: 0 0 6px 6px;
+    z-index: 1;
+  }
+  .key.white:active, .key.white.pressed {
+    background: linear-gradient(to bottom, #eaeaea 0%, #d8d8d8 100%);
+    border-bottom-width: 2px;
+    transform: translateY(4px);
+  }
+  .key.black {
+    width: 24px;
+    height: 60%;
+    background: linear-gradient(to bottom, #444 0%, #111 100%);
+    border-radius: 0 0 5px 5px;
+    border: 1px solid #000;
+    z-index: 2;
+    margin-left: -12px;
+    margin-right: -12px;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+  }
+  .key.black:active, .key.black.pressed {
+    background: linear-gradient(to bottom, #222 0%, #000 100%);
+    height: 59%;
+    transform: translateY(2px);
+  }
+
+  .key-label {
+    position: absolute;
+    bottom: 12px; left: 50%; transform: translateX(-50%);
+    font-size: 0.65rem; color: #888;
+    pointer-events: none;
+    font-weight: 700;
+  }
+  .key.black .key-label { color: #aaa; bottom: 8px; }
+
+  .pump-btn {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: #fff; border: none;
+    padding: 14px 40px; border-radius: 30px;
+    font-size: 0.95rem; font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(231,76,60,0.4);
+    margin-top: 20px;
+    transition: all 0.2s;
+  }
+  .pump-btn:active {
+    transform: scale(0.95);
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">🪗 વર્ચ્યુઅલ એકોર્ડિયન</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="accordion-container">
+      <div class="bellows-wrapper">
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-stripe"></div>
+        <div class="bellows-indicator" id="bellowsIndicator">પંપ કરો હવા ભરવા માટે (PUMP BELLOWS)</div>
+      </div>
+
+      <div class="accordion-layout">
+        <!-- Left Side Bass Chords -->
+        <div class="bass-section">
+          <div class="bass-btn" id="bass-C">C</div>
+          <div class="bass-btn" id="bass-F">F</div>
+          <div class="bass-btn" id="bass-G">G</div>
+          <div class="bass-btn" id="bass-Am">Am</div>
+          <div class="bass-btn" id="bass-Dm">Dm</div>
+          <div class="bass-btn" id="bass-Em">Em</div>
+        </div>
+
+        <!-- Right Side Keyboard Keys -->
+        <div class="keys-wrapper">
+          <div class="keyboard-scroll" id="keyboard"></div>
+        </div>
+      </div>
+
+      <button class="pump-btn" id="pumpBtn">💨 પંપ કરો (PUMP)</button>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🪗 વર્ચ્યુઅલ એકોર્ડિયન',
+      back: '← પાછા જાઓ',
+      bellows: 'હવા દબાણ: ',
+      pumpBtn: '💨 પંપ કરો (PUMP)'
+    },
+    hi: {
+      title: '🪗 वर्चुअल अकॉर्डियन',
+      back: '← वापस जाएं',
+      bellows: 'हवा दबाव: ',
+      pumpBtn: '💨 पंप करें (PUMP)'
+    },
+    en: {
+      title: '🪗 Virtual Accordion',
+      back: '← Go Back',
+      bellows: 'Air Pressure: ',
+      pumpBtn: '💨 PUMP'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('pumpBtn').textContent = t.pumpBtn;
+
+  let audioCtx = null;
+  let activeNotes = {};
+  let bellowsPressure = 0.6;
+
+  const NOTES = [
+    { note: 'F3', type: 'white', freq: 174.61 },
+    { note: 'F#3', type: 'black', freq: 185.00 },
+    { note: 'G3', type: 'white', freq: 196.00 },
+    { note: 'G#3', type: 'black', freq: 207.65 },
+    { note: 'A3', type: 'white', freq: 220.00 },
+    { note: 'A#3', type: 'black', freq: 233.08 },
+    { note: 'B3', type: 'white', freq: 246.94 },
+    { note: 'C4', type: 'white', freq: 261.63 },
+    { note: 'C#4', type: 'black', freq: 277.18 },
+    { note: 'D4', type: 'white', freq: 293.66 },
+    { note: 'D#4', type: 'black', freq: 311.13 },
+    { note: 'E4', type: 'white', freq: 329.63 },
+    { note: 'F4', type: 'white', freq: 349.23 },
+    { note: 'F#4', type: 'black', freq: 369.99 },
+    { note: 'G4', type: 'white', freq: 392.00 },
+    { note: 'G#4', type: 'black', freq: 415.30 },
+    { note: 'A4', type: 'white', freq: 440.00 },
+    { note: 'A#4', type: 'black', freq: 466.16 },
+    { note: 'B4', type: 'white', freq: 493.88 },
+    { note: 'C5', type: 'white', freq: 523.25 }
+  ];
+
+  const BASS_CHORDS = {
+    'C':  [130.81, 164.81, 196.00], // C major
+    'F':  [87.31,  110.00, 130.81], // F major
+    'G':  [98.00,  123.47, 146.83], // G major
+    'Am': [110.00, 130.81, 164.81], // A minor
+    'Dm': [146.83, 174.61, 220.00], // D minor
+    'Em': [82.41,  98.00,  123.47]  // E minor
+  };
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  function pumpBellows() {
+    initAudio();
+    bellowsPressure = Math.min(1.0, bellowsPressure + 0.22);
+    updateBellowsUI();
+  }
+
+  function updateBellowsUI() {
+    const stripes = document.querySelectorAll('.bellows-stripe');
+    const scaleX = 0.5 + bellowsPressure * 0.5;
+    stripes.forEach(str => {
+      str.style.transform = `scaleX(${scaleX})`;
+    });
+    document.getElementById('bellowsIndicator').textContent = `${t.bellows}${Math.round(bellowsPressure * 100)}%`;
+  }
+
+  // Gradually deplete bellows air pressure
+  setInterval(() => {
+    if (bellowsPressure > 0.05) {
+      const activeCount = Object.keys(activeNotes).length;
+      const depletionRate = 0.025 + (activeCount * 0.02);
+      bellowsPressure = Math.max(0.0, bellowsPressure - depletionRate);
+      updateBellowsUI();
+    }
+  }, 150);
+
+  // Musette Wet Accordion Tremolo Synthesis
+  function playAccordionNote(freq, noteName) {
+    initAudio();
+    if (activeNotes[noteName]) return;
+
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    osc1.type = 'triangle';
+    osc1.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc1.detune.setValueAtTime(-15, audioCtx.currentTime); // detuned low
+
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc2.detune.setValueAtTime(15, audioCtx.currentTime); // detuned high
+
+    filter.type = 'highpass'; // gives crisp accordion reed crunch
+    filter.frequency.setValueAtTime(250, audioCtx.currentTime);
+
+    gainNode.gain.setValueAtTime(0.0, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.22 * bellowsPressure, audioCtx.currentTime + 0.04);
+
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    osc1.start();
+    osc2.start();
+
+    activeNotes[noteName] = { osc1, osc2, gain: gainNode, baseVol: 0.22 };
+  }
+
+  function stopAccordionNote(noteName) {
+    const node = activeNotes[noteName];
+    if (!node) return;
+
+    node.gain.gain.setValueAtTime(node.gain.gain.value, audioCtx.currentTime);
+    node.gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+
+    setTimeout(() => {
+      try {
+        node.osc1.stop();
+        node.osc2.stop();
+        node.osc1.disconnect();
+        node.osc2.disconnect();
+        node.gain.disconnect();
+      } catch(e) {}
+    }, 180);
+
+    delete activeNotes[noteName];
+  }
+
+  // Play a full Bass chord
+  function playBassChord(chordName) {
+    const freqs = BASS_CHORDS[chordName];
+    if (!freqs) return;
+    freqs.forEach((freq, i) => {
+      playAccordionNote(freq, `bass-${chordName}-${i}`);
+    });
+  }
+
+  function stopBassChord(chordName) {
+    const freqs = BASS_CHORDS[chordName];
+    if (!freqs) return;
+    freqs.forEach((freq, i) => {
+      stopAccordionNote(`bass-${chordName}-${i}`);
+    });
+  }
+
+  function renderKeyboard() {
+    const keyboardEl = document.getElementById('keyboard');
+    keyboardEl.innerHTML = '';
+
+    NOTES.forEach(noteInfo => {
+      const key = document.createElement('div');
+      key.className = `key ${noteInfo.type}`;
+      key.id = 'key-' + noteInfo.note;
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'key-label';
+      labelEl.textContent = noteInfo.note;
+      key.appendChild(labelEl);
+
+      const startTrigger = (e) => {
+        e.preventDefault();
+        key.classList.add('pressed');
+        playAccordionNote(noteInfo.freq, noteInfo.note);
+      };
+
+      const endTrigger = (e) => {
+        e.preventDefault();
+        key.classList.remove('pressed');
+        stopAccordionNote(noteInfo.note);
+      };
+
+      key.addEventListener('mousedown', startTrigger);
+      key.addEventListener('mouseup', endTrigger);
+      key.addEventListener('mouseleave', endTrigger);
+
+      key.addEventListener('touchstart', startTrigger);
+      key.addEventListener('touchend', endTrigger);
+
+      keyboardEl.appendChild(key);
+    });
+  }
+
+  // Setup Bass buttons listeners
+  Object.keys(BASS_CHORDS).forEach(chord => {
+    const btn = document.getElementById('bass-' + chord);
+    btn.addEventListener('mousedown', () => playBassChord(chord));
+    btn.addEventListener('mouseup', () => stopBassChord(chord));
+    btn.addEventListener('mouseleave', () => stopBassChord(chord));
+    btn.addEventListener('touchstart', () => playBassChord(chord));
+    btn.addEventListener('touchend', () => stopBassChord(chord));
+  });
+
+  // Adjust active outputs as bellows pressure changes
+  setInterval(() => {
+    if (!audioCtx) return;
+    Object.keys(activeNotes).forEach(name => {
+      const node = activeNotes[name];
+      node.gain.gain.setTargetAtTime(node.baseVol * bellowsPressure, audioCtx.currentTime, 0.1);
+    });
+  }, 100);
+
+  document.getElementById('pumpBtn').onclick = pumpBellows;
+
+  renderKeyboard();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>

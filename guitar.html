@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Guitar - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .guitar-container {
+    background: linear-gradient(135deg, #5c2d1b 0%, #2c1208 100%);
+    border: 8px solid #1a0802;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+    position: relative;
+    text-align: center;
+  }
+
+  .guitar-layout {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  /* Left-side Chords Selector */
+  .chords-panel {
+    background: rgba(0,0,0,0.4);
+    border: 2px solid #5a2e1e;
+    border-radius: 16px;
+    padding: 15px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-width: 180px;
+    flex-shrink: 0;
+  }
+  .chord-btn {
+    padding: 12px;
+    background: #250f07;
+    border: 1.5px solid #5a2e1e;
+    color: #f7e6d5;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chord-btn:hover { background: #3d1b0f; }
+  .chord-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(230,126,34,0.4);
+  }
+
+  /* Right-side Strings Fretboard view */
+  .fretboard-wrapper {
+    background: radial-gradient(circle, #2d140a 0%, #0f0502 100%);
+    border: 4px solid #150602;
+    border-radius: 16px;
+    padding: 20px;
+    flex: 1;
+    min-width: 300px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 240px;
+    overflow: hidden;
+  }
+  .fret-wire {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.15);
+    z-index: 1;
+  }
+  .fret-wire:nth-child(1) { left: 20%; }
+  .fret-wire:nth-child(2) { left: 40%; }
+  .fret-wire:nth-child(3) { left: 60%; }
+  .fret-wire:nth-child(4) { left: 80%; }
+
+  .string-row {
+    position: relative;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .guitar-wire {
+    width: 100%;
+    background: linear-gradient(to bottom, #ccc 0%, #999 100%);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    pointer-events: none;
+    transition: background-color 0.1s;
+  }
+  /* String thicknesses */
+  .string-row:nth-child(1) .guitar-wire { height: 1px; }
+  .string-row:nth-child(2) .guitar-wire { height: 1.5px; }
+  .string-row:nth-child(3) .guitar-wire { height: 2px; }
+  .string-row:nth-child(4) .guitar-wire { height: 2.5px; }
+  .string-row:nth-child(5) .guitar-wire { height: 3px; }
+  .string-row:nth-child(6) .guitar-wire { height: 3.5px; }
+
+  .string-row:hover .guitar-wire, .string-row.active .guitar-wire {
+    background: #f1c40f;
+    box-shadow: 0 0 10px #f1c40f;
+  }
+
+  .string-label {
+    position: absolute;
+    left: -15px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #d5b395;
+    pointer-events: none;
+  }
+
+  .strum-hint {
+    font-size: 0.75rem;
+    color: var(--subtitle);
+    margin-top: 15px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">🎸 વર્ચ્યુઅલ ગિટાર</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="guitar-container">
+      <div class="guitar-layout">
+        <!-- Chord buttons -->
+        <div class="chords-panel" id="chordsPanel">
+          <button class="chord-btn active" data-chord="C">C</button>
+          <button class="chord-btn" data-chord="G">G</button>
+          <button class="chord-btn" data-chord="Am">Am</button>
+          <button class="chord-btn" data-chord="F">F</button>
+          <button class="chord-btn" data-chord="D">D</button>
+          <button class="chord-btn" data-chord="Em">Em</button>
+          <button class="chord-btn" data-chord="A">A</button>
+          <button class="chord-btn" data-chord="none">None</button>
+        </div>
+
+        <!-- Fretboard strings -->
+        <div class="fretboard-wrapper">
+          <div class="fret-wire"></div>
+          <div class="fret-wire"></div>
+          <div class="fret-wire"></div>
+          <div class="fret-wire"></div>
+
+          <div class="string-row" data-string="0"><span class="string-label" id="lblS0">E4</span><div class="guitar-wire"></div></div>
+          <div class="string-row" data-string="1"><span class="string-label" id="lblS1">B3</span><div class="guitar-wire"></div></div>
+          <div class="string-row" data-string="2"><span class="string-label" id="lblS2">G3</span><div class="guitar-wire"></div></div>
+          <div class="string-row" data-string="3"><span class="string-label" id="lblS3">D3</span><div class="guitar-wire"></div></div>
+          <div class="string-row" data-string="4"><span class="string-label" id="lblS4">A2</span><div class="guitar-wire"></div></div>
+          <div class="string-row" data-string="5"><span class="string-label" id="lblS5">E2</span><div class="guitar-wire"></div></div>
+        </div>
+      </div>
+
+      <div class="strum-hint" id="lblStrumHint">ટિપ: ડાબી બાજુથી કોર્ડ પસંદ કરો અને જમણી બાજુના તાર પર માઉસ સ્લાઇડ/સ્ટ્રમ કરીને ગિટાર વગાડો. (Strum across the strings to play)</div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🎸 વર્ચ્યુઅલ ગિટાર',
+      back: '← પાછા જાઓ',
+      hint: 'ટિપ: ડાબી બાજુથી કોર્ડ પસંદ કરો અને જમણી બાજુના તાર પર માઉસ સ્લાઇડ/સ્ટ્રમ કરીને ગિટાર વગાડો.'
+    },
+    hi: {
+      title: '🎸 वर्चुअल गिटार',
+      back: '← वापस जाएं',
+      hint: 'टिप: बाईं ओर से कॉर्ड चुनें और दाईं ओर के तारों पर माउस स्लाइड/स्ट्रम करके गिटार बजाएं।'
+    },
+    en: {
+      title: '🎸 Virtual Guitar',
+      back: '← Go Back',
+      hint: 'Tip: Select a chord on the left, then hover/slide across the strings on the right to strum.'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('lblStrumHint').textContent = t.hint;
+
+  let audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Guitar Pluck Sound Synthesis
+  function playGuitarPluck(freq) {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    // Noise pluck transient
+    const bufferSize = audioCtx.sampleRate * 0.02; // 20ms transient
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02);
+    noise.connect(noiseGain);
+    noiseGain.connect(audioCtx.destination);
+    noise.start();
+
+    // Guitar string body vibration
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.detune.setValueAtTime(2, audioCtx.currentTime);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(900, audioCtx.currentTime);
+
+    gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.5); // long ring sustain
+
+    osc.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 2.6);
+  }
+
+  // Standard open tunings: E4, B3, G3, D3, A2, E2
+  const STANDARD_TUNING = [329.63, 246.94, 196.00, 146.83, 110.00, 82.41];
+  const STANDARD_NAMES = ['E4', 'B3', 'G3', 'D3', 'A2', 'E2'];
+
+  // Chord mappings for the 6 strings (0 to 5)
+  const CHORDS = {
+    'C':  [261.63, 329.63, 196.00, 261.63, 329.63, 130.81], // C3, E3, G3, C4, E4, C3
+    'G':  [293.66, 246.94, 196.00, 146.83, 196.00, 98.00],  // D3, B3, G3, D3, G2, G2
+    'Am': [329.63, 220.00, 220.00, 146.83, 110.00, 110.00], // E3, A3, A3, D3, A2, A2
+    'F':  [349.23, 261.63, 174.61, 174.61, 130.81, 87.31],  // F3, C3, F3, F3, C2, F2
+    'D':  [293.66, 293.66, 220.00, 146.83, 110.00, 146.83], // D3, D3, A3, D3, A2, D3
+    'Em': [329.63, 246.94, 196.00, 146.83, 110.00, 82.41],  // Standard open E minor
+    'A':  [329.63, 277.18, 220.00, 146.83, 110.00, 110.00], // E3, C#3, A3, D3, A2, A2
+    'none': STANDARD_TUNING
+  };
+
+  let activeChord = 'C';
+
+  function updateStringLabels() {
+    const isStandard = activeChord === 'none';
+    for (let i = 0; i < 6; i++) {
+      const label = document.getElementById('lblS' + i);
+      label.textContent = isStandard ? STANDARD_NAMES[i] : `${activeChord} [${i+1}]`;
+    }
+  }
+
+  // Setup click and hover/strum trigger on string rows
+  document.querySelectorAll('.string-row').forEach(row => {
+    const stringIdx = parseInt(row.getAttribute('data-string'));
+    
+    const triggerPluck = () => {
+      const chordFreqs = CHORDS[activeChord] || STANDARD_TUNING;
+      const freq = chordFreqs[stringIdx];
+      
+      row.classList.add('active');
+      playGuitarPluck(freq);
+      setTimeout(() => row.classList.remove('active'), 100);
+    };
+
+    // Strum trigger on mouseover/pointerenter
+    row.addEventListener('pointerenter', triggerPluck);
+    row.addEventListener('mousedown', triggerPluck);
+  });
+
+  // Setup Chord select buttons
+  document.querySelectorAll('.chord-btn').forEach(btn => {
+    btn.onclick = function() {
+      document.querySelectorAll('.chord-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      activeChord = this.getAttribute('data-chord');
+      updateStringLabels();
+    };
+  });
+
+  updateStringLabels();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>
