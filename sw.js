@@ -1,4 +1,4 @@
-const CACHE_NAME = 'harmony-music-app-v82';
+const CACHE_NAME = 'harmony-music-app-v83';
 const ASSETS = [
   './', './index.html', './login.html', './dashboard.html', './profile.html', './daily-riyaz.html',
   './pitch-monitor.html', './pitch-monitor.css',
