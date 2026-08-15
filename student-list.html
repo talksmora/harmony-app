@@ -33,6 +33,10 @@
     color: var(--text);
     font-size: 0.9rem;
     outline: none;
+    transition: border 0.2s;
+  }
+  .search-wrap input:focus {
+    border-color: var(--accent);
   }
   .search-icon {
     position: absolute;
@@ -40,36 +44,65 @@
     transform: translateY(-50%);
     color: var(--subtitle);
   }
+  
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-pill.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
   .student-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 16px;
   }
   .student-card {
     background: rgba(255,255,255,0.03);
     border: 1.5px solid var(--border);
     border-radius: 16px;
-    padding: 18px;
+    padding: 20px;
     display: flex;
-    align-items: center;
-    gap: 14px;
-    transition: transform 0.2s;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s, border-color 0.2s;
   }
   .student-card:hover {
     transform: translateY(-2px);
     border-color: var(--accent);
   }
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
   .student-avatar {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background: var(--accent);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 800;
+    flex-shrink: 0;
   }
   .student-info {
     flex: 1;
@@ -79,37 +112,76 @@
     font-weight: 700;
     font-size: 0.95rem;
     margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .student-inst {
+  .student-phone {
     font-size: 0.75rem;
     color: var(--subtitle);
-    margin-bottom: 6px;
   }
-  .badge-row {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .level-badge {
-    font-size: 0.6rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 6px;
-    text-transform: uppercase;
-  }
-  .level-badge.beg { background: rgba(52, 152, 219, 0.15); color: #3498db; }
-  .level-badge.int { background: rgba(241, 196, 15, 0.15); color: #f1c40f; }
-  .level-badge.adv { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
   
-  .streak-badge {
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-top: 8px;
+  }
+  .detail-lbl {
+    color: var(--subtitle);
+  }
+  .detail-val {
+    font-weight: 600;
+  }
+  
+  .role-badge {
     font-size: 0.65rem;
     font-weight: 700;
-    color: #e67e22;
+    padding: 3px 8px;
+    border-radius: 8px;
+    text-transform: uppercase;
+  }
+  .role-badge.owner { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+  .role-badge.admin { background: rgba(241, 196, 15, 0.15); color: #f1c40f; }
+  .role-badge.student { background: rgba(52, 152, 219, 0.15); color: #3498db; }
+
+  .actions-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-top: 10px;
+    margin-top: auto;
+  }
+  .act-btn {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .act-btn.role {
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+  }
+  .act-btn.role:hover {
+    background: var(--accent);
+    color: white;
+  }
+  .act-btn.delete {
+    background: rgba(231, 76, 60, 0.15);
+    color: #e74c3c;
+  }
+  .act-btn.delete:hover {
+    background: #e74c3c;
+    color: white;
   }
 </style>
 </head>
-<body data-page="attendance">
+<body data-page="students">
   <div id="appShellRoot"></div>
   <div id="pageBody" style="display:none;">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
@@ -120,8 +192,10 @@
     <div class="student-container">
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
-        <input type="search" id="studentSearch" placeholder="Search students..." autocomplete="off">
+        <input type="search" id="studentSearch" placeholder="Search students by name or phone..." autocomplete="off">
       </div>
+
+      <div class="filter-row" id="filterRow"></div>
 
       <div class="student-grid" id="studentGrid"></div>
     </div>
@@ -134,81 +208,213 @@
 (function(){
   const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
 
+  const session = (typeof readMockSession === 'function') ? readMockSession() : null;
+  const isOwnerOrAdmin = !!(session && (session.isOwner || session.role === 'owner' || session.role === 'admin'));
+
   const TEXT = {
     gu: {
       title: '🧑‍🎓 વિદ્યાર્થીઓની યાદી',
       back: '← પાછા જાઓ',
-      search: 'વિદ્યાર્થી શોધો...',
-      streak: 'દિવસો રિયાઝ ક્રમ',
-      levels: { beg: 'પ્રારંભિક', int: 'મધ્યમ', adv: 'ઉચ્ચ' }
+      search: 'વિદ્યાર્થી અથવા ફોન નંબર શોધો...',
+      role: 'ભૂમિકા (Role):',
+      batch: 'બેચ:',
+      actionRole: 'રોલ બદલો',
+      actionDelete: 'કાઢી નાખો',
+      accessDenied: 'પ્રવેશ નિષેધ! આ પેજ માત્ર ઓનર અને એડમિન માટે જ છે.',
+      loading: 'વિદ્યાર્થીઓનો ડેટા લોડ થઈ રહ્યો છે...',
+      roles: { owner: 'ઓનર', admin: 'એડમિન', student: 'વિદ્યાર્થી' },
+      all: 'બધા',
+      owners: 'ઓનર્સ',
+      admins: 'એડમિન્સ',
+      students: 'વિદ્યાર્થીઓ',
+      confirmDelete: 'શું તમે ખરેખર આ પ્રોફાઇલ કાઢી નાખવા માંગો છો?'
     },
     hi: {
       title: '🧑‍🎓 छात्र सूची',
       back: '← वापस जाएं',
-      search: 'छात्र खोजें...',
-      streak: 'दिनों का रियाज़',
-      levels: { beg: 'प्रारंभिक', int: 'मध्यम', adv: 'उच्च' }
+      search: 'छात्र या फोन नंबर खोजें...',
+      role: 'भूमिका (Role):',
+      batch: 'बैच:',
+      actionRole: 'रोल बदलें',
+      actionDelete: 'हटाएं',
+      accessDenied: 'प्रवेश निषेध! यह पेज केवल ओनर और एडमिन के लिए है।',
+      loading: 'छात्रों का डेटा लोड हो रहा है...',
+      roles: { owner: 'ओनर', admin: 'एडमिन', student: 'छात्र' },
+      all: 'सभी',
+      owners: 'ओनर्स',
+      admins: 'एडमिन्स',
+      students: 'छात्रों',
+      confirmDelete: 'क्या आप वाकई इस प्रोफ़ाइल को हटाना चाहते हैं?'
     },
     en: {
       title: '🧑‍🎓 Student Directory',
       back: '← Go Back',
-      search: 'Search students...',
-      streak: 'Days Riyaz Streak',
-      levels: { beg: 'Beginner', int: 'Intermediate', adv: 'Advanced' }
+      search: 'Search students by name or phone...',
+      role: 'Role:',
+      batch: 'Batch:',
+      actionRole: 'Change Role',
+      actionDelete: 'Delete',
+      accessDenied: 'Access Denied! This page is for owners and admins only.',
+      loading: 'Loading student directory...',
+      roles: { owner: 'Owner', admin: 'Admin', student: 'Student' },
+      all: 'All',
+      owners: 'Owners',
+      admins: 'Admins',
+      students: 'Students',
+      confirmDelete: 'Are you sure you want to delete this profile?'
     }
   };
 
   const t = TEXT[lang] || TEXT.gu;
 
+  // Access guard
+  if (!isOwnerOrAdmin) {
+    alert(t.accessDenied);
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
   document.getElementById('lblTitle').textContent = t.title;
   document.getElementById('btnBack').textContent = t.back;
   document.getElementById('studentSearch').placeholder = t.search;
 
-  const students = [
-    { name: 'Aarav Patel', inst: 'Tabla (તબલા)', level: 'beg', streak: 12 },
-    { name: 'Kavya Sharma', inst: 'Harmonium (હાર્મોનિયમ)', level: 'int', streak: 24 },
-    { name: 'Dev Shah', inst: 'Santoor (સંતૂર)', level: 'adv', streak: 35 },
-    { name: 'Ishita Mehta', inst: 'Grand Piano (પિયાનો)', level: 'beg', streak: 8 },
-    { name: 'Rohan Joshi', inst: 'Flute (વાંસળી)', level: 'int', streak: 15 },
-    { name: 'Diya Trivedi', inst: 'Guitar (ગિટાર)', level: 'adv', streak: 42 }
-  ];
+  let allUsers = [];
+  let activeRoleFilter = 'all';
 
-  function render(query = '') {
+  async function loadData() {
+    const grid = document.getElementById('studentGrid');
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--subtitle);">${t.loading}</div>`;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      allUsers = data || [];
+      renderFilters();
+      renderGrid();
+    } catch(e) {
+      grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:#e74c3c;">Error: ${e.message}</div>`;
+    }
+  }
+
+  function renderFilters() {
+    const counts = {
+      all: allUsers.length,
+      owner: allUsers.filter(u => u.role === 'owner').length,
+      admin: allUsers.filter(u => u.role === 'admin').length,
+      student: allUsers.filter(u => u.role === 'student' || !u.role).length
+    };
+
+    const row = document.getElementById('filterRow');
+    row.innerHTML = `
+      <button class="filter-pill ${activeRoleFilter === 'all' ? 'active' : ''}" data-role="all">${t.all} (${counts.all})</button>
+      <button class="filter-pill ${activeRoleFilter === 'owner' ? 'active' : ''}" data-role="owner">${t.owners} (${counts.owner})</button>
+      <button class="filter-pill ${activeRoleFilter === 'admin' ? 'active' : ''}" data-role="admin">${t.admins} (${counts.admin})</button>
+      <button class="filter-pill ${activeRoleFilter === 'student' ? 'active' : ''}" data-role="student">${t.students} (${counts.student})</button>
+    `;
+
+    row.querySelectorAll('.filter-pill').forEach(btn => {
+      btn.onclick = () => {
+        activeRoleFilter = btn.getAttribute('data-role');
+        renderFilters();
+        renderGrid(document.getElementById('studentSearch').value.trim());
+      };
+    });
+  }
+
+  function renderGrid(query = '') {
     const grid = document.getElementById('studentGrid');
     grid.innerHTML = '';
 
-    const filtered = students.filter(s => 
-      s.name.toLowerCase().includes(query.toLowerCase()) ||
-      s.inst.toLowerCase().includes(query.toLowerCase())
-    );
+    let filtered = allUsers.filter(u => {
+      // Filter by search query
+      const nameMatch = (u.name || '').toLowerCase().includes(query.toLowerCase());
+      const phoneMatch = (u.phone || '').toLowerCase().includes(query.toLowerCase());
+      return nameMatch || phoneMatch;
+    });
 
-    filtered.forEach(s => {
+    // Filter by role pill
+    if (activeRoleFilter !== 'all') {
+      filtered = filtered.filter(u => {
+        const uRole = u.role || 'student';
+        return uRole === activeRoleFilter;
+      });
+    }
+
+    filtered.forEach(u => {
       const card = document.createElement('div');
       card.className = 'student-card';
 
-      const initial = s.name.charAt(0);
-      const levelText = t.levels[s.level] || s.level;
+      const initial = (u.name || 'G').charAt(0);
+      const roleVal = u.role || 'student';
+      const roleText = t.roles[roleVal] || roleVal;
+      const batchText = u.batch || '--';
+
+      // Create profile initial avatar background based on initial ASCII code
+      const hue = initial.charCodeAt(0) * 15 % 360;
 
       card.innerHTML = `
-        <div class="student-avatar" style="background: hsl(${initial.charCodeAt(0) * 15 % 360}, 60%, 40%);">${initial}</div>
-        <div class="student-info">
-          <h4 class="student-name">${s.name}</h4>
-          <div class="student-inst">${s.inst}</div>
-          <div class="badge-row">
-            <span class="level-badge ${s.level}">${levelText}</span>
-            <span class="streak-badge">🔥 ${s.streak} ${t.streak}</span>
+        <div class="card-top">
+          <div class="student-avatar" style="background: hsl(${hue}, 60%, 40%);">${initial}</div>
+          <div class="student-info">
+            <h4 class="student-name">${u.name || 'Guest'}</h4>
+            <div class="student-phone">${u.phone || ''}</div>
           </div>
+          <span class="role-badge ${roleVal}">${roleText}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-lbl">${t.batch}</span>
+          <span class="detail-val">${batchText}</span>
+        </div>
+        <div class="actions-row">
+          <button class="act-btn role" id="btnRole-${u.id}">${t.actionRole}</button>
+          <button class="act-btn delete" id="btnDel-${u.id}">${t.actionDelete}</button>
         </div>
       `;
+
+      // Role button action
+      card.querySelector(`#btnRole-${u.id}`).onclick = async () => {
+        const nextRole = roleVal === 'student' ? 'admin' : 'student';
+        const { error } = await supabase
+          .from('profiles')
+          .update({ role: nextRole })
+          .eq('id', u.id);
+        
+        if (error) {
+          alert(error.message);
+        } else {
+          loadData();
+        }
+      };
+
+      // Delete button action
+      card.querySelector(`#btnDel-${u.id}`).onclick = async () => {
+        if (confirm(t.confirmDelete)) {
+          const { error } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', u.id);
+          
+          if (error) {
+            alert(error.message);
+          } else {
+            loadData();
+          }
+        }
+      };
+
       grid.appendChild(card);
     });
   }
 
   document.getElementById('studentSearch').oninput = function() {
-    render(this.value.trim());
+    renderGrid(this.value.trim());
   };
 
-  render();
+  loadData();
   initAppShell({ title: t.title });
 })();
 </script>

@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { page: 'attendance', icon: '🗓️', label: { gu: 'હાજરી', hi: 'उपस्थिति', en: 'Attendance' }, href: 'attendance.html' },
   { page: 'fees', icon: '💳', label: { gu: 'ફી મેનેજમેન્ટ', hi: 'फीस प्रबंधन', en: 'Fee Management' }, href: 'fee-management.html' },
   { page: 'schedule', icon: '📅', label: { gu: 'ક્લાસ શેડ્યૂલ', hi: 'क्लास शेड्यूल', en: 'Class Schedule' }, href: 'class-schedule.html' },
-  { page: 'students', icon: '🧑‍🎓', label: { gu: 'વિદ્યાર્થી યાદી', hi: 'छात्र सूची', en: 'Student List' }, href: 'student-list.html' },
+  { page: 'students', icon: '🧑‍🎓', label: { gu: 'વિદ્યાર્થી યાદી', hi: 'छात्र सूची', en: 'Student List' }, href: 'student-list.html', ownerOnly: true },
   { section: { gu: 'મેનેજમેન્ટ', hi: 'प्रबंधन', en: 'Management' } },
   { page: 'owner-console', icon: '🛡️', label: { gu: 'ઓનર કન્સોલ', hi: 'ओनर कंसोल', en: 'Owner Console' }, href: 'owner-console.html', ownerOnly: true }
 ];
