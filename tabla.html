@@ -570,6 +570,26 @@
     background: var(--accent);
     box-shadow: 0 0 8px var(--accent);
   }
+
+  /* Premium Select dropdowns styling */
+  .control-select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+    font-weight: 700;
+    font-size: 1.05rem;
+    outline: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .control-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.25);
+  }
 </style>
 </head>
 <body data-page="tabla">
@@ -676,7 +696,7 @@
         <!-- Taal Selector -->
         <div class="panel-section">
           <span class="panel-label" id="lblSelectTaal">તાલ પસંદ કરો (Taal)</span>
-          <select id="taalSelect" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); color:var(--text); font-weight:600;">
+          <select id="taalSelect" class="control-select">
             <option value="teen_taal" selected>Teentaal (૧૬ માત્રા)</option>
             <option value="dadra">Dadra (૬ માત્રા)</option>
             <option value="kehrwa">Keherwa (૮ માત્રા)</option>
@@ -713,7 +733,7 @@
             <input type="checkbox" id="tanpuraCheckbox" style="width:20px; height:20px; accent-color:var(--accent);">
             <span id="lblEnableTanpura">તાનપુરા ડ્રોન ચાલુ કરો</span>
           </label>
-          <select id="tanpuraTuneSelect" style="width:100%; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); color:var(--text); margin-top:8px; font-size:0.85rem;">
+          <select id="tanpuraTuneSelect" class="control-select" style="margin-top:8px; font-size:0.85rem;">
             <option value="Pa" selected>Pa - Sa - Sa - Sa (પંચમ)</option>
             <option value="Ma">Ma - Sa - Sa - Sa (મધ્યમ)</option>
             <option value="Ni">Ni - Sa - Sa - Sa (નિષાદ)</option>
@@ -851,13 +871,13 @@
       const arrayBuffer = await response.arrayBuffer();
       tanpuraBuffer = await audioCtx.decodeAudioData(arrayBuffer);
       console.log(`Loaded authentic Tanpura sample for: ${scaleName}`);
-      if (document.getElementById('tanpuraCheckbox').checked && isPlaying) {
+      if (document.getElementById('tanpuraCheckbox').checked) {
         startTanpura();
       }
     } catch (e) {
       console.warn(`Failed to load authentic Tanpura sample for ${scaleName}, using synth fallback.`, e);
       tanpuraBuffer = null;
-      if (document.getElementById('tanpuraCheckbox').checked && isPlaying) {
+      if (document.getElementById('tanpuraCheckbox').checked) {
         startTanpura();
       }
     }
@@ -1726,14 +1746,17 @@
     updateBpm(bpm + 5);
   });
 
-  document.getElementById('tanpuraCheckbox').addEventListener('change', () => {
-    if (isPlaying) {
+  document.getElementById('tanpuraCheckbox').addEventListener('change', (e) => {
+    initAudio();
+    if (e.target.checked) {
       startTanpura();
+    } else {
+      stopTanpura();
     }
   });
 
   document.getElementById('tanpuraTuneSelect').addEventListener('change', () => {
-    if (isPlaying) {
+    if (document.getElementById('tanpuraCheckbox').checked) {
       startTanpura();
     }
   });
