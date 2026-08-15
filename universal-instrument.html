@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Instrument - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .universal-container {
+    background: linear-gradient(135deg, #1e272c 0%, #0f1315 100%);
+    border: 8px solid #07090a;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+    position: relative;
+    text-align: center;
+    min-height: 400px;
+  }
+
+  .inst-title-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  /* Dynamic visual layouts */
+  .strings-layout {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 250px;
+    background: radial-gradient(circle, #2d140a 0%, #0f0502 100%);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+  }
+  .string-row {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+  }
+  .string-wire {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to bottom, #ccc, #888);
+    transition: background 0.1s;
+  }
+  .string-row:hover .string-wire, .string-row.active .string-wire {
+    background: #f1c40f;
+    box-shadow: 0 0 10px #f1c40f;
+  }
+  .string-label {
+    position: absolute;
+    left: -15px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #e67e22;
+  }
+
+  /* Drum Pads Layout */
+  .drums-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 15px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .drum-pad {
+    height: 110px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #555, #222);
+    border: 4px solid #444;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 0.85rem;
+    color: #fff;
+    transition: transform 0.08s, background 0.08s;
+    user-select: none;
+  }
+  .drum-pad:active, .drum-pad.active {
+    transform: scale(0.92);
+    background: radial-gradient(circle, #e74c3c, #c0392b);
+    border-color: #ff6b6b;
+  }
+
+  /* Circular Tongue layout */
+  .tongue-layout {
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, #566573 0%, #2c3e50 60%, #1c2833 100%);
+    border: 5px solid #34495e;
+    border-radius: 50%;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .tongue-petal {
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, #7f8c8d 0%, #34495e 100%);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #fff;
+    font-size: 0.75rem;
+    transition: transform 0.1s;
+  }
+  .tongue-petal:active, .tongue-petal.active {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px #f1c40f;
+  }
+
+  /* 2D Pad layout for Theremin */
+  .theremin-pad {
+    width: 100%;
+    height: 300px;
+    background: #000;
+    border: 3px dashed var(--accent);
+    border-radius: 16px;
+    position: relative;
+    cursor: crosshair;
+    overflow: hidden;
+  }
+  .theremin-indicator {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid #fff;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    display: none;
+    box-shadow: 0 0 15px var(--accent);
+  }
+
+  /* Simple keyboard-style buttons for wind/keys */
+  .button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 12px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .grid-btn {
+    padding: 18px 10px;
+    background: #250f07;
+    border: 2px solid #5a2e1e;
+    color: #f7e6d5;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    transition: all 0.1s;
+    user-select: none;
+  }
+  .grid-btn:active, .grid-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: scale(0.95);
+  }
+
+  .interactive-hint {
+    font-size: 0.75rem;
+    color: var(--subtitle);
+    margin-top: 20px;
+    font-style: italic;
+  }
+
+  /* Sequencer Grid */
+  .seq-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(8, 1fr);
+    gap: 6px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .seq-cell {
+    height: 32px;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .seq-cell.active {
+    background: var(--accent);
+  }
+  .seq-cell.playing {
+    border-color: #fff;
+  }
+  .seq-label {
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div class="inst-title-area">
+      <h2 id="lblTitle" style="margin:0;">🎵 Virtual Instrument</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="universal-container">
+      <div id="dynamicInstrumentArea"></div>
+      <div class="interactive-hint" id="lblHint">તાર પર માઉસ સ્લાઇડ કરો અથવા ક્લિક કરી વગાડો (Hover or click to play)</div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+  
+  const TEXT = {
+    gu: { back: '← પાછા જાઓ', hint: 'તાર પર માઉસ સ્લાઇડ કરો અથવા ક્લિક કરી વગાડો (Hover or click to play)' },
+    hi: { back: '← वापस जाएं', hint: 'तार पर माउस स्लाइड करें या क्लिक करके बजाएं (Hover or click to play)' },
+    en: { back: '← Go Back', hint: 'Hover or click/tap to play the instrument' }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('lblHint').textContent = t.hint;
+
+  // Retrieve instrument name from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const instId = urlParams.get('inst') || 'flute';
+
+  // Config data for all 30 remaining instruments
+  const CONFIGS = {
+    // ---- String Instruments ----
+    banjo: {
+      title: { gu: '🪕 બેન્જો', hi: '🪕 बैंजो', en: 'Banjo' },
+      layout: 'strings',
+      strings: [392.00, 261.63, 293.66, 392.00, 587.33], // G4, C4, D4, G4, D5
+      labels: ['G4', 'C4', 'D4', 'G4', 'D5'],
+      osc: 'triangle',
+      decay: 1.0,
+      gain: 0.35,
+      harmonic: 3
+    },
+    violin: {
+      title: { gu: '🎻 વાયોલિન', hi: '🎻 वायलिन', en: 'Violin' },
+      layout: 'strings',
+      strings: [659.25, 440.00, 293.66, 196.00], // E5, A4, D4, G3
+      labels: ['E5', 'A4', 'D4', 'G3'],
+      osc: 'sawtooth',
+      attack: 0.15,
+      decay: 1.5,
+      gain: 0.28,
+      vibrato: true
+    },
+    cello: {
+      title: { gu: '🎻 ચેલો', hi: '🎻 चेलो', en: 'Cello' },
+      layout: 'strings',
+      strings: [220.00, 146.83, 98.00, 65.41], // A3, D3, G2, C2
+      labels: ['A3', 'D3', 'G2', 'C2'],
+      osc: 'sawtooth',
+      attack: 0.2,
+      decay: 1.8,
+      gain: 0.3,
+      vibrato: true
+    },
+    dulcimer: {
+      title: { gu: '🎵 માઉન્ટન ડલ્સીમર', hi: '🎵 माउंटन डल्सीमर', en: 'Mountain Dulcimer' },
+      layout: 'strings',
+      strings: [293.66, 220.00, 146.83], // D4, A3, D3
+      labels: ['D4', 'A3', 'D3'],
+      osc: 'triangle',
+      decay: 1.6,
+      gain: 0.35
+    },
+    erhu: {
+      title: { gu: '🎵 અરહુ', hi: '🎵 अरहू', en: 'Erhu' },
+      layout: 'strings',
+      strings: [440.00, 293.66], // A4, D4
+      labels: ['A4', 'D4'],
+      osc: 'sawtooth',
+      attack: 0.1,
+      decay: 1.4,
+      gain: 0.3,
+      vibrato: true
+    },
+    koto: {
+      title: { gu: '🎵 કોટો', hi: '🎵 कोटो', en: 'Koto' },
+      layout: 'strings',
+      strings: [220.00, 246.94, 293.66, 329.63, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 783.99, 880.00, 987.77],
+      labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'],
+      osc: 'triangle',
+      decay: 1.2,
+      gain: 0.32
+    },
+    oud: {
+      title: { gu: '🎵 ઊદ', hi: '🎵 ऊद', en: 'Oud' },
+      layout: 'strings',
+      strings: [220.00, 196.00, 146.83, 110.00, 98.00, 73.42],
+      labels: ['A3', 'G3', 'D3', 'A2', 'G2', 'D2'],
+      osc: 'sine',
+      decay: 1.5,
+      gain: 0.35
+    },
+
+    // ---- Melodic Percussion & Drums ----
+    marimba: {
+      title: { gu: '🎵 મેરિમ્બા', hi: '🎵 मरिम्बा', en: 'Marimba' },
+      layout: 'buttons',
+      notes: [130.81, 146.83, 164.81, 174.61, 196.00, 220.00, 246.94, 261.63],
+      labels: ['C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4'],
+      osc: 'sine',
+      decay: 0.4,
+      gain: 0.4
+    },
+    'steel-tongue-drum': {
+      title: { gu: '🥁 સ્ટીલ ટંગ ડ્રમ', hi: '🥁 स्टील टंग ड्रम', en: 'Steel Tongue Drum' },
+      layout: 'tongue',
+      notes: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25],
+      labels: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'],
+      osc: 'sine',
+      decay: 2.2,
+      gain: 0.45,
+      harmonic: 2
+    },
+    'drum-kit': {
+      title: { gu: '🥁 ડ્રમ કિટ', hi: '🥁 ड्रम किट', en: 'Drum Kit' },
+      layout: 'drums',
+      pads: ['Kick', 'Snare', 'Hi-Hat', 'Tom', 'Crash', 'Ride']
+    },
+    'drum-machine': {
+      title: { gu: '🎛️ ડ્રમ મશીન', hi: '🎛️ ड्रम मशीन', en: 'Drum Machine' },
+      layout: 'sequencer'
+    },
+    'music-box': {
+      title: { gu: '🎶 મ્યુઝિક બોક્સ', hi: '🎶  म्यूज़िक बॉक्स', en: 'Music Box' },
+      layout: 'buttons',
+      notes: [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50],
+      labels: ['C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6'],
+      osc: 'sine',
+      decay: 1.8,
+      gain: 0.35,
+      harmonic: 4
+    },
+
+    // ---- Woodwind & Brass ----
+    flute: {
+      title: { gu: '🪈 વાંસળી', hi: '🪈 बांसुरी', en: 'Flute (Bansuri)' },
+      layout: 'buttons',
+      notes: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25],
+      labels: ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni', 'Sa\''],
+      osc: 'sine',
+      attack: 0.15,
+      decay: 1.0,
+      gain: 0.3,
+      breath: true
+    },
+    piccolo: {
+      title: { gu: '🪈 પિકોલો', hi: '🪈 पिकोलो', en: 'Piccolo' },
+      layout: 'buttons',
+      notes: [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50],
+      labels: ['C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6'],
+      osc: 'sine',
+      attack: 0.08,
+      decay: 0.8,
+      gain: 0.28,
+      breath: true
+    },
+    clarinet: {
+      title: { gu: '🪈 ક્લેરિનેટ', hi: '🪈 क्लैरिनेट', en: 'Clarinet' },
+      layout: 'buttons',
+      notes: [146.83, 164.81, 174.61, 196.00, 220.00, 246.94, 261.63, 293.66],
+      labels: ['D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4'],
+      osc: 'square',
+      attack: 0.05,
+      decay: 1.2,
+      gain: 0.25
+    },
+    oboe: {
+      title: { gu: '🪈 ઓબો', hi: '🪈 ओबो', en: 'Oboe' },
+      layout: 'buttons',
+      notes: [233.08, 261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88],
+      labels: ['Bb3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'],
+      osc: 'sawtooth',
+      attack: 0.06,
+      decay: 1.4,
+      gain: 0.28,
+      vibrato: true
+    },
+    saxophone: {
+      title: { gu: '🎷 સેક્સોફોન', hi: '🎷 सैक्सोफोन', en: 'Saxophone' },
+      layout: 'buttons',
+      notes: [207.65, 233.08, 261.63, 293.66, 311.13, 349.23, 392.00, 440.00],
+      labels: ['Ab3', 'Bb3', 'C4', 'D4', 'Eb4', 'F4', 'G4', 'A4'],
+      osc: 'sawtooth',
+      attack: 0.08,
+      decay: 1.5,
+      gain: 0.3,
+      vibrato: true
+    },
+    recorder: {
+      title: { gu: '🪈 રેકોર્ડર', hi: '🪈 रिकॉर्डर', en: 'Recorder' },
+      layout: 'buttons',
+      notes: [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50],
+      labels: ['C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6'],
+      osc: 'sine',
+      attack: 0.05,
+      decay: 0.9,
+      gain: 0.3,
+      breath: true
+    },
+    ocarina: {
+      title: { gu: '🎵 ઓકેરીના', hi: '🎵 ओकोरीना', en: 'Ocarina' },
+      layout: 'buttons',
+      notes: [392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99],
+      labels: ['G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5'],
+      osc: 'sine',
+      attack: 0.04,
+      decay: 1.0,
+      gain: 0.32
+    },
+    trumpet: {
+      title: { gu: '🎺 ટ્રમ્પેટ', hi: '🎺 ट्रम्पेट', en: 'Trumpet' },
+      layout: 'buttons',
+      notes: [233.08, 261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88],
+      labels: ['1', '2', '3', '4', '5', '6', '7', '8'],
+      osc: 'sawtooth',
+      attack: 0.03,
+      decay: 1.0,
+      gain: 0.28
+    },
+    trombone: {
+      title: { gu: '🎺 ટ્રોમ્બોન', hi: '🎺 ट्रॉम्बोन', en: 'Trombone' },
+      layout: 'buttons',
+      notes: [110.00, 123.47, 130.81, 146.83, 164.81, 174.61, 196.00, 220.00],
+      labels: ['1', '2', '3', '4', '5', '6', '7', '8'],
+      osc: 'sawtooth',
+      attack: 0.05,
+      decay: 1.2,
+      gain: 0.3
+    },
+
+    // ---- Utilities ----
+    'ukulele-tuner': {
+      title: { gu: '🎵 યુકેલેલે ટ્યૂનર', hi: '🎵 यूकुलेले ट्यूनर', en: 'Ukulele Tuner' },
+      layout: 'buttons',
+      notes: [392.00, 261.63, 329.63, 440.00],
+      labels: ['G4', 'C4', 'E4', 'A4'],
+      osc: 'sine',
+      decay: 1.8,
+      gain: 0.35
+    },
+    'circle-of-fifths': {
+      title: { gu: '🎯 સર્કલ ઓફ ફિફ્થ્સ', hi: '🎯 सर्कल ऑफ फिफ्थ्स', en: 'Circle of Fifths' },
+      layout: 'buttons',
+      notes: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25],
+      labels: ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C'],
+      osc: 'triangle',
+      decay: 1.5,
+      gain: 0.3
+    },
+
+    // ---- Gesture / Theremin ----
+    'air-guitar': {
+      title: { gu: '🎸 એર ગિટાર', hi: '🎸 एयर गिटार', en: 'Air Guitar' },
+      layout: 'buttons',
+      notes: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25],
+      labels: ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C\''],
+      osc: 'triangle',
+      decay: 2.0,
+      gain: 0.35
+    },
+    'air-harp': {
+      title: { gu: '🎵 એર હાર્પ', hi: '🎵 एयर हार्प', en: 'Air Harp' },
+      layout: 'strings',
+      strings: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25],
+      labels: ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C\''],
+      osc: 'sine',
+      decay: 2.2,
+      gain: 0.35
+    },
+    'air-ukulele': {
+      title: { gu: '🎸 એર યુકેલેલે', hi: '🎸 एयर यूकुलेले', en: 'Air Ukulele' },
+      layout: 'strings',
+      strings: [392.00, 261.63, 329.63, 440.00],
+      labels: ['G4', 'C4', 'E4', 'A4'],
+      osc: 'sine',
+      decay: 1.5,
+      gain: 0.35
+    },
+    'air-theremin': {
+      title: { gu: '📡 એર થેરેમિન', hi: '📡 एयर थेरेमिन', en: 'Air Theremin' },
+      layout: 'theremin'
+    },
+    theremin: {
+      title: { gu: '📡 થેરેમિન', hi: '📡 थेरेमिन', en: 'Theremin' },
+      layout: 'theremin'
+    },
+    'sensory-sparkler': {
+      title: { gu: '✨ સેન્સરી સ્પાર્કલર', hi: '✨ सेंसरी स्पार्कलर', en: 'Sensory Sparkler' },
+      layout: 'theremin'
+    },
+    'air-drum': {
+      title: { gu: '🥁 એર ડ્રમ', hi: '🥁 एयर ड्रम', en: 'Air Drum' },
+      layout: 'drums',
+      pads: ['Kick', 'Snare', 'Hi-Hat', 'Crash']
+    }
+  };
+
+  const config = CONFIGS[instId] || CONFIGS.flute;
+  const title = config.title[lang] || config.title.en;
+  document.getElementById('lblTitle').textContent = title;
+
+  let audioCtx = null;
+  let delayNode = null;
+  let feedbackNode = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Generic Sound Synthesizer
+  function playNote(freq) {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const oscHarm = config.harmonic ? audioCtx.createOscillator() : null;
+    const gainNode = audioCtx.createGain();
+    const filter = config.breath ? audioCtx.createBiquadFilter() : null;
+
+    osc.type = config.osc || 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    if (oscHarm) {
+      oscHarm.type = config.osc || 'sine';
+      oscHarm.frequency.setValueAtTime(freq * config.harmonic, audioCtx.currentTime);
+    }
+
+    // ADSR Envelope
+    const A = config.attack || 0.01;
+    const D = config.decay || 1.2;
+    const G = config.gain || 0.35;
+
+    gainNode.gain.setValueAtTime(0.0, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(G, audioCtx.currentTime + A);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + A + D);
+
+    if (filter) {
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.connect(filter);
+      if (oscHarm) oscHarm.connect(filter);
+      filter.connect(gainNode);
+    } else {
+      osc.connect(gainNode);
+      if (oscHarm) oscHarm.connect(gainNode);
+    }
+
+    // Vibrato LFO
+    if (config.vibrato) {
+      const lfo = audioCtx.createOscillator();
+      const lfoGain = audioCtx.createGain();
+      lfo.frequency.setValueAtTime(6, audioCtx.currentTime);
+      lfoGain.gain.setValueAtTime(8, audioCtx.currentTime);
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      lfo.start();
+      lfo.stop(audioCtx.currentTime + A + D);
+    }
+
+    gainNode.connect(audioCtx.destination);
+    osc.start();
+    if (oscHarm) oscHarm.start();
+
+    osc.stop(audioCtx.currentTime + A + D + 0.1);
+    if (oscHarm) oscHarm.stop(audioCtx.currentTime + A + D + 0.1);
+  }
+
+  // Synthesize Drum Pad Sounds
+  function playDrum(padName) {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    if (padName === 'Kick') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+      gainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.16);
+    } else if (padName === 'Snare' || padName === 'Hi-Hat') {
+      // Noise buffer for percussive crack/hiss
+      const bufferSize = audioCtx.sampleRate * (padName === 'Snare' ? 0.2 : 0.05);
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const source = audioCtx.createBufferSource();
+      source.buffer = buffer;
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (padName === 'Snare' ? 0.18 : 0.04));
+      source.connect(noiseGain);
+      noiseGain.connect(audioCtx.destination);
+      source.start();
+    } else {
+      // Cymbal crash / tom tone
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(padName === 'Crash' ? 400 : 200, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.9);
+    }
+  }
+
+  // Draw Layout DOM dynamically
+  const area = document.getElementById('dynamicInstrumentArea');
+
+  if (config.layout === 'strings') {
+    const layout = document.createElement('div');
+    layout.className = 'strings-layout';
+    
+    config.strings.forEach((freq, idx) => {
+      const row = document.createElement('div');
+      row.className = 'string-row';
+      
+      const wire = document.createElement('div');
+      wire.className = 'string-wire';
+      row.appendChild(wire);
+
+      const label = document.createElement('span');
+      label.className = 'string-label';
+      label.textContent = config.labels[idx];
+      row.appendChild(label);
+
+      const trigger = () => {
+        row.classList.add('active');
+        playNote(freq);
+        setTimeout(() => row.classList.remove('active'), 100);
+      };
+
+      row.onpointerenter = trigger;
+      row.onmousedown = trigger;
+      layout.appendChild(row);
+    });
+    
+    area.appendChild(layout);
+  } else if (config.layout === 'buttons') {
+    const layout = document.createElement('div');
+    layout.className = 'button-grid';
+
+    config.notes.forEach((freq, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'grid-btn';
+      btn.textContent = config.labels[idx];
+      btn.onclick = () => {
+        btn.classList.add('active');
+        playNote(freq);
+        setTimeout(() => btn.classList.remove('active'), 100);
+      };
+      layout.appendChild(btn);
+    });
+
+    area.appendChild(layout);
+  } else if (config.layout === 'drums') {
+    const layout = document.createElement('div');
+    layout.className = 'drums-layout';
+
+    config.pads.forEach(pad => {
+      const padEl = document.createElement('div');
+      padEl.className = 'drum-pad';
+      padEl.textContent = pad;
+      padEl.onclick = () => {
+        padEl.classList.add('active');
+        playDrum(pad);
+        setTimeout(() => padEl.classList.remove('active'), 100);
+      };
+      layout.appendChild(padEl);
+    });
+
+    area.appendChild(layout);
+  } else if (config.layout === 'tongue') {
+    const layout = document.createElement('div');
+    layout.className = 'tongue-layout';
+
+    config.notes.forEach((freq, idx) => {
+      const petal = document.createElement('div');
+      petal.className = 'tongue-petal';
+      petal.textContent = config.labels[idx];
+      
+      // PositionSurrounding
+      const angle = (idx / 8) * 2 * Math.PI;
+      const x = 130 + 100 * Math.cos(angle);
+      const y = 130 + 100 * Math.sin(angle);
+      petal.style.left = x + 'px';
+      petal.style.top = y + 'px';
+
+      petal.onclick = () => {
+        petal.classList.add('active');
+        playNote(freq);
+        setTimeout(() => petal.classList.remove('active'), 100);
+      };
+      layout.appendChild(petal);
+    });
+
+    area.appendChild(layout);
+  } else if (config.layout === 'theremin') {
+    const pad = document.createElement('div');
+    pad.className = 'theremin-pad';
+    
+    const indicator = document.createElement('div');
+    indicator.className = 'theremin-indicator';
+    pad.appendChild(indicator);
+
+    let osc = null;
+    let gain = null;
+
+    const playTheremin = (e) => {
+      initAudio();
+      const rect = pad.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+
+      // Frequency map: X axis (100Hz to 1200Hz)
+      const freq = 100 + (x / rect.width) * 1100;
+      // Volume map: Y axis (0 to 0.45)
+      const vol = 0.45 * (1.0 - (y / rect.height));
+
+      indicator.style.left = x + 'px';
+      indicator.style.top = y + 'px';
+      indicator.style.display = 'block';
+
+      if (!osc) {
+        osc = audioCtx.createOscillator();
+        gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+      }
+
+      osc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.05);
+      gain.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.05);
+    };
+
+    const stopTheremin = () => {
+      indicator.style.display = 'none';
+      if (osc) {
+        osc.stop();
+        osc.disconnect();
+        gain.disconnect();
+        osc = null;
+        gain = null;
+      }
+    };
+
+    pad.onpointerdown = (e) => {
+      pad.setPointerCapture(e.pointerId);
+      playTheremin(e);
+    };
+    pad.onpointermove = (e) => {
+      if (e.buttons > 0) playTheremin(e);
+    };
+    pad.onpointerup = stopTheremin;
+    pad.onpointercancel = stopTheremin;
+
+    area.appendChild(pad);
+  } else if (config.layout === 'sequencer') {
+    // 8-step simple drum machine sequencer grid
+    const layout = document.createElement('div');
+    layout.className = 'seq-grid';
+
+    const tracks = ['Kick', 'Snare', 'Hi-Hat', 'Tom'];
+    const gridState = tracks.map(() => Array(8).fill(false));
+
+    tracks.forEach((track, tIdx) => {
+      const label = document.createElement('div');
+      label.className = 'seq-label';
+      label.textContent = track;
+      layout.appendChild(label);
+
+      for (let s = 0; s < 8; s++) {
+        const cell = document.createElement('div');
+        cell.className = 'seq-cell';
+        cell.onclick = () => {
+          gridState[tIdx][s] = !gridState[tIdx][s];
+          cell.classList.toggle('active');
+        };
+        layout.appendChild(cell);
+      }
+    });
+
+    area.appendChild(layout);
+
+    // Playback loop
+    let step = 0;
+    setInterval(() => {
+      if (!isListening) return; // borrow listening flag as loop run flag
+      
+      // Visual indicator line
+      const cells = document.querySelectorAll('.seq-cell');
+      cells.forEach(c => c.classList.remove('playing'));
+
+      tracks.forEach((track, tIdx) => {
+        const cellIdx = tIdx * 8 + step;
+        const cell = cells[cellIdx];
+        if (cell) cell.classList.add('playing');
+
+        if (gridState[tIdx][step]) {
+          playDrum(track);
+        }
+      });
+
+      step = (step + 1) % 8;
+    }, 220); // ~135 BPM
+
+    isListening = true; // Auto-start sequencer loop
+  }
+
+  initAppShell({ title: title });
+})();
+</script>
+</body>
+</html>
