@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Kalimba - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .kalimba-container {
+    background: linear-gradient(135deg, #4a2810 0%, #251204 100%);
+    border: 8px solid #1c0a02;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+    position: relative;
+    text-align: center;
+  }
+
+  .kalimba-controls {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: rgba(0,0,0,0.4);
+    border: 2.5px solid #633316;
+    padding: 15px 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+  }
+  .control-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #d5b395;
+  }
+  .control-group select {
+    background: #250f07;
+    border: 1px solid #5a2e1e;
+    color: #f7e6d5;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* Kalimba wooden body and metallic tines */
+  .kalimba-body {
+    width: 320px;
+    height: 380px;
+    background: radial-gradient(circle, #834e2b 0%, #3e1b0f 100%);
+    border: 5px solid #250f07;
+    border-radius: 20px 20px 30px 30px;
+    margin: 0 auto;
+    position: relative;
+    padding-top: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  
+  /* Soundhole in center */
+  .soundhole {
+    width: 80px;
+    height: 80px;
+    background: #000;
+    border-radius: 50%;
+    border: 4px solid #633316;
+    margin: 30px auto 0;
+    box-shadow: inset 0 5px 10px rgba(0,0,0,0.8);
+  }
+
+  .tines-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 200px;
+    padding: 0 15px;
+    position: absolute;
+    top: 40px; left: 0; right: 0;
+  }
+
+  .tine {
+    width: 14px;
+    background: linear-gradient(to right, #e0e0e0 0%, #aeaeae 50%, #888 100%);
+    border-radius: 0 0 8px 8px;
+    border: 1px solid #333;
+    border-top: none;
+    cursor: pointer;
+    transition: background 0.1s, height 0.1s;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+  }
+  .tine:active, .tine.active {
+    background: #f1c40f;
+    box-shadow: 0 0 12px #f1c40f;
+    transform: translateY(3px);
+  }
+
+  .tine-note {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.55rem;
+    font-weight: 900;
+    color: #111;
+    pointer-events: none;
+  }
+  .tine-key {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.5rem;
+    color: #555;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">🎵 વર્ચ્યુઅલ કલિમ્બા</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="kalimba-container">
+      <div class="kalimba-controls">
+        <div class="control-group">
+          <label id="lblTinesMode">ટાઇન મોડ (Tines Mode)</label>
+          <select id="tineModeSelect">
+            <option value="17" selected>17 Tines (Standard C Major)</option>
+            <option value="10">10 Tines (Pentatonic)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label id="lblEcho">ઇકો ઇફેક્ટ (Echo Reverb)</label>
+          <select id="echoSelect">
+            <option value="medium" selected>મીડિયમ (Medium Echo)</option>
+            <option value="long">લોંગ (Spacious Echo)</option>
+            <option value="off">બંધ (No Echo)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Wooden Kalimba Board -->
+      <div class="kalimba-body">
+        <div class="tines-container" id="tinesContainer"></div>
+        <div class="soundhole"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🎵 વર્ચ્યુઅલ કલિમ્બા',
+      back: '← પાછા જાઓ',
+      tinesMode: 'ટાઇન મોડ (Tines Mode)',
+      echo: 'ઇકો ઇફેક્ટ (Echo Reverb)'
+    },
+    hi: {
+      title: '🎵 वर्चुअल कलिम्बा',
+      back: '← वापस जाएं',
+      tinesMode: 'टाइन मोड (Tines Mode)',
+      echo: 'इको इफ़ेक्ट (Echo Reverb)'
+    },
+    en: {
+      title: '🎵 Virtual Kalimba (Thumb Piano)',
+      back: '← Go Back',
+      tinesMode: 'Tines Configuration',
+      echo: 'Spacious Echo Reverb'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('lblTinesMode').textContent = t.tinesMode;
+  document.getElementById('lblEcho').textContent = t.echo;
+
+  let audioCtx = null;
+  let delayNode = null;
+  let feedbackNode = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Kalimba metallic tine pluck synthesis
+  function playTinePluck(freq) {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const oscHarmonic = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    // High harmonic ring of metal tine
+    oscHarmonic.type = 'sine';
+    oscHarmonic.frequency.setValueAtTime(freq * 5, audioCtx.currentTime);
+
+    gainNode.gain.setValueAtTime(0.35, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2); // medium decay
+
+    osc.connect(gainNode);
+    oscHarmonic.connect(gainNode);
+
+    // Connect to Echo/Delay based on setting
+    const echoType = document.getElementById('echoSelect').value;
+    if (echoType !== 'off') {
+      if (!delayNode) {
+        delayNode = audioCtx.createDelay();
+        feedbackNode = audioCtx.createGain();
+      }
+      
+      const delayTime = echoType === 'long' ? 0.45 : 0.28;
+      const feedbackVal = echoType === 'long' ? 0.45 : 0.3;
+      
+      delayNode.delayTime.setValueAtTime(delayTime, audioCtx.currentTime);
+      feedbackNode.gain.setValueAtTime(feedbackVal, audioCtx.currentTime);
+      
+      gainNode.connect(delayNode);
+      delayNode.connect(feedbackNode);
+      feedbackNode.connect(delayNode);
+      delayNode.connect(audioCtx.destination);
+    }
+
+    gainNode.connect(audioCtx.destination);
+
+    osc.start();
+    oscHarmonic.start();
+    osc.stop(audioCtx.currentTime + 1.4);
+    oscHarmonic.stop(audioCtx.currentTime + 1.4);
+  }
+
+  // Tine data (Note, height multiplier, computer keyboard shortcut)
+  // Left-Right alternating layout like a real Kalimba
+  const TINES_17 = [
+    { note: 'D6', h: 100, key: 'q', freq: 1174.66 },
+    { note: 'B5', h: 110, key: 'w', freq: 987.77 },
+    { note: 'G5', h: 120, key: 'e', freq: 783.99 },
+    { note: 'E5', h: 130, key: 'r', freq: 659.25 },
+    { note: 'C5', h: 140, key: 't', freq: 523.25 },
+    { note: 'A4', h: 150, key: 'y', freq: 440.00 },
+    { note: 'F4', h: 160, key: 'u', freq: 349.23 },
+    { note: 'D4', h: 170, key: 'i', freq: 293.66 },
+    { note: 'C4', h: 180, key: 'space', freq: 261.63 }, // Middle long tine
+    { note: 'E4', h: 170, key: 'o', freq: 329.63 },
+    { note: 'G4', h: 160, key: 'p', freq: 392.00 },
+    { note: 'B4', h: 150, key: 'a', freq: 493.88 },
+    { note: 'D5', h: 140, key: 's', freq: 587.33 },
+    { note: 'F5', h: 130, key: 'd', freq: 698.46 },
+    { note: 'A5', h: 120, key: 'f', freq: 880.00 },
+    { note: 'C6', h: 110, key: 'g', freq: 1046.50 },
+    { note: 'E6', h: 100, key: 'h', freq: 1318.51 }
+  ];
+
+  const TINES_10 = [
+    { note: 'E5', h: 110, key: 'w', freq: 659.25 },
+    { note: 'C5', h: 125, key: 'e', freq: 523.25 },
+    { note: 'A4', h: 140, key: 'r', freq: 440.00 },
+    { note: 'F4', h: 155, key: 't', freq: 349.23 },
+    { note: 'C4', h: 170, key: 'space', freq: 261.63 },
+    { note: 'E4', h: 155, key: 'y', freq: 329.63 },
+    { note: 'G4', h: 140, key: 'u', freq: 392.00 },
+    { note: 'B4', h: 125, key: 'o', freq: 493.88 },
+    { note: 'D5', h: 110, key: 'p', freq: 587.33 },
+    { note: 'F5', h: 95,  key: 'a', freq: 698.46 }
+  ];
+
+  let currentTines = TINES_17;
+
+  function renderTines() {
+    const container = document.getElementById('tinesContainer');
+    container.innerHTML = '';
+
+    const mode = document.getElementById('tineModeSelect').value;
+    currentTines = mode === '17' ? TINES_17 : TINES_10;
+
+    currentTines.forEach(tineInfo => {
+      const tine = document.createElement('div');
+      tine.className = 'tine';
+      tine.id = 'tine-' + tineInfo.note;
+      tine.style.height = tineInfo.h + 'px';
+
+      const keyLabel = document.createElement('span');
+      keyLabel.className = 'tine-key';
+      keyLabel.textContent = tineInfo.key.toUpperCase();
+      tine.appendChild(keyLabel);
+
+      const noteLabel = document.createElement('span');
+      noteLabel.className = 'tine-note';
+      noteLabel.textContent = tineInfo.note;
+      tine.appendChild(noteLabel);
+
+      tine.onclick = () => {
+        tine.classList.add('active');
+        playTinePluck(tineInfo.freq);
+        setTimeout(() => tine.classList.remove('active'), 100);
+      };
+
+      container.appendChild(tine);
+    });
+  }
+
+  // Keyboard support mapping
+  window.addEventListener('keydown', (e) => {
+    if (e.repeat) return;
+    const keyName = e.code === 'Space' ? 'space' : e.key.toLowerCase();
+    const tineInfo = currentTines.find(t => t.key === keyName);
+    if (tineInfo) {
+      const tineEl = document.getElementById('tine-' + tineInfo.note);
+      if (tineEl) {
+        tineEl.classList.add('active');
+        playTinePluck(tineInfo.freq);
+        setTimeout(() => tineEl.classList.remove('active'), 100);
+      }
+    }
+  });
+
+  document.getElementById('tineModeSelect').onchange = renderTines;
+
+  renderTines();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>

@@ -1,8 +1,8 @@
-const CACHE_NAME = 'harmony-music-app-v118';
+const CACHE_NAME = 'harmony-music-app-v119';
 const ASSETS = [
   './', './index.html', './login.html', './dashboard.html', './profile.html', './daily-riyaz.html',
   './pitch-monitor.html', './pitch-monitor.css',
-  './progress.html', './owner-console.html', './practice-tool.html', './metronome.html', './tabla.html', './instruments.html', './harmonium.html', './santoor.html', './piano.html', './keyboard-piano.html', './organ.html', './accordion.html', './stylophone.html', './synthesizer.html', './guitar.html', './bass-guitar.html',
+  './progress.html', './owner-console.html', './practice-tool.html', './metronome.html', './tabla.html', './instruments.html', './harmonium.html', './santoor.html', './piano.html', './keyboard-piano.html', './organ.html', './accordion.html', './stylophone.html', './synthesizer.html', './guitar.html', './bass-guitar.html', './kalimba.html', './handpan.html',
   './shared/theme.css', './shared/app-shell.css', './shared/components.css',
   './shared/app-shell.js', './shared/supabase-client.js', './shared/utils.js',
   './manifest.json', './icon-192.png', './icon-512.png',

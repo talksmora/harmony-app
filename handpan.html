@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Handpan - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .handpan-container {
+    background: linear-gradient(135deg, #2c3e50 0%, #0f171e 100%);
+    border: 8px solid #0b1116;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+    position: relative;
+    text-align: center;
+  }
+
+  .handpan-controls {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: rgba(0,0,0,0.4);
+    border: 2px solid #34495e;
+    padding: 15px 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+  }
+  .control-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #aabccf;
+  }
+  .control-group select {
+    background: #1b2631;
+    border: 1px solid #34495e;
+    color: #f7e6d5;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* Handpan circular shape */
+  .handpan-body {
+    width: 360px;
+    height: 360px;
+    background: radial-gradient(circle, #566573 0%, #2c3e50 60%, #1c2833 100%);
+    border: 6px solid #34495e;
+    border-radius: 50%;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+  }
+
+  /* Center Ding */
+  .handpan-ding {
+    width: 90px;
+    height: 90px;
+    background: radial-gradient(circle, #f39c12 0%, #d35400 100%);
+    border: 3.5px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: #fff;
+    font-size: 0.85rem;
+    text-shadow: 1px 1px 2px #000;
+  }
+  .handpan-ding:active, .handpan-ding.active {
+    box-shadow: 0 0 20px #f39c12;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  /* Circular handpan tone fields */
+  .tone-field {
+    width: 62px;
+    height: 62px;
+    background: radial-gradient(circle, #7f8c8d 0%, #34495e 100%);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #fff;
+    font-size: 0.75rem;
+    transition: transform 0.1s;
+    user-select: none;
+  }
+  .tone-field:active, .tone-field.active {
+    box-shadow: 0 0 15px #f1c40f;
+    transform: scale(1.15);
+  }
+</style>
+</head>
+<body data-page="instruments">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">🎵 વર્ચ્યુઅલ હેન્ડપેન</h2>
+      <a href="instruments.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← પાછા જાઓ</a>
+    </div>
+
+    <div class="handpan-container">
+      <div class="handpan-controls">
+        <div class="control-group">
+          <label id="lblScale">હેન્ડપેન સ્કેલ (Handpan Scale)</label>
+          <select id="scaleSelect">
+            <option value="dMinor" selected>D Minor (D3 Ding, A3, Bb3, C4, D4, E4, F4, G4, A4)</option>
+            <option value="celtic">Celtic Minor (C3 Ding, G3, Ab3, Bb3, C4, D4, Eb4, F4, G4)</option>
+            <option value="hijaz">Hijaz (D3 Ding, A3, Bb3, C#4, D4, E4, F4, G4, A4)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label id="lblReverb">રિવર્બ ઇકો (Space Reverb)</label>
+          <select id="reverbSelect">
+            <option value="on" selected>ચાલુ (Spacious On)</option>
+            <option value="off">બંધ (Off)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="handpan-body">
+        <!-- Center Ding note -->
+        <div class="handpan-ding" id="dingBtn">Ding</div>
+
+        <!-- Tone fields (8 surrounding notes) -->
+        <div class="tone-field" id="field0" style="top:12%; left:50%; transform:translateX(-50%);">1</div>
+        <div class="tone-field" id="field1" style="top:22%; left:75%; transform:translateX(-50%);">2</div>
+        <div class="tone-field" id="field2" style="top:50%; left:88%; transform:translateY(-50%);">3</div>
+        <div class="tone-field" id="field3" style="top:78%; left:75%; transform:translateX(-50%);">4</div>
+        <div class="tone-field" id="field4" style="bottom:12%; left:50%; transform:translateX(-50%);">5</div>
+        <div class="tone-field" id="field5" style="top:78%; left:25%; transform:translateX(-50%);">6</div>
+        <div class="tone-field" id="field6" style="top:50%; left:12%; transform:translateY(-50%);">7</div>
+        <div class="tone-field" id="field7" style="top:22%; left:25%; transform:translateX(-50%);">8</div>
+      </div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🎵 વર્ચ્યુઅલ હેન્ડપેન',
+      back: '← પાછા જાઓ',
+      scale: 'હેન્ડપેન સ્કેલ (Handpan Scale)',
+      reverb: 'રિવર્બ ઇકો (Space Reverb)'
+    },
+    hi: {
+      title: '🎵 वर्चुअल हैंडपैन',
+      back: '← वापस जाएं',
+      scale: 'हैंडपैन स्केल (Handpan Scale)',
+      reverb: 'रीवरब इको (Space Reverb)'
+    },
+    en: {
+      title: '🎵 Virtual Handpan',
+      back: '← Go Back',
+      scale: 'Handpan Scale Selection',
+      reverb: 'Ambience Reverb Echo'
+    }
+  };
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('lblScale').textContent = t.scale;
+  document.getElementById('lblReverb').textContent = t.reverb;
+
+  let audioCtx = null;
+  let delayNode = null;
+  let feedbackNode = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Synthesize Handpan metallic gong tone
+  function playHandpanGong(freq) {
+    initAudio();
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const osc3 = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    // Noise pluck transient
+    const bufferSize = audioCtx.sampleRate * 0.015; // 15ms transient
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.015);
+    noise.connect(noiseGain);
+    noiseGain.connect(audioCtx.destination);
+    noise.start();
+
+    // Gong/steel drum harmonic series
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(freq, audioCtx.currentTime); // Fundamental
+
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(freq * 2, audioCtx.currentTime); // Octave
+
+    osc3.type = 'sine';
+    osc3.frequency.setValueAtTime(freq * 3, audioCtx.currentTime); // Perfect fifth/octave harmonic
+    osc3.detune.setValueAtTime(3, audioCtx.currentTime);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1000, audioCtx.currentTime);
+
+    gainNode.gain.setValueAtTime(0.45, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.8); // Long ring
+
+    osc1.connect(filter);
+    osc2.connect(filter);
+    osc3.connect(filter);
+    filter.connect(gainNode);
+
+    // Optional Reverb/Delay
+    const hasReverb = document.getElementById('reverbSelect').value === 'on';
+    if (hasReverb) {
+      if (!delayNode) {
+        delayNode = audioCtx.createDelay();
+        feedbackNode = audioCtx.createGain();
+      }
+      delayNode.delayTime.setValueAtTime(0.35, audioCtx.currentTime);
+      feedbackNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
+      
+      gainNode.connect(delayNode);
+      delayNode.connect(feedbackNode);
+      feedbackNode.connect(delayNode);
+      delayNode.connect(audioCtx.destination);
+    }
+
+    gainNode.connect(audioCtx.destination);
+
+    osc1.start();
+    osc2.start();
+    osc3.start();
+    osc1.stop(audioCtx.currentTime + 3.0);
+    osc2.stop(audioCtx.currentTime + 3.0);
+    osc3.stop(audioCtx.currentTime + 3.0);
+  }
+
+  // Scales details
+  const SCALES = {
+    dMinor: [146.83, 220.00, 233.08, 261.63, 293.66, 329.63, 349.23, 392.00, 440.00], // D3, A3, Bb3, C4, D4, E4, F4, G4, A4
+    celtic: [130.81, 196.00, 207.65, 233.08, 261.63, 293.66, 311.13, 349.23, 392.00], // C3, G3, Ab3, Bb3, C4, D4, Eb4, F4, G4
+    hijaz:  [146.83, 220.00, 233.08, 277.18, 293.66, 329.63, 349.23, 392.00, 440.00]  // D3, A3, Bb3, C#4, D4, E4, F4, G4, A4
+  };
+
+  const NOTE_LABELS = {
+    dMinor: ['D3', 'A3', 'Bb3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4'],
+    celtic: ['C3', 'G3', 'Ab3', 'Bb3', 'C4', 'D4', 'Eb4', 'F4', 'G4'],
+    hijaz:  ['D3', 'A3', 'Bb3', 'C#4', 'D4', 'E4', 'F4', 'G4', 'A4']
+  };
+
+  function renderHandpan() {
+    const scale = document.getElementById('scaleSelect').value;
+    const freqs = SCALES[scale];
+    const labels = NOTE_LABELS[scale];
+
+    // Center Ding
+    const ding = document.getElementById('dingBtn');
+    ding.textContent = labels[0];
+    ding.onclick = () => {
+      ding.classList.add('active');
+      playHandpanGong(freqs[0]);
+      setTimeout(() => ding.classList.remove('active'), 150);
+    };
+
+    // Surrounding tone fields
+    for (let i = 0; i < 8; i++) {
+      const field = document.getElementById('field' + i);
+      field.textContent = labels[i + 1];
+      field.onclick = () => {
+        field.classList.add('active');
+        playHandpanGong(freqs[i + 1]);
+        setTimeout(() => field.classList.remove('active'), 150);
+      };
+    }
+  }
+
+  // Keyboard support mapping (1 to 9)
+  window.addEventListener('keydown', (e) => {
+    if (e.repeat) return;
+    const keyNum = parseInt(e.key);
+    if (keyNum >= 1 && keyNum <= 9) {
+      const scale = document.getElementById('scaleSelect').value;
+      const freqs = SCALES[scale];
+      
+      if (keyNum === 1) {
+        const ding = document.getElementById('dingBtn');
+        ding.classList.add('active');
+        playHandpanGong(freqs[0]);
+        setTimeout(() => ding.classList.remove('active'), 150);
+      } else {
+        const fieldIdx = keyNum - 2;
+        const field = document.getElementById('field' + fieldIdx);
+        if (field) {
+          field.classList.add('active');
+          playHandpanGong(freqs[fieldIdx + 1]);
+          setTimeout(() => field.classList.remove('active'), 150);
+        }
+      }
+    }
+  });
+
+  document.getElementById('scaleSelect').onchange = renderHandpan;
+
+  renderHandpan();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>
