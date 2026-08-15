@@ -848,6 +848,50 @@
     }
   }
 
+  const BOL_TRANSLATIONS = {
+    gu: {
+      'Dha': 'ધા', 'Dhin': 'ધીં', 'Tin': 'તીં', 'Ta': 'તા', 'Na': 'ના', 'Ti': 'તી', 
+      'Ge': 'ગે', 'Ka': 'ક', 'Ghe': 'ઘે', 'Gi': 'ગિ', 'Tu': 'તૂ', 'Tun': 'તૂં', 
+      'Kita': 'કિટ', 'Tita': 'તિત', 'Traka': 'ત્રક', 'Tra': 'ત્ર', 'Tirakita': 'તિરકિટ', 
+      'Dhage': 'ધાગે', 'Tina': 'તીના', 'Gadi': 'ગદિ', 'Gana': 'ગન', 'Kat': 'કત', 
+      'Tira': 'તિર', 'NaTi': 'નાતી', 'NaKe': 'નાકે', 'DhaGe': 'ધાગે', 'DhiNa': 'ધીના', 
+      'Dhi': 'ધી', 'Kata': 'કત', 'Ke': 'કે', 'Di': 'દિ', 'Dhun': 'ધૂં', 'Dhit': 'ધિત', 
+      'Tit': 'તિત', 'Te': 'ટે', '-': '-'
+    },
+    hi: {
+      'Dha': 'धा', 'Dhin': 'धिं', 'Tin': 'तिं', 'Ta': 'ता', 'Na': 'ना', 'Ti': 'ति', 
+      'Ge': 'गे', 'Ka': 'क', 'Ghe': 'घे', 'Gi': 'गि', 'Tu': 'तू', 'Tun': 'तूं', 
+      'Kita': 'किट', 'Tita': 'तित', 'Traka': 'त्रक', 'Tra': 'त्र', 'Tirakita': 'तिरकिट', 
+      'Dhage': 'धागे', 'Tina': 'तीना', 'Gadi': 'गदि', 'Gana': 'गन', 'Kat': 'कत', 
+      'Tira': 'तिर', 'NaTi': 'नाती', 'NaKe': 'नाके', 'DhaGe': 'धागे', 'DhiNa': 'धीना', 
+      'Dhi': 'धी', 'Kata': 'कत', 'Ke': 'के', 'Di': 'दि', 'Dhun': 'धूं', 'Dhit': 'धित', 
+      'Tit': 'तित', 'Te': 'टे', '-': '-'
+    },
+    en: {
+      'Dha': 'Dha', 'Dhin': 'Dhin', 'Tin': 'Tin', 'Ta': 'Ta', 'Na': 'Na', 'Ti': 'Ti', 
+      'Ge': 'Ge', 'Ka': 'Ka', 'Ghe': 'Ghe', 'Gi': 'Gi', 'Tu': 'Tu', 'Tun': 'Tun', 
+      'Kita': 'Kita', 'Tita': 'Tita', 'Traka': 'Traka', 'Tra': 'Tra', 'Tirakita': 'Tirakita', 
+      'Dhage': 'Dhage', 'Tina': 'Tina', 'Gadi': 'Gadi', 'Gana': 'Gana', 'Kat': 'Kat', 
+      'Tira': 'Tira', 'NaTi': 'NaTi', 'NaKe': 'NaKe', 'DhaGe': 'DhaGe', 'DhiNa': 'DhiNa', 
+      'Dhi': 'Dhi', 'Kata': 'Kata', 'Ke': 'Ke', 'Di': 'Di', 'Dhun': 'Dhun', 'Dhit': 'Dhit', 
+      'Tit': 'Tit', 'Te': 'Te', '-': '-'
+    }
+  };
+
+  function getLocalizedNumber(num, lang) {
+    const numStr = num.toString();
+    if (lang === 'en') return numStr;
+    
+    const guDigits = ['૦', '૧', '૨', '૩', '૪', '૫', '૬', '૭', '૮', '૯'];
+    const hiDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+    const digits = lang === 'gu' ? guDigits : hiDigits;
+    
+    return numStr.split('').map(char => {
+      const parsed = parseInt(char, 10);
+      return isNaN(parsed) ? char : digits[parsed];
+    }).join('');
+  }
+
   const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
   const t = TABLA_TEXT[lang] || TABLA_TEXT.gu;
 
@@ -1615,7 +1659,8 @@
       if (!isPlaying) return;
       
       // Update display text
-      document.getElementById('currentBolDisplay').textContent = bol;
+      const localized = BOL_TRANSLATIONS[lang]?.[bol] || bol;
+      document.getElementById('currentBolDisplay').textContent = localized;
       
       // Update active beat indicator dot
       document.querySelectorAll('.beat-dot').forEach(dot => dot.classList.remove('active'));
@@ -1658,7 +1703,7 @@
       dot.id = 'dot-' + i;
       
       const oneBasedIdx = i + 1;
-      let symbol = oneBasedIdx.toString();
+      let symbol = getLocalizedNumber(oneBasedIdx, lang);
       
       if (oneBasedIdx === 1) {
         dot.classList.add('sam');
@@ -1666,7 +1711,7 @@
       } else if (currentSequence.accents.includes(oneBasedIdx)) {
         symbol = '👏'; // Tali (clap)
       } else if (currentSequence.khali.includes(oneBasedIdx)) {
-        symbol = '0';  // Khali
+        symbol = getLocalizedNumber(0, lang);  // Khali
       }
       
       const symbolEl = document.createElement('span');
@@ -1675,7 +1720,8 @@
       
       const bolEl = document.createElement('span');
       bolEl.className = 'beat-bol';
-      bolEl.textContent = currentSequence.bols[i] || '-';
+      const rawBol = currentSequence.bols[i] || '-';
+      bolEl.textContent = BOL_TRANSLATIONS[lang]?.[rawBol] || rawBol;
       
       dot.appendChild(symbolEl);
       dot.appendChild(bolEl);
@@ -1963,7 +2009,7 @@
       
       const label = document.createElement('div');
       label.className = 'seq-label';
-      label.textContent = bol;
+      label.textContent = BOL_TRANSLATIONS[lang]?.[bol] || bol;
       row.appendChild(label);
       
       const grid = document.createElement('div');
@@ -1973,7 +2019,7 @@
         const cell = document.createElement('div');
         cell.className = 'seq-cell';
         cell.id = `cell-${r}-${c}`;
-        cell.textContent = bol;
+        cell.textContent = BOL_TRANSLATIONS[lang]?.[bol] || bol;
         
         // Click to toggle step active
         cell.addEventListener('click', () => {
