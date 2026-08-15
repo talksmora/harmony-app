@@ -651,7 +651,193 @@
   // Draw Layout DOM dynamically
   const area = document.getElementById('dynamicInstrumentArea');
 
-  if (config.layout === 'strings') {
+  if (instId === 'circle-of-fifths') {
+    // Beautiful interactive SVG Circle of Fifths dial
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '320');
+    svg.setAttribute('height', '320');
+    svg.style.margin = '0 auto';
+    svg.style.display = 'block';
+
+    const keys = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'Ab', 'Eb', 'Bb', 'F'];
+    const freqs = [261.63, 392.00, 293.66, 440.00, 329.63, 246.94, 369.99, 277.18, 415.30, 311.13, 466.16, 349.23];
+
+    keys.forEach((key, idx) => {
+      const angle = (idx / 12) * 2 * Math.PI - Math.PI / 2;
+      const angleNext = ((idx + 1) / 12) * 2 * Math.PI - Math.PI / 2;
+      
+      const x1 = 160 + 140 * Math.cos(angle);
+      const y1 = 160 + 140 * Math.sin(angle);
+      const x2 = 160 + 140 * Math.cos(angleNext);
+      const y2 = 160 + 140 * Math.sin(angleNext);
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M 160 160 L ${x1} ${y1} A 140 140 0 0 1 ${x2} ${y2} Z`);
+      path.setAttribute('fill', `hsl(${idx * 30}, 60%, 25%)`);
+      path.setAttribute('stroke', '#0f1315');
+      path.setAttribute('stroke-width', '2');
+      path.style.cursor = 'pointer';
+      path.style.transition = 'fill 0.2s';
+
+      path.onmouseover = () => path.setAttribute('fill', `hsl(${idx * 30}, 80%, 45%)`);
+      path.onmouseout = () => path.setAttribute('fill', `hsl(${idx * 30}, 60%, 25%)`);
+      
+      path.onclick = () => {
+        // Play major triad chord (Root, Major 3rd, Perfect 5th)
+        playNote(freqs[idx]);
+        playNote(freqs[idx] * 1.25);
+        playNote(freqs[idx] * 1.5);
+      };
+
+      // Add Key text label
+      const textAngle = angle + Math.PI / 12;
+      const tx = 160 + 105 * Math.cos(textAngle);
+      const ty = 160 + 105 * Math.sin(textAngle);
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', tx);
+      text.setAttribute('y', ty + 6);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('fill', '#fff');
+      text.setAttribute('font-weight', '900');
+      text.setAttribute('font-size', '14');
+      text.style.pointerEvents = 'none';
+      text.textContent = key;
+
+      svg.appendChild(path);
+      svg.appendChild(text);
+    });
+
+    area.appendChild(svg);
+  } 
+  else if (instId === 'ukulele-tuner') {
+    // Beautiful Ukulele Headstock Tuner Layout
+    const headstock = document.createElement('div');
+    headstock.style.width = '200px';
+    headstock.style.height = '300px';
+    headstock.style.background = 'linear-gradient(to bottom, #8e44ad, #5b2c6f)';
+    headstock.style.margin = '0 auto';
+    headstock.style.borderRadius = '20px';
+    headstock.style.border = '5px solid #2e1a3c';
+    headstock.style.position = 'relative';
+    headstock.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
+
+    const pegs = [
+      { name: 'G4', freq: 392.00, top: '40px', left: '-25px' },
+      { name: 'C4', freq: 261.63, top: '110px', left: '-25px' },
+      { name: 'E4', freq: 329.63, top: '110px', right: '-25px' },
+      { name: 'A4', freq: 440.00, top: '40px', right: '-25px' }
+    ];
+
+    pegs.forEach(peg => {
+      const pegBtn = document.createElement('button');
+      pegBtn.textContent = peg.name;
+      pegBtn.style.position = 'absolute';
+      pegBtn.style.top = peg.top;
+      if (peg.left) pegBtn.style.left = peg.left;
+      if (peg.right) pegBtn.style.right = peg.right;
+      pegBtn.style.width = '44px';
+      pegBtn.style.height = '44px';
+      pegBtn.style.borderRadius = '50%';
+      pegBtn.style.background = '#f1c40f';
+      pegBtn.style.border = '3px solid #d4af37';
+      pegBtn.style.color = '#111';
+      pegBtn.style.fontWeight = '900';
+      pegBtn.style.cursor = 'pointer';
+      pegBtn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4)';
+      pegBtn.style.transition = 'all 0.1s';
+
+      pegBtn.onclick = () => {
+        pegBtn.style.transform = 'scale(0.9)';
+        playNote(peg.freq);
+        setTimeout(() => pegBtn.style.transform = 'none', 100);
+      };
+      headstock.appendChild(pegBtn);
+    });
+
+    area.appendChild(headstock);
+  }
+  else if (instId === 'sensory-sparkler') {
+    // Beautiful interactive neon particle canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 300;
+    canvas.style.background = '#050508';
+    canvas.style.border = '2px solid #ff007f';
+    canvas.style.borderRadius = '16px';
+    canvas.style.display = 'block';
+    canvas.style.margin = '0 auto';
+    canvas.style.cursor = 'crosshair';
+
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 6 + 2;
+        this.speedX = Math.random() * 4 - 2;
+        this.speedY = Math.random() * 4 - 2;
+        this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.size > 0.2) this.size -= 0.1;
+      }
+      draw() {
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function animate() {
+      ctx.fillStyle = 'rgba(5, 5, 8, 0.15)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].size <= 0.2) {
+          particles.splice(i, 1);
+          i--;
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    const triggerSpark = (e) => {
+      initAudio();
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+
+      // Add particles
+      for (let i = 0; i < 8; i++) {
+        particles.push(new Particle(x, y));
+      }
+
+      // Play high chime note
+      const freq = 400 + (x / rect.width) * 800;
+      playNote(freq);
+    };
+
+    canvas.onpointermove = (e) => {
+      if (e.buttons > 0 || e.pointerType === 'touch') {
+        triggerSpark(e);
+      }
+    };
+    canvas.onpointerdown = triggerSpark;
+
+    area.appendChild(canvas);
+  }
+  else if (config.layout === 'strings') {
     const layout = document.createElement('div');
     layout.className = 'strings-layout';
     
