@@ -166,17 +166,14 @@ async function getProfile(phone) {
   const sb = getSupabase();
   if (sb) {
     try {
-      const { data: { user } } = await sb.auth.getUser();
-      if (user) {
-        const { data, error } = await sb
-          .from('profiles')
-          .select('name, batch, photo_url, category, raga')
-          .eq('phone', phone)
-          .maybeSingle();
-        if (!error && data) {
-          try { localStorage.setItem('harmonyProfile:' + phone, JSON.stringify(data)); } catch(e) {}
-          return data;
-        }
+      const { data, error } = await sb
+        .from('profiles')
+        .select('name, batch, photo_url, category, raga')
+        .eq('phone', phone)
+        .maybeSingle();
+      if (!error && data) {
+        try { localStorage.setItem('harmonyProfile:' + phone, JSON.stringify(data)); } catch(e) {}
+        return data;
       }
     } catch(e) {}
   }
@@ -197,15 +194,12 @@ async function upsertProfile(phone, name, batch, photo_url, category, raga) {
   const sb = getSupabase();
   if (sb) {
     try {
-      const { data: { user } } = await sb.auth.getUser();
-      if (user) {
-        const { error } = await sb
-          .from('profiles')
-          .upsert(profileData);
-        if (error) throw error;
-      }
+      const { error } = await sb
+        .from('profiles')
+        .upsert(profileData);
+      if (error) throw error;
     } catch(e) {
-      console.warn('Supabase upsertProfile failed or not authenticated - saved locally only');
+      console.warn('Supabase upsertProfile failed:', e);
     }
   }
   return true;
@@ -215,17 +209,14 @@ async function getProgress(phone) {
   const sb = getSupabase();
   if (sb) {
     try {
-      const { data: { user } } = await sb.auth.getUser();
-      if (user) {
-        const { data, error } = await sb
-          .from('progress')
-          .select('ratings')
-          .eq('phone', phone)
-          .maybeSingle();
-        if (!error && data) {
-          try { localStorage.setItem('progress:' + phone, JSON.stringify(data.ratings)); } catch(e) {}
-          return data.ratings;
-        }
+      const { data, error } = await sb
+        .from('progress')
+        .select('ratings')
+        .eq('phone', phone)
+        .maybeSingle();
+      if (!error && data) {
+        try { localStorage.setItem('progress:' + phone, JSON.stringify(data.ratings)); } catch(e) {}
+        return data.ratings;
       }
     } catch(e) {}
   }
@@ -245,15 +236,12 @@ async function saveProgress(phone, ratings) {
   const sb = getSupabase();
   if (sb) {
     try {
-      const { data: { user } } = await sb.auth.getUser();
-      if (user) {
-        const { error } = await sb
-          .from('progress')
-          .upsert({ phone, ratings, updated_at: new Date().toISOString() });
-        if (error) throw error;
-      }
+      const { error } = await sb
+        .from('progress')
+        .upsert({ phone, ratings, updated_at: new Date().toISOString() });
+      if (error) throw error;
     } catch(e) {
-      console.warn('Supabase saveProgress failed or not authenticated - saved locally only');
+      console.warn('Supabase saveProgress failed:', e);
     }
   }
   return true;
@@ -279,23 +267,20 @@ async function saveRiyazLog(phone, category, topic, hours, minutes, audio_url) {
   const sb = getSupabase();
   if (sb) {
     try {
-      const { data: { user } } = await sb.auth.getUser();
-      if (user) {
-        const { error } = await sb
-          .from('daily_riyaz')
-          .upsert({
-            phone,
-            practice_date: today,
-            category,
-            topic,
-            hours: Number(hours),
-            minutes: Number(minutes),
-            audio_url
-          }, { onConflict: 'phone, practice_date' });
-        if (error) { console.error('Error saving riyaz log:', error); throw error; }
-      }
+      const { error } = await sb
+        .from('daily_riyaz')
+        .upsert({
+          phone,
+          practice_date: today,
+          category,
+          topic,
+          hours: Number(hours),
+          minutes: Number(minutes),
+          audio_url
+        }, { onConflict: 'phone, practice_date' });
+      if (error) { console.error('Error saving riyaz log:', error); throw error; }
     } catch (e) {
-      console.warn('Supabase save failed or not authenticated - saving locally');
+      console.warn('Supabase save failed:', e);
     }
   }
 
@@ -311,16 +296,13 @@ async function getRiyazLogToday(phone) {
   const sb = getSupabase();
   if (sb) {
     try {
-      const { data: { user } } = await sb.auth.getUser();
-      if (user) {
-        const { data, error } = await sb
-          .from('daily_riyaz')
-          .select('*')
-          .eq('phone', phone)
-          .eq('practice_date', today)
-          .maybeSingle();
-        if (!error && data) return data;
-      }
+      const { data, error } = await sb
+        .from('daily_riyaz')
+        .select('*')
+        .eq('phone', phone)
+        .eq('practice_date', today)
+        .maybeSingle();
+      if (!error && data) return data;
     } catch (e) {}
   }
 
@@ -338,15 +320,12 @@ async function saveAchievement(phone, event_date, event_name, song_details, priz
   const sb = getSupabase();
   if (sb) {
     try {
-      const { data: { user } } = await sb.auth.getUser();
-      if (user) {
-        const { error } = await sb
-          .from('competitions_achievements')
-          .insert([{ phone, event_date, event_name, song_details, prize_details }]);
-        if (error) { console.error('Error saving achievement:', error); throw error; }
-      }
+      const { error } = await sb
+        .from('competitions_achievements')
+        .insert([{ phone, event_date, event_name, song_details, prize_details }]);
+      if (error) { console.error('Error saving achievement:', error); throw error; }
     } catch(e) {
-      console.warn('Supabase achievement insert failed or not authenticated - saving locally');
+      console.warn('Supabase achievement insert failed:', e);
     }
   }
 
@@ -362,15 +341,12 @@ async function getAchievements(phone) {
   const sb = getSupabase();
   if (sb) {
     try {
-      const { data: { user } } = await sb.auth.getUser();
-      if (user) {
-        const { data, error } = await sb
-          .from('competitions_achievements')
-          .select('*')
-          .eq('phone', phone)
-          .order('event_date', { ascending: false });
-        if (!error && data) return data;
-      }
+      const { data, error } = await sb
+        .from('competitions_achievements')
+        .select('*')
+        .eq('phone', phone)
+        .order('event_date', { ascending: false });
+      if (!error && data) return data;
     } catch(e) {}
   }
 
@@ -387,21 +363,18 @@ async function getWeeklyRiyazLogs(phone) {
   const sb = getSupabase();
   if (sb) {
     try {
-      const { data: { user } } = await sb.auth.getUser();
-      if (user) {
-        const today = new Date();
-        const pastDate = new Date();
-        pastDate.setDate(today.getDate() - 7);
-        const pastStr = pastDate.toISOString().split('T')[0];
+      const today = new Date();
+      const pastDate = new Date();
+      pastDate.setDate(today.getDate() - 7);
+      const pastStr = pastDate.toISOString().split('T')[0];
 
-        const { data, error } = await sb
-          .from('daily_riyaz')
-          .select('practice_date, hours, minutes')
-          .eq('phone', phone)
-          .gte('practice_date', pastStr)
-          .order('practice_date', { ascending: true });
-        if (!error && data) return data;
-      }
+      const { data, error } = await sb
+        .from('daily_riyaz')
+        .select('practice_date, hours, minutes')
+        .eq('phone', phone)
+        .gte('practice_date', pastStr)
+        .order('practice_date', { ascending: true });
+      if (!error && data) return data;
     } catch(e) {}
   }
 
