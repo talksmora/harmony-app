@@ -201,6 +201,7 @@
     </div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="shared/utils.js"></script>
 <script src="shared/supabase-client.js"></script>
 <script src="shared/app-shell.js"></script>
@@ -286,13 +287,24 @@
     grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--subtitle);">${t.loading}</div>`;
 
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('name');
-      
-      if (error) throw error;
-      allUsers = data || [];
+      const sb = getSupabase();
+      if (sb) {
+        const { data, error } = await sb
+          .from('profiles')
+          .select('*')
+          .order('name');
+        
+        if (error) throw error;
+        allUsers = data || [];
+      } else {
+        allUsers = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key.startsWith('harmonyProfile:')) {
+            try { allUsers.push(JSON.parse(localStorage.getItem(key))); } catch(e) {}
+          }
+        }
+      }
       renderFilters();
       renderGrid();
     } catch(e) {
@@ -303,9 +315,9 @@
   function renderFilters() {
     const counts = {
       all: allUsers.length,
-      owner: allUsers.filter(u => u.role === 'owner').length,
-      admin: allUsers.filter(u => u.role === 'admin').length,
-      student: allUsers.filter(u => u.role === 'student' || !u.role).length
+      owner: allUsers.filter(u => u && u.role === 'owner').length,
+      admin: allUsers.filter(u => u && u.role === 'admin').length,
+      student: allUsers.filter(u => u && (u.role === 'student' || !u.role)).length
     };
 
     const row = document.getElementById('filterRow');
@@ -330,21 +342,21 @@
     grid.innerHTML = '';
 
     let filtered = allUsers.filter(u => {
-      // Filter by search query
+      if (!u) return false;
       const nameMatch = (u.name || '').toLowerCase().includes(query.toLowerCase());
       const phoneMatch = (u.phone || '').toLowerCase().includes(query.toLowerCase());
       return nameMatch || phoneMatch;
     });
 
-    // Filter by role pill
     if (activeRoleFilter !== 'all') {
       filtered = filtered.filter(u => {
-        const uRole = u.role || 'student';
+        const uRole = (u && u.role) || 'student';
         return uRole === activeRoleFilter;
       });
     }
 
     filtered.forEach(u => {
+      if (!u) return;
       const card = document.createElement('div');
       card.className = 'student-card';
 
@@ -353,7 +365,6 @@
       const roleText = t.roles[roleVal] || roleVal;
       const batchText = u.batch || '--';
 
-      // Create profile initial avatar background based on initial ASCII code
       const hue = initial.charCodeAt(0) * 15 % 360;
 
       card.innerHTML = `
@@ -370,37 +381,48 @@
           <span class="detail-val">${batchText}</span>
         </div>
         <div class="actions-row">
-          <button class="act-btn role" id="btnRole-${u.id}">${t.actionRole}</button>
-          <button class="act-btn delete" id="btnDel-${u.id}">${t.actionDelete}</button>
+          <button class="act-btn role" id="btnRole-${u.id || u.phone}">${t.actionRole}</button>
+          <button class="act-btn delete" id="btnDel-${u.id || u.phone}">${t.actionDelete}</button>
         </div>
       `;
 
-      // Role button action
-      card.querySelector(`#btnRole-${u.id}`).onclick = async () => {
+      card.querySelector(`#btnRole-${u.id || u.phone}`).onclick = async () => {
         const nextRole = roleVal === 'student' ? 'admin' : 'student';
-        const { error } = await supabase
-          .from('profiles')
-          .update({ role: nextRole })
-          .eq('id', u.id);
-        
-        if (error) {
-          alert(error.message);
-        } else {
-          loadData();
-        }
-      };
-
-      // Delete button action
-      card.querySelector(`#btnDel-${u.id}`).onclick = async () => {
-        if (confirm(t.confirmDelete)) {
-          const { error } = await supabase
+        const sb = getSupabase();
+        if (sb && u.id) {
+          const { error } = await sb
             .from('profiles')
-            .delete()
+            .update({ role: nextRole })
             .eq('id', u.id);
           
           if (error) {
             alert(error.message);
           } else {
+            loadData();
+          }
+        } else {
+          u.role = nextRole;
+          localStorage.setItem('harmonyProfile:' + u.phone, JSON.stringify(u));
+          loadData();
+        }
+      };
+
+      card.querySelector(`#btnDel-${u.id || u.phone}`).onclick = async () => {
+        if (confirm(t.confirmDelete)) {
+          const sb = getSupabase();
+          if (sb && u.id) {
+            const { error } = await sb
+              .from('profiles')
+              .delete()
+              .eq('id', u.id);
+            
+            if (error) {
+              alert(error.message);
+            } else {
+              loadData();
+            }
+          } else {
+            localStorage.removeItem('harmonyProfile:' + u.phone);
             loadData();
           }
         }
