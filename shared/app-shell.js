@@ -382,31 +382,71 @@ async function initAppShell(options) {
           <div style="font-size: 3.5rem; margin-bottom: 16px;">🔒</div>
           <h2 style="margin: 0 0 12px; color: #e74c3c;">${lockT.title}</h2>
           <p style="font-size: 0.95rem; color: #a6b9c7; line-height: 1.6; margin: 0 0 20px;">${lockT.msg}</p>
-          <button class="lock-btn" id="globalLockPayBtn">${lockT.pay}</button>
+          
+          <div style="margin-bottom: 20px; text-align: left;">
+            <label style="font-size: 0.75rem; color: var(--subtitle); font-weight: 700; display: block; margin-bottom: 6px;">Select Subscription Plan:</label>
+            <select id="globalLockPlanSelect" style="width: 100%; padding: 12px 16px; border-radius: 12px; background: #222; border: 1.5px solid var(--border); color: #fff; font-weight: 700; font-size: 0.95rem; outline: none; cursor: pointer;">
+              <option value="1" data-amount="2000" selected>1 Month / ૧ મહિનો — ₹2,000</option>
+              <option value="3" data-amount="5100">3 Months / ૩ મહિના — ₹5,100 (₹1,700/mo)</option>
+              <option value="6" data-amount="9000">6 Months / ૬ મહિના — ₹9,000 (₹1,500/mo)</option>
+            </select>
+          </div>
+
+          <button class="lock-btn" id="globalLockPayBtn" style="width: 100%;">${lockT.pay}</button>
         </div>
       `;
 
       document.body.appendChild(overlay);
       document.body.style.overflow = 'hidden';
 
-      document.getElementById('globalLockPayBtn').onclick = () => {
+      const planSelect = document.getElementById('globalLockPlanSelect');
+      const payBtn = document.getElementById('globalLockPayBtn');
+
+      planSelect.onchange = () => {
+        const amt = planSelect.options[planSelect.selectedIndex].getAttribute('data-amount');
+        payBtn.textContent = SHELL_LANG === 'en' 
+          ? `💳 Pay Fees Now (₹${parseInt(amt).toLocaleString()})` 
+          : SHELL_LANG === 'hi' 
+            ? `💳 फीस भरें (₹${parseInt(amt).toLocaleString()})` 
+            : `💳 ફી ભરો (₹${parseInt(amt).toLocaleString()})`;
+      };
+
+      payBtn.onclick = () => {
         if (!window.Razorpay) {
           alert('Razorpay is loading, please try again in a second...');
           return;
         }
 
+        const selectedOption = planSelect.options[planSelect.selectedIndex];
+        const monthsCount = parseInt(planSelect.value);
+        const amountRs = parseInt(selectedOption.getAttribute('data-amount'));
+
         const options = {
           key: 'rzp_test_HarmonyMusicKey123',
-          amount: 200000,
+          amount: amountRs * 100,
           currency: 'INR',
           name: 'Harmony Music Class',
-          description: 'Monthly Tuition Fees',
+          description: `${monthsCount} Month Tuition Fees`,
           handler: function(response) {
             localStorage.setItem('harmony_fee_status', 'Paid');
             
+            // Advance due date by selected months count
             const nextDueDate = new Date(dueDate);
-            nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+            nextDueDate.setMonth(nextDueDate.getMonth() + monthsCount);
             localStorage.setItem('harmony_fee_due_date', nextDueDate.toISOString().split('T')[0]);
+
+            // Save to payment history
+            const todayStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            const newPayment = {
+              date: todayStr,
+              amount: `₹${amountRs.toLocaleString()}`,
+              method: 'UPI (Razorpay)',
+              status: 'Paid',
+              receiptNo: '#HM-' + Math.floor(1000 + Math.random() * 9000)
+            };
+            const localPayList = JSON.parse(localStorage.getItem('harmony_payments_list') || '[]');
+            localPayList.unshift(newPayment);
+            localStorage.setItem('harmony_payments_list', JSON.stringify(localPayList));
 
             alert(SHELL_LANG === 'en' ? 'Payment Successful! App Unlocked.' : SHELL_LANG === 'hi' ? 'भुगतान सफल! ऐप अनलॉक हो गया।' : 'ચુકવણી સફળ! એપ અનલોક થઈ ગઈ છે.');
             window.location.reload();

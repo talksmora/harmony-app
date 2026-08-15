@@ -123,9 +123,16 @@
         <div>
           <h3 id="valPlanName" style="margin:0 0 6px;">Monthly Music Course</h3>
           <p style="margin:0; font-size:0.8rem; color:var(--subtitle);"><span id="lblDueDate">Next Due:</span> <strong id="valDueDate">10 Sept 2026</strong></p>
+          <div id="planSelectContainer" style="margin-top: 12px; display: none;">
+            <select id="feePlanSelect" style="padding: 8px 12px; border-radius: 8px; background: #222; border: 1.5px solid var(--border); color: #fff; font-weight: 700; font-size: 0.85rem; outline: none; cursor: pointer;">
+              <option value="1" data-amount="2000" selected>1 Month — ₹2,000</option>
+              <option value="3" data-amount="5100">3 Months — ₹5,100</option>
+              <option value="6" data-amount="9000">6 Months — ₹9,000</option>
+            </select>
+          </div>
         </div>
-        <div style="text-align:right;">
-          <div style="font-size:1.4rem; font-weight:900; color:var(--accent); margin-bottom:4px;">₹2,000 / month</div>
+        <div style="text-align:right; display: flex; flex-direction: column; align-items: flex-end;">
+          <div id="valAmountText" style="font-size:1.4rem; font-weight:900; color:var(--accent); margin-bottom:4px;">₹2,000</div>
           <span class="status-badge" id="valStatus">Paid</span>
         </div>
       </div>
@@ -230,6 +237,9 @@
 
   const valDueDate = document.getElementById('valDueDate');
   const valStatus = document.getElementById('valStatus');
+  const planSelectContainer = document.getElementById('planSelectContainer');
+  const feePlanSelect = document.getElementById('feePlanSelect');
+  const valAmountText = document.getElementById('valAmountText');
 
   valDueDate.textContent = dueDateStr;
 
@@ -237,14 +247,28 @@
     valStatus.textContent = t.paid;
     valStatus.className = 'status-badge';
     valStatus.style.cursor = 'default';
+    planSelectContainer.style.display = 'none';
+    const paidAmount = localStorage.getItem('harmony_last_paid_amount') || '2,000';
+    valAmountText.textContent = `₹${paidAmount}`;
   } else {
-    // Show active Pay Now button badge!
-    valStatus.textContent = lang === 'en' ? '💳 Pay Now (₹2,000)' : lang === 'hi' ? '💳 भुगतान करें (₹2,000)' : '💳 ચૂકવણી કરો (₹2,000)';
+    planSelectContainer.style.display = 'block';
+    const updateAmountText = () => {
+      const amt = feePlanSelect.options[feePlanSelect.selectedIndex].getAttribute('data-amount');
+      valAmountText.textContent = `₹${parseInt(amt).toLocaleString()}`;
+      valStatus.textContent = lang === 'en' 
+        ? `💳 Pay Now (₹${parseInt(amt).toLocaleString()})` 
+        : lang === 'hi' 
+          ? `💳 भुगतान करें (₹${parseInt(amt).toLocaleString()})` 
+          : `💳 ચૂકવણી કરો (₹${parseInt(amt).toLocaleString()})`;
+    };
+    
+    feePlanSelect.onchange = updateAmountText;
+    updateAmountText();
+
     valStatus.className = 'status-badge pending';
     valStatus.style.cursor = 'pointer';
 
     valStatus.onclick = () => {
-      // Trigger Razorpay
       if (!window.Razorpay) {
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -257,20 +281,25 @@
   }
 
   function startRazorpay() {
+    const selectedOption = feePlanSelect.options[feePlanSelect.selectedIndex];
+    const monthsCount = parseInt(feePlanSelect.value);
+    const amountRs = parseInt(selectedOption.getAttribute('data-amount'));
+
     const options = {
       key: 'rzp_test_HarmonyMusicKey123',
-      amount: 200000,
+      amount: amountRs * 100,
       currency: 'INR',
       name: 'Harmony Music Class',
-      description: 'Monthly Tuition Fees',
+      description: `${monthsCount} Month Tuition Fees`,
       handler: function(response) {
         localStorage.setItem('harmony_fee_status', 'Paid');
+        localStorage.setItem('harmony_last_paid_amount', amountRs.toLocaleString());
         
         // Push a new payment to list
         const todayStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
         const newPayment = {
           date: todayStr,
-          amount: '₹2,000',
+          amount: `₹${amountRs.toLocaleString()}`,
           method: 'UPI (Razorpay)',
           status: 'Paid',
           receiptNo: '#HM-' + Math.floor(1000 + Math.random() * 9000)
@@ -279,9 +308,9 @@
         localPay.unshift(newPayment);
         localStorage.setItem('harmony_payments_list', JSON.stringify(localPay));
 
-        // Advance due date
+        // Advance due date by selected months count
         const dDate = new Date(dueDateStr);
-        dDate.setMonth(dDate.getMonth() + 1);
+        dDate.setMonth(dDate.getMonth() + monthsCount);
         localStorage.setItem('harmony_fee_due_date', dDate.toISOString().split('T')[0]);
 
         alert(lang === 'en' ? 'Payment Successful! App Unlocked.' : lang === 'hi' ? 'भुगतान सफल! ऐप अनलॉक हो गया।' : 'ચુકવણી સફળ! એપ અનલોક થઈ ગઈ છે.');
