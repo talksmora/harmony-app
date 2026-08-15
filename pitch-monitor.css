@@ -1,0 +1,411 @@
+/* ============================================================
+   Vocal Pitch Monitor — page-specific styles
+   Theme variables are in shared/theme.css (single source).
+   ============================================================ */
+
+body[data-page="pitch-monitor"] {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0px 60px;
+}
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.onboarding-card {
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 18px;
+  max-width: 420px;
+  width: 100%;
+  padding: 24px 20px 20px;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+.onboarding-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--subtitle);
+  cursor: pointer;
+}
+.onboarding-step-num {
+  font-size: 0.75rem;
+  color: var(--subtitle);
+  margin-bottom: 8px;
+  text-align: center;
+}
+.onboarding-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.onboarding-body {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 20px;
+  text-align: center;
+  white-space: pre-line;
+}
+.onboarding-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.onboarding-nav-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.onboarding-skip-btn {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.install-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+  padding: 0 16px;
+}
+.install-btn {
+  background: #000;
+  color: #f4c542;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+.brand-text {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--text);
+  letter-spacing: 0.3px;
+}
+h1 {
+  font-size: 1.6rem;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.subtitle {
+  color: var(--subtitle);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+  text-align: center;
+  padding: 0 16px;
+}
+.tonic-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: var(--text);
+  padding: 0 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.tonic-selector select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.85rem;
+  background: #fff;
+}
+.instrument-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: var(--text);
+  padding: 0 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.instrument-btns {
+  display: flex;
+  gap: 8px;
+}
+.inst-btn {
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.inst-btn.active {
+  background: #e74c3c;
+  border-color: #e74c3c;
+  color: #fff;
+  font-weight: 600;
+}
+.top-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 16px;
+}
+.pitch-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card-bg);
+  border-radius: 30px;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.mic-icon { font-size: 1.2rem; }
+#startBtn {
+  background: #fff;
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 30px;
+  cursor: pointer;
+}
+#startBtn.listening {
+  background: #e74c3c;
+  color: #fff;
+}
+.container {
+  width: 100%;
+  max-width: 900px;
+}
+/* Cents meter bar */
+.meter-bar {
+  position: relative;
+  display: flex;
+  height: 70px;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+.meter-bar .zone {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: #555;
+  padding-bottom: 6px;
+}
+.z-flat, .z-sharp { background: #d4d4d4; }
+.z-12 { background: #d9d9d9; }
+.z-5 { background: #dcefe6; }
+.z-center { background: #cdeee0; }
+.meter-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #e74c3c;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: left 0.08s linear;
+}
+/* Piano */
+.piano-wrap {
+  position: relative;
+  width: 100%;
+  border-bottom: 1px solid #ddd;
+}
+.piano {
+  position: relative;
+  height: 130px;
+  width: 100%;
+}
+.key {
+  position: absolute;
+  top: 0;
+  background: var(--key-white-bg);
+  border: 1px solid var(--key-white-border);
+  border-top: none;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+}
+.key.white.playing { background: #f6d6c9; }
+.key.black {
+  background: var(--key-black-bg);
+  z-index: 2;
+  border-radius: 0 0 2px 2px;
+}
+.key.black.playing { background: #e74c3c; }
+.key.sa-key { background: #fff3d6; }
+.key.black.sa-key { background: #7a5a1a; }
+.key-label {
+  position: absolute;
+  bottom: 6px;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 7px;
+  line-height: 1.4;
+  color: #777;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: visible;
+}
+.key-label.black-label {
+  color: #ddd;
+  bottom: 6px;
+  font-size: 6.5px;
+}
+.sargam-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+.sargam-letter.sargam-komal {
+  border-bottom: 1.2px solid currentColor;
+  padding-bottom: 0.5px;
+}
+/* .sargam-letter.sargam-tivra — no extra style needed; તીવ્ર uses apostrophe (મ') */
+.sargam-dots {
+  font-size: 0.75em;
+  letter-spacing: 1px;
+  line-height: 0.6;
+}
+.sargam-dots-above { margin-bottom: 1px; }
+.sargam-dots-below { margin-top: 1px; }
+.piano-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #e74c3c;
+  transition: left 0.08s linear;
+  pointer-events: none;
+  display: none;
+  z-index: 3;
+}
+.trail-wrap {
+  width: 100%;
+  height: 16px;
+  background: var(--history-bg);
+  position: relative;
+  border-bottom: 1px solid #ddd;
+}
+canvas#trailCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* Scrolling history */
+.history-wrap {
+  width: 100%;
+  height: 260px;
+  overflow: hidden;
+  position: relative;
+  background: var(--history-bg);
+}
+canvas#historyCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.tanpura-panel {
+  padding: 20px 16px;
+}
+.tanpura-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.tanpura-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tanpura-row label {
+  font-size: 0.85rem;
+  color: var(--text);
+  font-weight: 600;
+}
+.tanpura-row select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+.tanpura-row input[type="range"] {
+  width: 100%;
+}
+.tanpura-play-btn {
+  margin-top: 10px;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tanpura-play-btn.playing {
+  background: #27ae60;
+}
+.status {
+  color: var(--status-color);
+  font-size: 0.8rem;
+  margin-top: 16px;
+  text-align: center;
+  padding: 0 16px;
+}
+.footer-note {
+  color: var(--footer-color);
+  font-size: 0.72rem;
+  margin-top: 26px;
+  text-align: center;
+  max-width: 420px;
+  padding: 0 16px;
+}

@@ -1,0 +1,6 @@
+node_modules/
+.agents/
+.gemini/
+*.mp4
+*.zip
+*.log

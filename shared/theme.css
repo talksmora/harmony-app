@@ -1,0 +1,101 @@
+/* ============================================================
+   Harmony Music — Global Theme System
+   Single source of truth for ALL pages. No page should
+   define its own :root / body.dark-theme variables.
+   ============================================================ */
+
+:root {
+  /* ---- Core ---- */
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --text: #1c1e21;
+  --subtitle: #666666;
+  --card-bg: #ffffff;
+  --border: #e2e4e8;
+  --shadow: 0 4px 16px rgba(0,0,0,0.08);
+
+  /* ---- Accent ---- */
+  --accent: #e74c3c;
+  --accent-gold: #f4c542;
+  --accent-green: #27ae60;
+
+  /* ---- Sidebar ---- */
+  --sidebar-bg: #14161a;
+  --sidebar-text: #e8e8e8;
+  --sidebar-active: #e74c3c;
+
+  /* ---- Pitch Monitor specific ---- */
+  --key-white-bg: #ffffff;
+  --key-white-border: #999999;
+  --key-black-bg: #222222;
+  --history-bg: #fbfaf8;
+  --grid-line: #e4e4e2;
+  --status-color: #888888;
+  --footer-color: #999999;
+
+  /* ---- Progress Card specific ---- */
+  --progress-hero: linear-gradient(160deg, #6d2332 0%, #4a1622 100%);
+  --progress-hero-text: #f6ecd9;
+  --progress-eyebrow: #d9a83f;
+  --progress-accent: #6d2332;
+  --progress-accent-deep: #4a1622;
+  --progress-brass: #b8862f;
+  --progress-brass-bright: #d9a83f;
+  --progress-green: #3d5c4a;
+  --star-empty: #9a8b6d;
+  --star-empty-sub: #a08f6c;
+  --muted: #7a6a4f;
+}
+
+body.dark-theme {
+  /* ---- Core ---- */
+  --bg: #0f1114;
+  --surface: #1a1d22;
+  --text: #eaeaea;
+  --subtitle: #a8a8a8;
+  --card-bg: #1e2126;
+  --border: #2e3138;
+  --shadow: 0 4px 16px rgba(0,0,0,0.4);
+
+  /* ---- Accent ---- */
+  --accent: #e74c3c;
+  --accent-gold: #f4c542;
+  --accent-green: #2ecc71;
+
+  /* ---- Sidebar ---- */
+  --sidebar-bg: #000000;
+  --sidebar-text: #dcdcdc;
+  --sidebar-active: #e74c3c;
+
+  /* ---- Pitch Monitor specific ---- */
+  --key-white-bg: #d8d8d8;
+  --key-white-border: #555555;
+  --key-black-bg: #000000;
+  --history-bg: #1b1d22;
+  --grid-line: #33363c;
+  --status-color: #a0a0a0;
+  --footer-color: #888888;
+
+  /* ---- Progress Card specific ---- */
+  --progress-hero: linear-gradient(160deg, #c9576e 0%, #e8899a 100%);
+  --progress-hero-text: #1a1210;
+  --progress-eyebrow: #f0c675;
+  --progress-accent: #c9576e;
+  --progress-accent-deep: #e8899a;
+  --progress-brass: #d9a83f;
+  --progress-brass-bright: #f0c675;
+  --progress-green: #5fae86;
+  --star-empty: #6b5f4e;
+  --star-empty-sub: #7a6d58;
+  --muted: #a89a80;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+a { color: inherit; }

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Harmony Music</title>
+  <link rel="stylesheet" href="shared/theme.css">
+  <link rel="stylesheet" href="shared/app-shell.css">
+  <link rel="stylesheet" href="shared/components.css">
+  <style>
+    .profile-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 600px;
+      margin: 20px auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .profile-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .avatar-wrapper {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid var(--accent);
+      cursor: pointer;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .avatar-wrapper:hover {
+      transform: scale(1.05);
+      border-color: var(--accent-green);
+    }
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .avatar-placeholder {
+      font-size: 2.5rem;
+    }
+    .avatar-selector {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin: 15px 0 25px;
+      justify-items: center;
+    }
+    .avatar-option {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      background: var(--bg-body);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .avatar-option.selected {
+      border-color: var(--accent);
+      background: var(--accent-alpha, rgba(231, 76, 60, 0.1));
+      transform: scale(1.1);
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .form-group input[type="text"],
+    .form-group input[type="url"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-body);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus {
+      border-color: var(--accent);
+    }
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .category-item {
+      display: flex;
+      align-items: center;
+      background: var(--bg-body);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .category-item input {
+      margin-right: 10px;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+    }
+    .category-item:hover {
+      border-color: var(--accent);
+    }
+    .save-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 15px;
+    }
+    .save-btn:hover {
+      background: var(--accent-hover, #c0392b);
+    }
+    .save-btn:active {
+      transform: scale(0.98);
+    }
+    .status-msg {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .status-msg.ok { color: var(--accent-green); }
+    .status-msg.error { color: var(--accent); }
+    @media (max-width: 480px) {
+      .profile-card {
+        padding: 16px;
+        margin: 10px;
+        border-radius: 8px;
+      }
+      .avatar-selector {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+      .category-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body data-page="profile">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="avatar-wrapper" id="avatarWrapper">
+          <span class="avatar-placeholder" id="avatarPreview">👤</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--subtitle); margin-top: 8px;" id="lblSelectAvatar">અવતાર પસંદ કરો અથવા નીચે ફોટો લિંક નાખો</p>
+      </div>
+
+      <div class="avatar-selector" id="avatarSelector">
+        <div class="avatar-option" data-emoji="🎤">🎤</div>
+        <div class="avatar-option" data-emoji="🎸">🎸</div>
+        <div class="avatar-option" data-emoji="🎹">🎹</div>
+        <div class="avatar-option" data-emoji="🥁">🥁</div>
+        <div class="avatar-option" data-emoji="🎼">🎼</div>
+      </div>
+
+      <div class="form-group">
+        <label id="lblPhotoUpload" style="display:block; margin-bottom:6px; font-weight:600; color:var(--text);">પ્રોફાઇલ ફોટો (Profile Photo)</label>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <button type="button" id="uploadTriggerBtn" class="pill-btn" style="background:var(--accent); color:#fff; border:none; padding:10px 16px; border-radius:20px; font-weight:600; cursor:pointer;">📁 ફોટો અપલોડ કરો (JPG/PNG)</button>
+          <input type="file" id="photoFileInput" accept="image/jpeg,image/png" style="display:none;">
+          <span id="photoFileName" style="font-size:0.85rem; color:var(--subtitle); word-break:break-all;"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="nameInput" id="lblName">વિદ્યાર્થીનું નામ (Full Name)</label>
+        <input type="text" id="nameInput" placeholder="તમારું પૂરું નામ લખો">
+      </div>
+
+      <div class="form-group">
+        <label for="batchInput" id="lblBatch">બેચ અને સમય (Batch & Time)</label>
+        <input type="text" id="batchInput" placeholder="દા.ત. 9-11 (Morning)">
+      </div>
+
+      <div class="form-group">
+        <label id="lblCategories">સંગીત શ્રેણી / વાદ્ય (Category / Instrument)</label>
+        <div class="category-grid">
+          <label class="category-item">
+            <input type="checkbox" value="Vocal">
+            <span id="catVocal">Vocal (ગાયકી)</span>
+          </label>
+          <label class="category-item">
+            <input type="checkbox" value="Guitar">
+            <span id="catGuitar">Guitar (ગીતાર)</span>
+          </label>
+          <label class="category-item">
+            <input type="checkbox" value="Piano">
+            <span id="catPiano">Piano (પિયાનો)</span>
+          </label>
+          <label class="category-item">
+            <input type="checkbox" value="Tabla">
+            <span id="catTabla">Tabla (તબલા)</span>
+          </label>
+          <label class="category-item">
+            <input type="checkbox" value="Harmonium">
+            <span id="catHarmonium">Harmonium (હાર્મોનિયમ)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="ragaInput" id="lblRaga">હાલનો રાગ / અભ્યાસનો વિષય (Current Raga / Focus)</label>
+        <input type="text" id="ragaInput" placeholder="દા.ત. રાગ યમન, અલંકાર">
+      </div>
+
+      <button class="save-btn" id="saveProfileBtn">પ્રોફાઇલ સેવ કરો</button>
+      <div class="status-msg" id="statusMsg"></div>
+    </div>
+
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+  const PROFILE_TEXT = {
+    gu: {
+      title: 'મારી પ્રોફાઇલ',
+      lblSelectAvatar: 'અવતાર પસંદ કરો અથવા ફોટો અપલોડ કરો',
+      lblPhotoUpload: 'પ્રોફાઇલ ફોટો (Profile Photo)',
+      btnPhotoUpload: '📁 ફોટો અપલોડ કરો (JPG/PNG)',
+      lblName: 'વિદ્યાર્થીનું નામ (Full Name)',
+      lblBatch: 'બેચ અને સમય (Batch & Time)',
+      lblCategories: 'સંગીત શ્રેણી / વાદ્ય (Category / Instrument)',
+      lblRaga: 'હાલનો રાગ / અભ્યાસનો વિષય (Current Raga / Focus)',
+      btnSave: 'પ્રોફાઇલ સેવ કરો',
+      errEmpty: 'નામ અને બેચ લખવી ફરજિયાત છે!',
+      saveOk: 'પ્રોફાઇલ સફળતાપૂર્વક અપડેટ થઈ ગઈ છે! ✅',
+      saveErr: 'પ્રોફાઇલ સેવ કરવામાં ભૂલ આવી છે.',
+      placeholderName: 'તમારું પૂરું નામ લખો',
+      placeholderBatch: 'દા.ત. 9-11 (Morning)',
+      placeholderRaga: 'દા.ત. રાગ યમન, અલંકાર'
+    },
+    hi: {
+      title: 'मेरी प्रोफाइल',
+      lblSelectAvatar: 'अवतार चुनें या फोटो अपलोड करें',
+      lblPhotoUpload: 'प्रोफ़ाइल फ़ोटो (Profile Photo)',
+      btnPhotoUpload: '📁 फोटो अपलोड करें (JPG/PNG)',
+      lblName: 'छात्र का नाम (Full Name)',
+      lblBatch: 'बैच और समय (Batch & Time)',
+      lblCategories: 'संगीत श्रेणी / वाद्य (Category / Instrument)',
+      lblRaga: 'वर्तमान राग / अभ्यास का विषय (Current Raga / Focus)',
+      btnSave: 'प्रोफाइल सहेजें',
+      errEmpty: 'नाम और बैच लिखना अनिवार्य है!',
+      saveOk: 'Profile updated successfully! ✅',
+      saveErr: 'Error saving profile.',
+      placeholderName: 'अपना पूरा नाम लिखें',
+      placeholderBatch: 'जैसे 9-11 (Morning)',
+      placeholderRaga: 'जैसे राग यमन, अलंकार'
+    },
+    en: {
+      title: 'My Profile',
+      lblSelectAvatar: 'Select avatar or upload photo below',
+      lblPhotoUpload: 'Profile Photo (Profile Photo)',
+      btnPhotoUpload: '📁 Upload Photo (JPG/PNG)',
+      lblName: 'Student Name (Full Name)',
+      lblBatch: 'Batch & Time (Batch & Time)',
+      lblCategories: 'Music Category / Instrument (Category / Instrument)',
+      lblRaga: 'Current Raga / Focus (Current Raga / Focus)',
+      btnSave: 'Save Profile',
+      errEmpty: 'Name and Batch are required!',
+      saveOk: 'Profile updated successfully! ✅',
+      saveErr: 'Error saving profile.',
+      placeholderName: 'Enter your full name',
+      placeholderBatch: 'e.g. 9-11 (Morning)',
+      placeholderRaga: 'e.g. Raga Yaman, Alankars'
+    }
+  };
+
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+  const t = PROFILE_TEXT[lang] || PROFILE_TEXT.gu;
+
+  function applyPageTranslations() {
+    document.getElementById('lblSelectAvatar').textContent = t.lblSelectAvatar;
+    document.getElementById('lblPhotoUpload').textContent = t.lblPhotoUpload;
+    document.getElementById('uploadTriggerBtn').textContent = t.btnPhotoUpload;
+    document.getElementById('lblName').textContent = t.lblName;
+    document.getElementById('lblBatch').textContent = t.lblBatch;
+    document.getElementById('lblCategories').textContent = t.lblCategories;
+    document.getElementById('lblRaga').textContent = t.lblRaga;
+    document.getElementById('saveProfileBtn').textContent = t.btnSave;
+    
+    // Set localized input placeholders
+    document.getElementById('nameInput').placeholder = t.placeholderName;
+    document.getElementById('batchInput').placeholder = t.placeholderBatch;
+    document.getElementById('ragaInput').placeholder = t.placeholderRaga;
+  }
+
+  applyPageTranslations();
+
+  const avatarPreview = document.getElementById('avatarPreview');
+  const photoFileInput = document.getElementById('photoFileInput');
+  const uploadTriggerBtn = document.getElementById('uploadTriggerBtn');
+  const photoFileName = document.getElementById('photoFileName');
+  const nameInput = document.getElementById('nameInput');
+  const batchInput = document.getElementById('batchInput');
+  const ragaInput = document.getElementById('ragaInput');
+  const statusMsg = document.getElementById('statusMsg');
+  const checkboxes = document.querySelectorAll('.category-grid input[type="checkbox"]');
+  let selectedAvatar = '👤';
+
+  // Handle Avatar Selection
+  document.querySelectorAll('.avatar-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      selectedAvatar = opt.dataset.emoji;
+      avatarPreview.innerHTML = selectedAvatar;
+      photoFileName.textContent = ''; // Clear custom photo filename if avatar selected
+    });
+  });
+
+  // Custom photo file upload listener
+  uploadTriggerBtn.addEventListener('click', () => {
+    photoFileInput.click();
+  });
+
+  photoFileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check if the file is JPG or PNG
+    const fileType = file.type;
+    if (fileType !== 'image/jpeg' && fileType !== 'image/png') {
+      alert(lang === 'en' ? 'Only JPG and PNG files are allowed!' : lang === 'hi' ? 'केवल JPG और PNG फाइलें ही स्वीकृत हैं!' : 'ફક્ત JPG અને PNG ફાઇલો જ અપલોડ કરી શકાશે!');
+      photoFileInput.value = '';
+      return;
+    }
+
+    photoFileName.textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        // Resize image to max 200px width/height using Canvas
+        const canvas = document.createElement('canvas');
+        const maxDim = 200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        selectedAvatar = dataUrl;
+        avatarPreview.innerHTML = `<img src="${dataUrl}" class="avatar-img">`;
+        
+        // Deselect any selected emojis
+        document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Fetch Session
+  const session = (typeof readMockSession === 'function') ? readMockSession() : null;
+
+  async function loadProfile() {
+    if (session && session.phone) {
+      const sb = getSupabase();
+      const { data: { user } } = sb ? await sb.auth.getUser() : { data: {} };
+      
+      let profileData = null;
+      if (user) {
+        profileData = await getProfile(session.phone);
+      }
+      
+      if (!profileData) {
+        // Fallback to local cache
+        try {
+          const raw = localStorage.getItem('harmonyProfile:' + session.phone);
+          if (raw) profileData = JSON.parse(raw);
+        } catch(e) {}
+      }
+
+      if (profileData) {
+        nameInput.value = profileData.name || '';
+        batchInput.value = profileData.batch || '';
+        ragaInput.value = profileData.raga || '';
+        
+        const photo = profileData.photo_url || '';
+        if (photo) {
+          selectedAvatar = photo;
+          if (photo.startsWith('http') || photo.startsWith('data:image')) {
+            photoFileName.textContent = lang === 'en' ? 'Uploaded Photo' : lang === 'hi' ? 'अपलोड किया गया फोटो' : 'અપલોડ કરેલ ફોટો';
+            avatarPreview.innerHTML = `<img src="${photo}" class="avatar-img">`;
+          } else {
+            avatarPreview.innerHTML = photo;
+            document.querySelectorAll('.avatar-option').forEach(opt => {
+              if (opt.dataset.emoji === photo) opt.classList.add('selected');
+            });
+          }
+        }
+
+        // Set categories checkboxes
+        const cats = profileData.category ? profileData.category.split(',') : [];
+        checkboxes.forEach(cb => {
+          cb.checked = cats.includes(cb.value);
+        });
+      }
+    }
+  }
+
+  document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+    statusMsg.textContent = '';
+    statusMsg.className = 'status-msg';
+
+    const name = nameInput.value.trim();
+    const batch = batchInput.value.trim();
+    const raga = ragaInput.value.trim();
+    const photoUrl = selectedAvatar;
+
+    const selectedCats = [];
+    checkboxes.forEach(cb => {
+      if (cb.checked) selectedCats.push(cb.value);
+    });
+    const categoryStr = selectedCats.join(',');
+
+    if (!name || !batch) {
+      statusMsg.textContent = t.errEmpty;
+      statusMsg.classList.add('error');
+      return;
+    }
+
+    if (session && session.phone) {
+      try {
+        const sb = getSupabase();
+        const { data: { user } } = sb ? await sb.auth.getUser() : { data: {} };
+        
+        if (user) {
+          await upsertProfile(session.phone, name, batch, photoUrl, categoryStr, raga);
+        } else {
+          console.warn('Supabase not authenticated - saving locally only');
+        }
+
+        // Save local cache
+        const profileData = { name, batch, phone: session.phone, photo_url: photoUrl, category: categoryStr, raga };
+        localStorage.setItem('harmonyProfile:' + session.phone, JSON.stringify(profileData));
+
+        statusMsg.textContent = t.saveOk;
+        statusMsg.classList.add('ok');
+
+        // If forced to complete, redirect back to dashboard after 1.5 seconds
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('forceComplete') === '1') {
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1500);
+        }
+
+        // Dynamically update sidebar user footer
+        const userLine = document.getElementById('sidebarUserLine');
+        if (userLine) {
+          const photoStr = photoUrl ? (photoUrl.startsWith('http') ? `<img src="${photoUrl}" style="width:24px; height:24px; border-radius:50%; margin-right:8px; object-fit:cover; vertical-align:middle;">` : `<span style="margin-right:8px; vertical-align:middle;">${photoUrl}</span>`) : '👤 ';
+          userLine.innerHTML = `${photoStr}${name}`;
+        }
+      } catch(err) {
+        console.error('Error saving profile:', err);
+        statusMsg.textContent = t.saveErr + ' (' + err.message + ')';
+        statusMsg.classList.add('error');
+      }
+    }
+  });
+
+  loadProfile();
+  initAppShell({ title: t.title });
+</script>
+</body>
+</html>

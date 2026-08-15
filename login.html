@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<style>
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .login-card {
+    position: relative;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 26px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .lang-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+  }
+  .lang-btn:hover {
+    border-color: #e74c3c;
+    transform: scale(1.05);
+  }
+  .login-card img { width: 64px; height: 64px; border-radius: 50%; margin-bottom: 10px; }
+  .login-card h1 { font-size: 1.3rem; margin: 0 0 4px; }
+  .login-card p { color: var(--subtitle); font-size: 0.85rem; margin: 0 0 22px; }
+  .field { text-align: left; margin-bottom: 14px; }
+  .field label { font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 5px; }
+  .field input {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+  .primary-btn {
+    width: 100%;
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 13px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .primary-btn:disabled { opacity: 0.6; }
+  .msg { font-size: 0.8rem; margin-top: 12px; min-height: 18px; }
+  .msg.error { color: #e74c3c; }
+  .msg.ok { color: #27ae60; }
+  .dev-note {
+    margin-top: 22px;
+    font-size: 0.72rem;
+    color: var(--subtitle);
+    border-top: 1px dashed var(--border);
+    padding-top: 12px;
+    text-align: left;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <div class="login-card">
+    <button class="lang-btn" id="loginLangBtn" title="Language">🌐</button>
+    <img src="icon-192.png" alt="Harmony Music">
+    <h1>Harmony Music</h1>
+    <p id="loginDesc">તમારો મોબાઈલ નંબર દાખલ કરીને લોગિન કરો</p>
+
+    <div id="phoneStep">
+      <div class="field">
+        <label for="phoneInput" id="labelPhone">Mobile Number</label>
+        <input id="phoneInput" type="tel" placeholder="+91 9XXXXXXXXX" autocomplete="tel">
+      </div>
+      <button class="primary-btn" id="sendOtpBtn">OTP મોકલો</button>
+    </div>
+
+    <div id="otpStep" style="display:none;">
+      <div class="field">
+        <label for="otpInput" id="labelOtp">OTP</label>
+        <input id="otpInput" type="text" inputmode="numeric" placeholder="6-digit code" maxlength="6">
+      </div>
+      <button class="primary-btn" id="verifyOtpBtn">Verify & Login</button>
+    </div>
+
+    <div class="msg" id="loginMsg"></div>
+
+    <div class="dev-note">
+      <strong>Dev note:</strong> Supabase Phone Auth હજુ connect નથી થયું. અત્યારે "OTP મોકલો" દબાવતાં mock login થઈ જશે (કોઈ પણ number/OTP ચાલશે) જેથી app નું UI test કરી શકાય.
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script>
+  const LOGIN_TEXT = {
+    gu: {
+      desc: 'તમારો મોબાઈલ નંબર દાખલ કરીને લોગિન કરો',
+      labelPhone: 'મોબાઈલ નંબર',
+      sendOtp: 'OTP મોકલો',
+      labelOtp: 'OTP Code',
+      verifyBtn: 'Verify & Login',
+      errPhoneEmpty: 'Mobile number લખો',
+      errPhoneInvalid: 'Valid number લખો (E.164: +919876543210)',
+      otpSent: 'OTP મોકલાયો ✅',
+      mockOtpSent: '(Mock mode) OTP મોકલાયો — કોઈ પણ 6 digit code enter કરો',
+      errOtpEmpty: 'OTP લખો',
+      errOtpFormat: '6-અંકી ન્યુમેરિક OTP લખો',
+      devNote: '<strong>Dev note:</strong> Supabase Phone Auth હજુ connect નથી થયું. અત્યારે "OTP મોકલો" દબાવતાં mock login થઈ જશે (કોઈ પણ number/OTP ચાલશે) જેથી app નું UI test કરી શકાય.'
+    },
+    hi: {
+      desc: 'अपना मोबाइल नंबर दर्ज करके लॉगिन करें',
+      labelPhone: 'मोबाइल नंबर',
+      sendOtp: 'OTP भेजें',
+      labelOtp: 'OTP कोड',
+      verifyBtn: 'सत्यापित करें और लॉगिन करें',
+      errPhoneEmpty: 'मोबाइल नंबर दर्ज करें',
+      errPhoneInvalid: 'मान्य नंबर दर्ज करें (E.164: +919876543210)',
+      otpSent: 'OTP भेजा गया ✅',
+      mockOtpSent: '(Mock mode) OTP भेजा गया — कोई भी 6 digit code दर्ज करें',
+      errOtpEmpty: 'OTP दर्ज करें',
+      errOtpFormat: '6-अंकीय न्यूमेरिक OTP दर्ज करें',
+      devNote: '<strong>Dev note:</strong> Supabase Phone Auth अभी कनेक्ट नहीं हुआ है। अभी "OTP भेजें" दबाने पर mock login हो जाएगा (कोई भी नंबर/OTP चलेगा) ताकि ऐप का UI टेस्ट किया जा सके।'
+    },
+    en: {
+      desc: 'Enter your mobile number to log in',
+      labelPhone: 'Mobile Number',
+      sendOtp: 'Send OTP',
+      labelOtp: 'OTP Code',
+      verifyBtn: 'Verify & Login',
+      errPhoneEmpty: 'Please enter your mobile number',
+      errPhoneInvalid: 'Please enter a valid E.164 phone number (+919876543210)',
+      otpSent: 'OTP Sent ✅',
+      mockOtpSent: '(Mock mode) OTP Sent — enter any 6 digit code',
+      errOtpEmpty: 'Please enter the OTP',
+      errOtpFormat: 'Please enter a 6-digit numeric OTP',
+      devNote: '<strong>Dev note:</strong> Supabase Phone Auth is not connected yet. Click "Send OTP" to use mock login (any number/OTP will work) to test the app UI.'
+    }
+  };
+
+  let currentLang = (() => {
+    try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch (e) { return 'gu'; }
+  })();
+
+  function applyTranslations() {
+    const t = LOGIN_TEXT[currentLang] || LOGIN_TEXT.gu;
+    document.getElementById('loginDesc').textContent = t.desc;
+    document.getElementById('labelPhone').textContent = t.labelPhone;
+    document.getElementById('sendOtpBtn').textContent = t.sendOtp;
+    document.getElementById('labelOtp').textContent = t.labelOtp;
+    document.getElementById('verifyOtpBtn').textContent = t.verifyBtn;
+    document.querySelector('.dev-note').innerHTML = t.devNote;
+  }
+
+  document.getElementById('loginLangBtn').addEventListener('click', () => {
+    const cycle = ['gu', 'hi', 'en'];
+    const idx = cycle.indexOf(currentLang);
+    currentLang = cycle[(idx + 1) % cycle.length];
+    try { localStorage.setItem('harmonyAppLang', currentLang); } catch (e) {}
+    applyTranslations();
+  });
+
+  applyTranslations();
+
+  const phoneStep = document.getElementById('phoneStep');
+  const otpStep = document.getElementById('otpStep');
+  const phoneInput = document.getElementById('phoneInput');
+  const otpInput = document.getElementById('otpInput');
+  const msg = document.getElementById('loginMsg');
+  let pendingPhone = '';
+
+  function setMsg(text, type) {
+    msg.textContent = text;
+    msg.className = 'msg' + (type ? ' ' + type : '');
+  }
+
+  document.getElementById('sendOtpBtn').addEventListener('click', async () => {
+    const phone = phoneInput.value.trim();
+    const t = LOGIN_TEXT[currentLang] || LOGIN_TEXT.gu;
+    if (!phone) { setMsg(t.errPhoneEmpty, 'error'); return; }
+    // E.164 format validation
+    const cleaned = phone.replace(/\s/g, '');
+    const phoneRegex = /^\+?[1-9]\d{6,14}$/;
+    if (!phoneRegex.test(cleaned)) {
+      setMsg(t.errPhoneInvalid, 'error');
+      return;
+    }
+    // Auto-normalize: Add +91 prefix if it is a 10-digit number
+    let normalized = cleaned;
+    if (!normalized.startsWith('+')) {
+      if (normalized.length === 10) {
+        normalized = '+91' + normalized;
+      } else {
+        normalized = '+' + normalized;
+      }
+    }
+    pendingPhone = normalized;
+
+    // Check if the number is in allowed_numbers database
+    const allowed = await isAllowedNumber(pendingPhone);
+    if (!allowed) {
+      const notAllowedMsg = {
+        gu: 'તમને આ એપ વાપરવાની મંજૂરી નથી. કૃપા કરીને ઓનરનો સંપર્ક કરો.',
+        hi: 'आपको इस ऐप का उपयोग करने की अनुमति नहीं है। कृपया ओनर से संपर्क करें।',
+        en: 'You are not allowed to use this app. Please contact the owner.'
+      };
+      setMsg(notAllowedMsg[currentLang] || notAllowedMsg.gu, 'error');
+      return;
+    }
+
+    try {
+      await sendOtp(phone); // real Supabase call once configured
+      setMsg(t.otpSent, 'ok');
+    } catch (err) {
+      // Supabase not configured yet -> fall back to mock flow so UI is testable today
+      setMsg(t.mockOtpSent, 'ok');
+    }
+    phoneStep.style.display = 'none';
+    otpStep.style.display = 'block';
+  });
+
+  document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
+    const otp = otpInput.value.trim();
+    const t = LOGIN_TEXT[currentLang] || LOGIN_TEXT.gu;
+    if (!otp) { setMsg(t.errOtpEmpty, 'error'); return; }
+    if (!/^\d{6}$/.test(otp)) { setMsg(t.errOtpFormat, 'error'); return; }
+    try {
+      const session = await verifyOtp(pendingPhone, otp); // real Supabase call once configured
+      const user = await getCurrentUser();
+      const owner = await isOwner(user);
+      writeMockSession({ phone: pendingPhone, isOwner: owner });
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      // Mock fallback (no Supabase yet): check if the user is owner in the database
+      const sb = getSupabase();
+      let isOwnerUser = false;
+      if (sb) {
+        const { data } = await sb.from('allowed_numbers')
+          .select('role')
+          .eq('phone', pendingPhone)
+          .maybeSingle();
+        if (data && data.role === 'owner') {
+          isOwnerUser = true;
+        }
+      }
+      writeMockSession({ phone: pendingPhone, isOwner: isOwnerUser });
+      window.location.href = 'dashboard.html';
+    }
+  });
+</script>
+</body>
+</html>

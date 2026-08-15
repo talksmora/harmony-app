@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<style>
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .loader { text-align: center; }
+  .loader img { width: 64px; height: 64px; border-radius: 50%; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+  <div class="loader">
+    <img src="icon-192.png" alt="Harmony Music">
+    <div>Harmony Music</div>
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script>
+  // Entry point — send the user to dashboard if logged in, else to login.
+  // TODO (Antigravity): once Supabase is wired up, replace readMockSession()
+  // with an await getCurrentUser() check.
+  const session = (typeof readMockSession === 'function') ? readMockSession() : null;
+  window.location.href = session ? 'dashboard.html' : 'login.html';
+</script>
+</body>
+</html>

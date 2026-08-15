@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocal Pitch Monitor - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Harmony Music">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="pitch-monitor.css">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+</head>
+<body data-page="pitch-monitor">
+  <div id="appShellRoot"></div>
+  <div id="pageBody">
+
+
+
+  <div class="onboarding-overlay" id="onboardingOverlay" style="display:none;">
+    <div class="onboarding-card">
+      <button class="onboarding-close" id="onboardingClose">✕</button>
+      <div class="onboarding-step-num" id="onboardingStepNum">1 / 7</div>
+      <h2 class="onboarding-title" id="onboardingTitle"></h2>
+      <p class="onboarding-body" id="onboardingBody"></p>
+      <div class="onboarding-nav">
+        <button id="onboardingPrev" class="onboarding-nav-btn">‹</button>
+        <button id="onboardingSkip" class="onboarding-skip-btn"></button>
+        <button id="onboardingNext" class="onboarding-nav-btn">›</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="brand-row">
+    <img src="data:image/png;base64,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" alt="Harmony Music" class="brand-logo">
+    <div class="brand-text">Harmony Music</div>
+  </div>
+  <h1>🎤 Vocal Pitch Monitor</h1>
+  <div class="subtitle" data-i18n="subtitle">Gaao ane live pitch juo — click karo piano key par to sur sambhlo</div>
+
+  <div class="tonic-selector">
+    <label for="tonicSelect" data-i18n="sa_label">તમારો સા (Sa) પસંદ કરો:</label>
+    <select id="tonicSelect">
+      <option value="0" data-i18n="tonic_0">સફેદ ૧ (C)</option>
+      <option value="1" data-i18n="tonic_1">કાળી ૧ (C#)</option>
+      <option value="2" data-i18n="tonic_2">સફેદ ૨ (D)</option>
+      <option value="3" data-i18n="tonic_3">કાળી ૨ (D#)</option>
+      <option value="4" data-i18n="tonic_4">સફેદ ૩ (E)</option>
+      <option value="5" data-i18n="tonic_5">સફેદ ૪ (F)</option>
+      <option value="6" data-i18n="tonic_6">કાળી ૩ (F#)</option>
+      <option value="7" data-i18n="tonic_7">સફેદ ૫ (G)</option>
+      <option value="8" data-i18n="tonic_8">કાળી ૪ (G#)</option>
+      <option value="9" data-i18n="tonic_9">સફેદ ૬ (A)</option>
+      <option value="10" data-i18n="tonic_10">કાળી ૫ (A#)</option>
+      <option value="11" data-i18n="tonic_11">સફેદ ૭ (B)</option>
+    </select>
+  </div>
+
+  <div class="instrument-selector">
+    <label data-i18n="instrument_label">Key vagade to kayu instrument sambhlay:</label>
+    <div class="instrument-btns">
+      <button class="inst-btn active" data-inst="harmonium" data-i18n="inst_harmonium">હાર્મોનિયમ</button>
+      <button class="inst-btn" data-inst="piano" data-i18n="inst_piano">પિયાનો</button>
+      <button class="inst-btn" data-inst="tanpura" data-i18n="inst_tanpura">તાનપુરો</button>
+    </div>
+  </div>
+
+  <div class="top-row">
+    <div class="pitch-pill"><span class="mic-icon">🎙️</span><span id="noteBig">-</span></div>
+    <button id="startBtn" data-i18n="start_listening">Start Listening</button>
+  </div>
+
+  <div class="install-row">
+    <button id="installBtn" class="install-btn" style="display:none;">⬇️ <span data-i18n="install_btn">Install કરો</span></button>
+  </div>
+
+  <div class="container" id="keyboardPanel">
+    <div class="meter-bar">
+      <div class="zone z-flat">♭ flat</div>
+      <div class="zone z-12">-12¢</div>
+      <div class="zone z-5">-5¢</div>
+      <div class="zone z-center">0</div>
+      <div class="zone z-5">+5¢</div>
+      <div class="zone z-12">+12¢</div>
+      <div class="zone z-sharp"># sharp</div>
+      <div class="meter-marker" id="needle"></div>
+    </div>
+
+    <div class="piano-wrap">
+      <div class="piano" id="piano"></div>
+    </div>
+    <div class="trail-wrap">
+      <canvas id="trailCanvas"></canvas>
+    </div>
+
+    <div class="history-wrap">
+      <canvas id="historyCanvas"></canvas>
+    </div>
+  </div>
+
+  <div class="container tanpura-panel" id="tanpuraPanel" style="display:none;">
+    <div class="tanpura-controls">
+      <div class="tanpura-row">
+        <label for="droneModeSelect" data-i18n="drone_mode">ડ્રોન પ્રકાર:</label>
+        <select id="droneModeSelect">
+          <option value="tanpura" selected>Tanpura (તાનપુરો)</option>
+          <option value="harmonium">Harmonium (હાર્મોનિયમ)</option>
+          <option value="simple">Simple Tone (સાદો સૂર)</option>
+        </select>
+      </div>
+      <div class="tanpura-row" style="justify-content: flex-start; gap: 8px;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; cursor:pointer; color:var(--text); margin: 0;">
+          <input type="checkbox" id="droneSaPaCheck" style="width:auto; margin:0;" checked>
+          <span data-i18n="drone_sapa">સા + પા (Sa + Pa)</span>
+        </label>
+      </div>
+      <div class="tanpura-row">
+        <label for="tanpuraFineTune"><span data-i18n="tanpura_finetune">Fine Tune</span>: <span id="tanpuraFineTuneVal">0¢</span></label>
+        <input type="range" id="tanpuraFineTune" min="-50" max="50" value="0" step="1">
+      </div>
+      <div class="tanpura-row">
+        <label for="tanpuraVolume"><span data-i18n="tanpura_volume">Volume</span>: <span id="tanpuraVolumeVal">70%</span></label>
+        <input type="range" id="tanpuraVolume" min="0" max="100" value="70" step="1">
+      </div>
+      <button id="tanpuraPlayBtn" class="tanpura-play-btn">▶ <span data-i18n="tanpura_play">તાનપુરો ચાલુ કરો</span></button>
+    </div>
+  </div>
+
+  <div class="status" id="status" data-i18n="status_default">Mic access જરૂરી છે — "Start Listening" દબાવો</div>
+  <div class="footer-note" data-i18n="footer_note">Free tool — kisi ko bhi share karo. Sound sirf browser ma process thay che, kyay save nathi thatu.</div>
+
+<script>
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+// Sargam base letters WITH old text suffix (કો/તી) — kept as requested, marks are ADDED on top of this
+const SARGAM_BASE = ['સા','રે કો','રે','ગ કો','ગ','મ','મ','પા','ધ કો','ધ','ની કો','ની'];
+// type of each of the 12 semitone steps relative to Sa: 'sa' | 'shuddh' | 'komal' | 'tivra' | 'pa'
+const SARGAM_TYPE = ['sa','komal','shuddh','komal','shuddh','shuddh','tivra','pa','komal','shuddh','komal','shuddh'];
+
+// Per-instrument key ranges (MIDI numbers)
+const HARMONIUM_RANGE = { min: 36, max: 71 };   // C2..B4 — exactly 3 fixed saptaks
+const PIANO_RANGE = { min: 21, max: 108 };       // A0..C8 — full 88-key range, dynamic saptaks
+
+let MIDI_MIN = HARMONIUM_RANGE.min;
+let MIDI_MAX = HARMONIUM_RANGE.max;
+const isBlackMidi = m => [1,3,6,8,10].includes(m % 12);
+
+function midiToFreq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+function freqToMidiFloat(freq) { return 69 + 12 * Math.log2(freq / 440); }
+function noteName(midi) {
+  const idx = ((Math.round(midi) % 12) + 12) % 12;
+  const octave = Math.floor(Math.round(midi) / 12) - 1;
+  return NOTE_NAMES[idx] + octave;
+}
+let tonicOffset = 0; // semitone (0=C) chosen as user's Sa — only decides WHICH swar is "Sa", never the saptak boundaries
+
+function setKeyRangeForInstrument(inst) {
+  const r = inst === 'piano' ? PIANO_RANGE : HARMONIUM_RANGE; // tanpura doesn't use this
+  MIDI_MIN = r.min;
+  MIDI_MAX = r.max;
+}
+
+// saptak is ALWAYS anchored to fixed octave-numbers: C3–B3 = madhya (octave number 3), regardless of chosen Sa
+// returns { relOctave, dotCount, side: 'below'|'above'|'none' }
+function saptakInfoForMidi(midi) {
+  const octaveNumber = Math.floor(Math.round(midi) / 12) - 1; // matches noteName's convention (C4 => 4)
+  const rel = octaveNumber - 3; // 0 = madhya (C3-B3)
+  if (rel === 0) return { dotCount: 0, side: 'none' };
+  const dotCount = Math.min(Math.abs(rel), 3); // cap at 3 dots (અતિશય મન્દ્ર/તાર) per classical convention
+  return { dotCount, side: rel < 0 ? 'below' : 'above' };
+}
+
+// returns { text, type, dotCount, side }
+function sargamName(midi) {
+  const rounded = Math.round(midi);
+  const idx = ((rounded % 12) + 12) % 12;
+  const rel = ((idx - tonicOffset) % 12 + 12) % 12;
+  const saptak = saptakInfoForMidi(rounded);
+  return { text: SARGAM_BASE[rel], type: SARGAM_TYPE[rel], dotCount: saptak.dotCount, side: saptak.side };
+}
+function sargamDisplayString(midi) {
+  const s = sargamName(midi);
+  return s.type === 'tivra' ? (s.text + '\u2019') : s.text;
+}
+
+// ---------- Build piano (responsive, fits full width, no scroll) ----------
+const piano = document.getElementById('piano');
+const pianoWrap = document.querySelector('.piano-wrap');
+let whiteKeyWidth = 20;
+let blackKeyWidth = 12;
+let totalWidth = 0;
+const whitePositions = {};
+
+function buildSargamLabelEl(midi) {
+  const info = sargamName(midi);
+  const wrap = document.createElement('span');
+  wrap.className = 'sargam-wrap';
+
+  if (info.side === 'above') {
+    const dots = document.createElement('span');
+    dots.className = 'sargam-dots sargam-dots-above';
+    dots.textContent = '•'.repeat(info.dotCount);
+    wrap.appendChild(dots);
+  }
+  const letterSpan = document.createElement('span');
+  letterSpan.className = 'sargam-letter sargam-' + info.type;
+  letterSpan.textContent = info.type === 'tivra' ? (info.text + '\u2019') : info.text;
+  wrap.appendChild(letterSpan);
+  if (info.side === 'below') {
+    const dots = document.createElement('span');
+    dots.className = 'sargam-dots sargam-dots-below';
+    dots.textContent = '•'.repeat(info.dotCount);
+    wrap.appendChild(dots);
+  }
+  return wrap;
+}
+
+function buildPiano() {
+  piano.innerHTML = '';
+  const containerWidth = pianoWrap.clientWidth;
+  let whiteCount = 0;
+  for (let m = MIDI_MIN; m <= MIDI_MAX; m++) if (!isBlackMidi(m)) whiteCount++;
+  whiteKeyWidth = containerWidth / whiteCount;
+  blackKeyWidth = whiteKeyWidth * 0.6;
+
+  let xPos = 0;
+  for (let m = MIDI_MIN; m <= MIDI_MAX; m++) {
+    if (!isBlackMidi(m)) { whitePositions[m] = xPos; xPos += whiteKeyWidth; }
+  }
+  totalWidth = xPos;
+  piano.style.width = totalWidth + 'px';
+
+  for (let m = MIDI_MIN; m <= MIDI_MAX; m++) {
+    if (!isBlackMidi(m)) {
+      const key = document.createElement('div');
+      key.className = 'key white';
+      key.style.left = whitePositions[m] + 'px';
+      key.style.width = whiteKeyWidth + 'px';
+      key.style.height = '130px';
+      key.dataset.midi = m;
+      if (m % 12 === tonicOffset) key.classList.add('sa-key');
+      const label = document.createElement('div');
+      label.className = 'key-label';
+      label.appendChild(buildSargamLabelEl(m));
+      key.appendChild(label);
+      piano.appendChild(key);
+    }
+  }
+  for (let m = MIDI_MIN; m <= MIDI_MAX; m++) {
+    if (isBlackMidi(m)) {
+      const leftWhite = whitePositions[m - 1] !== undefined ? whitePositions[m - 1] : whitePositions[m - 2];
+      const key = document.createElement('div');
+      key.className = 'key black';
+      key.style.left = (leftWhite + whiteKeyWidth - blackKeyWidth / 2) + 'px';
+      key.style.width = blackKeyWidth + 'px';
+      key.style.height = '78px';
+      key.dataset.midi = m;
+      if (m % 12 === tonicOffset) key.classList.add('sa-key');
+      const label = document.createElement('div');
+      label.className = 'key-label black-label';
+      label.appendChild(buildSargamLabelEl(m));
+      key.appendChild(label);
+      piano.appendChild(key);
+    }
+  }
+  const marker = document.createElement('div');
+  marker.className = 'piano-marker';
+  marker.id = 'pianoMarker';
+  piano.appendChild(marker);
+}
+buildPiano();
+window.addEventListener('resize', buildPiano);
+
+const tonicSelect = document.getElementById('tonicSelect');
+tonicSelect.addEventListener('change', () => {
+  tonicOffset = parseInt(tonicSelect.value, 10);
+  buildPiano();
+  if (tanpuraPlaying) {
+    startTanpuraDrone();
+  }
+});
+
+function noteCenterX(midi) {
+  if (isBlackMidi(midi)) {
+    let leftWhite = whitePositions[midi - 1] !== undefined ? whitePositions[midi - 1] : whitePositions[midi - 2];
+    if (leftWhite === undefined) leftWhite = 0;
+    return leftWhite + whiteKeyWidth - blackKeyWidth / 2 + blackKeyWidth / 2;
+  }
+  const x = whitePositions[midi] !== undefined ? whitePositions[midi] : 0;
+  return x + whiteKeyWidth / 2;
+}
+
+function midiFloatToX(midiFloat) {
+  const lower = Math.floor(midiFloat);
+  const upper = lower + 1;
+  const frac = midiFloat - lower;
+  const clampedLower = Math.max(MIDI_MIN, Math.min(MIDI_MAX, lower));
+  const clampedUpper = Math.max(MIDI_MIN, Math.min(MIDI_MAX, upper));
+  const xLower = noteCenterX(clampedLower);
+  const xUpper = noteCenterX(clampedUpper);
+  return xLower + (xUpper - xLower) * frac;
+}
+
+// ---------- Multi-instrument sound engine ----------
+let playbackCtx;
+const activeVoices = {}; // midi -> voice data
+let currentInstrument = 'harmonium';
+let tanpuraTimeouts = [];
+let droneOscillators = [];
+let droneGainNode = null;
+
+function ensureCtx() {
+  if (!playbackCtx) {
+    playbackCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const n = 16;
+    const real = new Float32Array(n);
+    const imag = new Float32Array(n);
+    const amps = [0, 1, 0.55, 0.75, 0.35, 0.45, 0.22, 0.30, 0.15, 0.20, 0.10, 0.13, 0.07, 0.09, 0.05, 0.06];
+    for (let i = 1; i < n; i++) real[i] = amps[i];
+    sharedWave = playbackCtx.createPeriodicWave(real, imag, { disableNormalization: false });
+  }
+  if (playbackCtx.state === 'suspended') playbackCtx.resume();
+}
+
+function makeNoiseBurst(freq, dur, gainLevel) {
+  const now = playbackCtx.currentTime;
+  const buf = playbackCtx.createBuffer(1, playbackCtx.sampleRate * dur, playbackCtx.sampleRate);
+  const nd = buf.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1);
+  const src = playbackCtx.createBufferSource();
+  src.buffer = buf;
+  const filt = playbackCtx.createBiquadFilter();
+  filt.type = 'bandpass';
+  filt.frequency.value = freq * 2;
+  filt.Q.value = 1.2;
+  const g = playbackCtx.createGain();
+  g.gain.setValueAtTime(gainLevel, now);
+  g.gain.linearRampToValueAtTime(0, now + dur);
+  src.connect(filt).connect(g);
+  src.start();
+  return g;
+}
+
+// --- Harmonium: warm double-reed chorusing bellows tone ---
+function harmoniumOn(midi, freq) {
+  const now = playbackCtx.currentTime;
+  const master = playbackCtx.createGain();
+  master.gain.setValueAtTime(0, now);
+  master.gain.linearRampToValueAtTime(0.24, now + 0.08); // slow build like bellows pumping
+  master.connect(playbackCtx.destination);
+
+  // Tremolo & vibrato LFO (bellows pressure simulation)
+  const bellowsLfo = playbackCtx.createOscillator();
+  bellowsLfo.frequency.setValueAtTime(5.5, now); // 5.5 Hz vibrato
+  const bellowsGain = playbackCtx.createGain();
+  bellowsGain.gain.setValueAtTime(0.02, now);
+  bellowsLfo.connect(bellowsGain).connect(master.gain);
+  bellowsLfo.start(now);
+
+  const filter = playbackCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(freq * 5, now);
+  filter.Q.value = 1.0;
+  filter.connect(master);
+
+  const oscs = [];
+
+  // Bank 1: Middle Reed (Sawtooth + Triangle)
+  const osc1a = playbackCtx.createOscillator();
+  osc1a.type = 'sawtooth';
+  osc1a.frequency.setValueAtTime(freq * 1.002, now);
+  
+  const osc1b = playbackCtx.createOscillator();
+  osc1b.type = 'triangle';
+  osc1b.frequency.setValueAtTime(freq * 0.998, now);
+
+  // Bank 2: Octave Reed (Sawtooth + Triangle)
+  const osc2a = playbackCtx.createOscillator();
+  osc2a.type = 'sawtooth';
+  osc2a.frequency.setValueAtTime(freq * 2.001, now);
+  
+  const osc2b = playbackCtx.createOscillator();
+  osc2b.type = 'triangle';
+  osc2b.frequency.setValueAtTime(freq * 1.999, now);
+
+  const g1 = playbackCtx.createGain();
+  g1.gain.value = 0.5;
+  const g2 = playbackCtx.createGain();
+  g2.gain.value = 0.35;
+
+  osc1a.connect(g1); osc1b.connect(g1);
+  osc2a.connect(g2); osc2b.connect(g2);
+
+  g1.connect(filter);
+  g2.connect(filter);
+
+  osc1a.start(now); osc1b.start(now);
+  osc2a.start(now); osc2b.start(now);
+
+  oscs.push(osc1a, osc1b, osc2a, osc2b, bellowsLfo);
+
+  // Bellows key onset chuff
+  const noiseGain = makeNoiseBurst(freq, 0.12, 0.05);
+  noiseGain.connect(master);
+
+  activeVoices[midi] = { oscs, master, type: 'harmonium' };
+}
+
+function harmoniumOff(midi) {
+  const v = activeVoices[midi];
+  if (!v) return;
+  const now = playbackCtx.currentTime;
+  v.master.gain.cancelScheduledValues(now);
+  v.master.gain.setValueAtTime(v.master.gain.value, now);
+  v.master.gain.linearRampToValueAtTime(0, now + 0.18);
+  v.oscs.forEach(o => { try { o.stop(now + 0.22); } catch (e) {} });
+  delete activeVoices[midi];
+}
+
+// --- Piano: realistic hammer strike, stretched harmonics and decay rates ---
+function pianoOn(midi, freq) {
+  const now = playbackCtx.currentTime;
+  const master = playbackCtx.createGain();
+  master.gain.setValueAtTime(0, now);
+  master.gain.linearRampToValueAtTime(0.6, now + 0.005); // hammer strike
+  master.connect(playbackCtx.destination);
+
+  const filter = playbackCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(freq * 8, now);
+  filter.frequency.exponentialRampToValueAtTime(freq * 2, now + 1.5);
+  filter.connect(master);
+
+  const oscs = [];
+  // 5 harmonics with realistic piano string decay times
+  const harmonics = [
+    { ratio: 1.000, type: 'triangle', amp: 1.0, decay: 3.5 },
+    { ratio: 2.001, type: 'triangle', amp: 0.5, decay: 1.8 },
+    { ratio: 3.003, type: 'triangle', amp: 0.25, decay: 0.9 },
+    { ratio: 4.006, type: 'triangle', amp: 0.15, decay: 0.4 },
+    { ratio: 5.010, type: 'triangle', amp: 0.08, decay: 0.2 },
+  ];
+
+  harmonics.forEach(h => {
+    const osc = playbackCtx.createOscillator();
+    osc.type = h.type;
+    osc.frequency.setValueAtTime(freq * h.ratio, now);
+    
+    const g = playbackCtx.createGain();
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(h.amp, now + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.001, now + h.decay);
+    
+    osc.connect(g).connect(filter);
+    osc.start(now);
+    oscs.push(osc);
+  });
+
+  // Hammer noise transient
+  const noiseGain = makeNoiseBurst(freq, 0.04, 0.2);
+  noiseGain.connect(master);
+
+  activeVoices[midi] = { oscs, master, type: 'piano', startedAt: now };
+}
+
+function pianoOff(midi) {
+  const v = activeVoices[midi];
+  if (!v) return;
+  const now = playbackCtx.currentTime;
+  v.master.gain.cancelScheduledValues(now);
+  v.master.gain.setValueAtTime(v.master.gain.value, now);
+  v.master.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+  v.oscs.forEach(o => { try { o.stop(now + 0.4); } catch (e) {} });
+  delete activeVoices[midi];
+}
+
+// --- Tanpura: dynamic Jivari filter sweep and rich resonant harmonics ---
+function tanpuraOn(midi, freq, opts) {
+  opts = opts || {};
+  const pluckIntervalMs = opts.pluckIntervalMs || 1200;
+  const volumeScale = opts.volumeScale !== undefined ? opts.volumeScale : 1;
+  const now = playbackCtx.currentTime;
+
+  const master = playbackCtx.createGain();
+  master.gain.setValueAtTime(0, now);
+  master.gain.linearRampToValueAtTime(0.28 * volumeScale, now + 0.1);
+  master.connect(playbackCtx.destination);
+
+  const filter = playbackCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(6000, now);
+  filter.frequency.exponentialRampToValueAtTime(800, now + 1.5);
+  filter.Q.value = 2.0; // resonance for Jivari buzz
+  filter.connect(master);
+
+  const oscs = [];
+  const harmonics = [
+    { ratio: 1.000, type: 'sawtooth', amp: 0.6 },
+    { ratio: 2.000, type: 'sawtooth', amp: 0.3 },
+    { ratio: 3.000, type: 'sine',     amp: 0.15 },
+    { ratio: 4.000, type: 'sawtooth', amp: 0.1 },
+    { ratio: 5.001, type: 'sine',     amp: 0.08 },
+    { ratio: 6.002, type: 'sine',     amp: 0.05 },
+    { ratio: 0.500, type: 'triangle', amp: 0.15 }
+  ];
+
+  harmonics.forEach(h => {
+    const osc = playbackCtx.createOscillator();
+    osc.type = h.type;
+    const detune = 1 + (Math.random() - 0.5) * 0.003;
+    osc.frequency.setValueAtTime(freq * h.ratio * detune, now);
+    
+    const g = playbackCtx.createGain();
+    g.gain.setValueAtTime(h.amp, now);
+    
+    // Slight vibrato for string movement
+    const vibrato = playbackCtx.createOscillator();
+    vibrato.frequency.setValueAtTime(6 + Math.random() * 2, now);
+    const vGain = playbackCtx.createGain();
+    vGain.gain.setValueAtTime(1.5, now);
+    vibrato.connect(vGain).connect(osc.frequency);
+    vibrato.start(now);
+    
+    osc.connect(g).connect(filter);
+    osc.start(now);
+    oscs.push(osc, vibrato);
+  });
+
+  const noiseGain = makeNoiseBurst(freq, 0.05, 0.12);
+  noiseGain.connect(master);
+
+  const pluckInterval = setInterval(() => {
+    const t = playbackCtx.currentTime;
+    master.gain.cancelScheduledValues(t);
+    master.gain.setValueAtTime(master.gain.value, t);
+    master.gain.linearRampToValueAtTime(0.28 * volumeScale, t + 0.08);
+    master.gain.exponentialRampToValueAtTime(0.12 * volumeScale, t + 1.0);
+
+    filter.frequency.cancelScheduledValues(t);
+    filter.frequency.setValueAtTime(6000, t);
+    filter.frequency.exponentialRampToValueAtTime(800, t + 1.5);
+  }, pluckIntervalMs);
+
+  activeVoices[midi] = { oscs, master, type: 'tanpura', pluckInterval };
+}
+function tanpuraOff(midi) {
+  const v = activeVoices[midi];
+  if (!v) return;
+  const now = playbackCtx.currentTime;
+  clearInterval(v.pluckInterval);
+  v.master.gain.cancelScheduledValues(now);
+  v.master.gain.setValueAtTime(v.master.gain.value, now);
+  v.master.gain.linearRampToValueAtTime(0, now + 1.2);
+  v.oscs.forEach(o => { try { o.stop(now + 1.3); } catch (e) {} });
+  delete activeVoices[midi];
+}
+function noteOn(midi) {
+  ensureCtx();
+  if (activeVoices[midi]) return;
+  const freq = midiToFreq(midi);
+  if (currentInstrument === 'piano') pianoOn(midi, freq);
+  else if (currentInstrument === 'tanpura') tanpuraOn(midi, freq);
+  else harmoniumOn(midi, freq);
+}
+function noteOff(midi) {
+  const v = activeVoices[midi];
+  if (!v) return;
+  if (v.type === 'piano') pianoOff(midi);
+  else if (v.type === 'tanpura') tanpuraOff(midi);
+  else harmoniumOff(midi);
+}
+
+const keyboardPanel = document.getElementById('keyboardPanel');
+const tanpuraPanel = document.getElementById('tanpuraPanel');
+
+function applyInstrumentMode(inst) {
+  // stop any held piano/harmonium notes and the tanpura drone when switching modes
+  Object.keys(activeVoices).forEach(k => noteOff(isNaN(k) ? k : Number(k)));
+  stopTanpuraDrone();
+
+  if (inst === 'tanpura') {
+    keyboardPanel.style.display = 'none';
+    tanpuraPanel.style.display = 'block';
+  } else {
+    keyboardPanel.style.display = '';
+    tanpuraPanel.style.display = 'none';
+    setKeyRangeForInstrument(inst);
+    buildPiano();
+  }
+}
+
+document.querySelectorAll('.inst-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.inst-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentInstrument = btn.dataset.inst;
+    applyInstrumentMode(currentInstrument);
+  });
+});
+
+// ---------- Tanpura drone controls ----------
+const tanpuraFineTuneSlider = document.getElementById('tanpuraFineTune');
+const tanpuraFineTuneVal = document.getElementById('tanpuraFineTuneVal');
+const tanpuraVolumeSlider = document.getElementById('tanpuraVolume');
+const tanpuraVolumeVal = document.getElementById('tanpuraVolumeVal');
+const tanpuraPlayBtn = document.getElementById('tanpuraPlayBtn');
+const droneModeSelect = document.getElementById('droneModeSelect');
+const droneSaPaCheck = document.getElementById('droneSaPaCheck');
+let tanpuraPlaying = false;
+const TANPURA_KEYS = ['tanpura_str_0', 'tanpura_str_1', 'tanpura_str_2', 'tanpura_str_3'];
+
+function startTanpuraDrone() {
+  ensureCtx();
+  stopTanpuraDrone();
+  const mode = droneModeSelect.value;
+  const fineTuneCents = parseFloat(tanpuraFineTuneSlider.value) || 0;
+  const volumeScale = (parseFloat(tanpuraVolumeSlider.value) || 70) / 100;
+  const addPa = droneSaPaCheck.checked;
+  
+  // Reference Sa in octave 3 for warm drone: 48 + tonicOffset
+  const saMidi = 48 + tonicOffset; 
+  const freq = midiToFreq(saMidi) * Math.pow(2, fineTuneCents / 1200);
+  const paFreq = freq * 1.5;
+
+  tanpuraPlaying = true;
+  droneOscillators = [];
+
+  const now = playbackCtx.currentTime;
+  droneGainNode = playbackCtx.createGain();
+  droneGainNode.gain.setValueAtTime(0.001, now);
+  droneGainNode.gain.exponentialRampToValueAtTime(0.24 * volumeScale, now + 0.3);
+  droneGainNode.connect(playbackCtx.destination);
+
+  if (mode === 'simple') {
+    const o = playbackCtx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(freq, now);
+    o.connect(droneGainNode);
+    o.start(now);
+    droneOscillators.push(o);
+    if (addPa) {
+      const o2 = playbackCtx.createOscillator();
+      o2.type = 'triangle';
+      o2.frequency.setValueAtTime(paFreq, now);
+      const g2 = playbackCtx.createGain();
+      g2.gain.value = 0.7;
+      o2.connect(g2).connect(droneGainNode);
+      o2.start(now);
+      droneOscillators.push(o2);
+    }
+  } else if (mode === 'tanpura') {
+    // Additive Tanpura synthesis from Metronome
+    const harmonics = [
+      { ratio: 1, type: 'sine', vol: 0.5 },
+      { ratio: 2, type: 'sine', vol: 0.2 },
+      { ratio: 3, type: 'sine', vol: 0.08 },
+      { ratio: 1.002, type: 'sine', vol: 0.15 },
+      { ratio: 0.998, type: 'sine', vol: 0.12 },
+      { ratio: 0.5, type: 'triangle', vol: 0.1 },
+    ];
+    harmonics.forEach(h => {
+      const o = playbackCtx.createOscillator();
+      o.type = h.type;
+      o.frequency.setValueAtTime(freq * h.ratio, now);
+      const g = playbackCtx.createGain();
+      g.gain.value = h.vol;
+      o.connect(g).connect(droneGainNode);
+      o.start(now);
+      droneOscillators.push(o);
+    });
+    if (addPa) {
+      [1, 1.003, 2].forEach((r, i) => {
+        const o = playbackCtx.createOscillator();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(paFreq * r, now);
+        const g = playbackCtx.createGain();
+        g.gain.value = i === 0 ? 0.35 : 0.08;
+        o.connect(g).connect(droneGainNode);
+        o.start(now);
+        droneOscillators.push(o);
+      });
+    }
+  } else if (mode === 'harmonium') {
+    // Harmonium drone from Metronome
+    const o = playbackCtx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(freq, now);
+    const lpf = playbackCtx.createBiquadFilter();
+    lpf.type = 'lowpass';
+    lpf.frequency.setValueAtTime(freq * 4, now);
+    lpf.Q.value = 0.5;
+    o.connect(lpf).connect(droneGainNode);
+    o.start(now);
+    droneOscillators.push(o);
+
+    const o2 = playbackCtx.createOscillator();
+    o2.type = 'triangle';
+    o2.frequency.setValueAtTime(freq * 0.5, now);
+    const g2 = playbackCtx.createGain();
+    g2.gain.value = 0.15;
+    o2.connect(g2).connect(droneGainNode);
+    o2.start(now);
+    droneOscillators.push(o2);
+
+    if (addPa) {
+      const o3 = playbackCtx.createOscillator();
+      o3.type = 'sawtooth';
+      o3.frequency.setValueAtTime(paFreq, now);
+      const lpf2 = playbackCtx.createBiquadFilter();
+      lpf2.type = 'lowpass';
+      lpf2.frequency.value = paFreq * 4;
+      const g3 = playbackCtx.createGain();
+      g3.gain.value = 0.65;
+      o3.connect(lpf2).connect(g3).connect(droneGainNode);
+      o3.start(now);
+      droneOscillators.push(o3);
+    }
+  }
+
+  tanpuraPlayBtn.textContent = '■ ' + (TRANSLATIONS[currentLang] || TRANSLATIONS.gu).tanpura_stop;
+  tanpuraPlayBtn.classList.add('playing');
+}
+
+function stopTanpuraDrone() {
+  tanpuraTimeouts.forEach(t => clearTimeout(t));
+  tanpuraTimeouts = [];
+  TANPURA_KEYS.forEach(k => tanpuraOff(k));
+
+  if (droneGainNode) {
+    try {
+      const now = playbackCtx.currentTime;
+      droneGainNode.gain.cancelScheduledValues(now);
+      droneGainNode.gain.setValueAtTime(droneGainNode.gain.value, now);
+      droneGainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    } catch (e) {}
+  }
+  const nodesToStop = [...droneOscillators];
+  droneOscillators = [];
+  setTimeout(() => {
+    nodesToStop.forEach(o => { try { o.stop(); } catch(e) {} });
+  }, 350);
+
+  tanpuraPlaying = false;
+  if (tanpuraPlayBtn) {
+    tanpuraPlayBtn.textContent = '▶ ' + (TRANSLATIONS[currentLang] || TRANSLATIONS.gu).tanpura_play;
+    tanpuraPlayBtn.classList.remove('playing');
+  }
+}
+
+tanpuraPlayBtn.addEventListener('click', () => {
+  if (tanpuraPlaying) stopTanpuraDrone();
+  else startTanpuraDrone();
+});
+tanpuraFineTuneSlider.addEventListener('input', () => {
+  tanpuraFineTuneVal.textContent = (tanpuraFineTuneSlider.value > 0 ? '+' : '') + tanpuraFineTuneSlider.value + '¢';
+  if (tanpuraPlaying) startTanpuraDrone();
+});
+tanpuraVolumeSlider.addEventListener('input', () => {
+  tanpuraVolumeVal.textContent = tanpuraVolumeSlider.value + '%';
+  if (tanpuraPlaying) startTanpuraDrone();
+});
+droneModeSelect.addEventListener('change', () => {
+  if (tanpuraPlaying) startTanpuraDrone();
+});
+droneSaPaCheck.addEventListener('change', () => {
+  if (tanpuraPlaying) startTanpuraDrone();
+});
+
+function keyElAt(target) {
+  return target.closest ? target.closest('.key') : null;
+}
+
+piano.addEventListener('pointerdown', (e) => {
+  const keyEl = keyElAt(e.target);
+  if (!keyEl) return;
+  const midi = parseInt(keyEl.dataset.midi, 10);
+  keyEl.classList.add('playing');
+  noteOn(midi);
+  keyEl.setPointerCapture && keyEl.setPointerCapture(e.pointerId);
+});
+piano.addEventListener('pointerup', (e) => {
+  const keyEl = keyElAt(e.target);
+  if (!keyEl) return;
+  const midi = parseInt(keyEl.dataset.midi, 10);
+  keyEl.classList.remove('playing');
+  noteOff(midi);
+});
+piano.addEventListener('pointerleave', (e) => {
+  const keyEl = keyElAt(e.target);
+  if (!keyEl) return;
+  const midi = parseInt(keyEl.dataset.midi, 10);
+  keyEl.classList.remove('playing');
+  noteOff(midi);
+}, true);
+piano.addEventListener('pointercancel', (e) => {
+  const keyEl = keyElAt(e.target);
+  if (!keyEl) return;
+  const midi = parseInt(keyEl.dataset.midi, 10);
+  keyEl.classList.remove('playing');
+  noteOff(midi);
+});
+
+// ---------- Pitch detection (improved: lower threshold + octave-error guard) ----------
+function autoCorrelate(buf, sampleRate) {
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.0018) return -1; // catches very soft/short notes
+
+  let r1 = 0, r2 = SIZE - 1;
+  const thres = 0.2;
+  for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) < thres) { r1 = i; break; } }
+  for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; } }
+
+  const trimmed = buf.slice(r1, r2);
+  const newSize = trimmed.length;
+  const c = new Array(newSize).fill(0);
+  for (let i = 0; i < newSize; i++) {
+    for (let j = 0; j < newSize - i; j++) c[i] += trimmed[j] * trimmed[j + i];
+  }
+
+  let d = 0;
+  while (d + 1 < newSize && c[d] > c[d + 1]) d++;
+  let maxval = -1, maxpos = -1;
+  for (let i = d; i < newSize; i++) if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+  let T0 = maxpos;
+  if (T0 <= 0) return -1;
+
+  // parabolic interpolation for sub-sample precision
+  const x1 = c[T0 - 1] || 0, x2 = c[T0] || 0, x3 = c[T0 + 1] || 0;
+  const a = (x1 + x3 - 2 * x2) / 2;
+  const b = (x3 - x1) / 2;
+  if (a) T0 = T0 - b / (2 * a);
+
+  let freq = sampleRate / T0;
+
+  // octave-error guard: if correlation at half the period is nearly as strong,
+  // the true fundamental is likely double the detected frequency (avoids "an octave low" glitches)
+  const halfT = Math.round(T0 / 2);
+  if (halfT > 0 && halfT < newSize && c[halfT] > 0.92 * maxval) {
+    freq = freq * 2;
+  }
+
+  return freq;
+}
+
+let audioContext, analyser, mediaStream, dataArray, rafId;
+const startBtn = document.getElementById('startBtn');
+const noteBig = document.getElementById('noteBig');
+const needle = document.getElementById('needle');
+const statusEl = document.getElementById('status');
+let listening = false;
+
+// ---------- Pitch movement trail (tukda-tukda segments showing recent voice movement) ----------
+const trailCanvas = document.getElementById('trailCanvas');
+const trailCtx = trailCanvas.getContext('2d');
+let pitchSamples = []; // {x, t}
+const TRAIL_LIFETIME = 900; // ms a segment stays visible
+
+function resizeTrailCanvas() {
+  trailCanvas.width = trailCanvas.clientWidth * devicePixelRatio;
+  trailCanvas.height = trailCanvas.clientHeight * devicePixelRatio;
+}
+window.addEventListener('resize', resizeTrailCanvas);
+resizeTrailCanvas();
+
+function recordTrailSample(midiFloat) {
+  const now = performance.now();
+  if (midiFloat && midiFloat > 0) {
+    const x = midiFloatToX(midiFloat);
+    pitchSamples.push({ x, t: now });
+  }
+  pitchSamples = pitchSamples.filter(s => now - s.t < TRAIL_LIFETIME);
+}
+
+function drawTrail() {
+  const w = trailCanvas.width, h = trailCanvas.height;
+  trailCtx.clearRect(0, 0, w, h);
+  const now = performance.now();
+  const segW = Math.max(3, (w / totalWidth) * (whiteKeyWidth * 0.35));
+  pitchSamples.forEach(s => {
+    const age = now - s.t;
+    const alpha = Math.max(0, 1 - age / TRAIL_LIFETIME);
+    const relX = (s.x / totalWidth) * w;
+    trailCtx.fillStyle = `rgba(231, 76, 60, ${alpha * 0.85})`;
+    trailCtx.fillRect(relX - segW / 2, 0, segW, h);
+  });
+}
+
+// ---------- History canvas: continuous scrolling pitch line (jem singingcarrots ma hoy) ----------
+const canvas = document.getElementById('historyCanvas');
+const ctx = canvas.getContext('2d');
+const HISTORY_SCROLL_SPEED = 55; // px/sec — line niche khasti jay tenu speed
+const SILENCE_GAP_MS = 150; // aatla thi vadhare gap hoy to line todi nakhvi (break)
+
+let pitchHistoryPoints = []; // {x, t} exact continuous position, t in ms
+let lastValidSoundTime = 0;
+
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function registerPitchForHistory(midiFloat) {
+  const now = performance.now();
+  if (midiFloat && midiFloat > 0) {
+    lastValidSoundTime = now;
+    const x = midiFloatToX(midiFloat); // exact non-quantized position (real cents precision)
+    pitchHistoryPoints.push({ x, t: now, gap: false });
+  } else if (pitchHistoryPoints.length && (now - lastValidSoundTime) < SILENCE_GAP_MS + 20) {
+    // mark a tiny gap marker so the line breaks cleanly on real silence
+  }
+  const maxAgeMs = ((canvas.height / devicePixelRatio) / HISTORY_SCROLL_SPEED) * 1000 + 500;
+  pitchHistoryPoints = pitchHistoryPoints.filter(p => (now - p.t) < maxAgeMs);
+}
+
+function drawHistory() {
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  const now = performance.now();
+
+  // faint scrolling grid for depth reference
+  const offset = ((now / 1000) * HISTORY_SCROLL_SPEED * devicePixelRatio) % 40;
+  ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--grid-line').trim() || '#e4e4e2';
+  ctx.lineWidth = 1;
+  for (let y = -40; y < h + 40; y += 40) {
+    const yy = y + offset;
+    ctx.beginPath();
+    ctx.moveTo(0, yy);
+    ctx.lineTo(w, yy);
+    ctx.stroke();
+  }
+
+  if (pitchHistoryPoints.length < 2) return;
+
+  ctx.strokeStyle = '#e74c3c';
+  ctx.lineWidth = 3 * devicePixelRatio;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  let drawing = false;
+  for (let i = 0; i < pitchHistoryPoints.length; i++) {
+    const p = pitchHistoryPoints[i];
+    const age = (now - p.t) / 1000;
+    const y = age * HISTORY_SCROLL_SPEED * devicePixelRatio;
+    const x = (p.x / totalWidth) * w;
+    const prev = pitchHistoryPoints[i - 1];
+    const timeSincePrev = prev ? (p.t - prev.t) : 0;
+
+    if (!prev || timeSincePrev > SILENCE_GAP_MS) {
+      if (drawing) ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      drawing = true;
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  if (drawing) ctx.stroke();
+}
+
+function updateUI(freq) {
+  const pianoMarker = document.getElementById('pianoMarker');
+  if (freq < 0 || freq > 1600 || freq < 60) {
+    noteBig.textContent = '-';
+    needle.style.left = '50%';
+    if (pianoMarker) pianoMarker.style.display = 'none';
+    registerPitchForHistory(0);
+    drawHistory();
+    recordTrailSample(0);
+    drawTrail();
+    return;
+  }
+  const midiFloat = freqToMidiFloat(freq);
+  const rounded = Math.round(midiFloat);
+  const cents = Math.round((midiFloat - rounded) * 100);
+  noteBig.textContent = sargamDisplayString(midiFloat) + ' / ' + noteName(midiFloat) + '  (' + freq.toFixed(0) + ' Hz, ' + (cents > 0 ? '+' : '') + cents + '¢)';
+
+  const clamped = Math.max(-50, Math.min(50, cents));
+  needle.style.left = (50 + clamped) + '%';
+
+  if (pianoMarker) {
+    const xPix = midiFloatToX(midiFloat);
+    pianoMarker.style.display = 'block';
+    pianoMarker.style.left = xPix + 'px';
+  }
+
+  registerPitchForHistory(midiFloat);
+  drawHistory();
+  recordTrailSample(midiFloat);
+  drawTrail();
+}
+
+function loop() {
+  try {
+    analyser.getFloatTimeDomainData(dataArray);
+    const freq = autoCorrelate(dataArray, audioContext.sampleRate);
+    updateUI(freq);
+  } catch (err) {
+    // never let a rendering/detection glitch kill the whole live loop
+    console.error('pitch-loop error (recovered):', err);
+  }
+  rafId = requestAnimationFrame(loop);
+}
+
+// ---------- Screen Wake Lock — jethi app khullu hoy tyare screen band na thay ----------
+let wakeLockSentinel = null;
+
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLockSentinel = await navigator.wakeLock.request('screen');
+      wakeLockSentinel.addEventListener('release', () => {
+        wakeLockSentinel = null;
+      });
+    }
+  } catch (err) {
+    // wake lock not supported or denied — silently ignore, app still works
+    console.warn('Wake lock unavailable:', err);
+  }
+}
+
+function releaseWakeLock() {
+  if (wakeLockSentinel) {
+    wakeLockSentinel.release().catch(() => {});
+    wakeLockSentinel = null;
+  }
+}
+
+// re-acquire wake lock if tab becomes visible again while still listening
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && listening && !wakeLockSentinel) {
+    requestWakeLock();
+  }
+});
+
+async function startListening() {
+  try {
+    statusEl.textContent = 'Mic access mangyu che...';
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: true
+      }
+    });
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContext.createMediaStreamSource(mediaStream);
+
+    const boost = audioContext.createGain();
+    boost.gain.value = 3.5; // amplify quiet voices before detection
+
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 2048;
+    dataArray = new Float32Array(analyser.fftSize);
+    source.connect(boost);
+    boost.connect(analyser);
+
+    startBtn.textContent = (TRANSLATIONS[currentLang] || TRANSLATIONS.gu).stop_listening;
+    startBtn.classList.add('listening');
+    statusEl.textContent = 'Listening... gaao!';
+    listening = true;
+    loop();
+    requestWakeLock();
+  } catch (err) {
+    if (location.protocol === 'file:') {
+      statusEl.textContent = 'Mic kaam nahi karshe - aa file direct kholi chhe (file://). Netlify Drop par upload karo pehla.';
+    } else {
+      statusEl.textContent = 'Mic access nathi malyu. Browser permission check karo.';
+    }
+  }
+}
+
+function stopListening() {
+  if (rafId) cancelAnimationFrame(rafId);
+  if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+  if (audioContext) audioContext.close();
+  listening = false;
+  startBtn.textContent = (TRANSLATIONS[currentLang] || TRANSLATIONS.gu).start_listening;
+  startBtn.classList.remove('listening');
+  statusEl.textContent = 'Mic access જરૂરી છે — "Start Listening" દબાવો';
+  noteBig.textContent = '-';
+  const pianoMarker = document.getElementById('pianoMarker');
+  if (pianoMarker) pianoMarker.style.display = 'none';
+  pitchSamples = [];
+  pitchHistoryPoints = [];
+  drawHistory();
+  drawTrail();
+  releaseWakeLock();
+}
+
+startBtn.addEventListener('click', () => {
+  if (listening) stopListening();
+  else startListening();
+});
+
+drawHistory();
+drawTrail();
+
+// ---------- Localization (Gujarati / Hindi / English) ----------
+const TRANSLATIONS = {
+  gu: {
+    subtitle: 'ગાઓ અને લાઈવ પિચ જુઓ — પિયાનો કી પર ક્લિક કરીને સૂર સાંભળો',
+    sa_label: 'તમારો સા (Sa) પસંદ કરો:',
+    instrument_label: 'કી વગાડવાથી કયું વાદ્ય સંભળાય:',
+    inst_harmonium: 'હાર્મોનિયમ',
+    inst_piano: 'પિયાનો',
+    inst_tanpura: 'તાનપુરો',
+    start_listening: 'સાંભળવાનું શરૂ કરો',
+    stop_listening: 'બંધ કરો',
+    tanpura_tuning: 'ટ્યુનિંગ',
+    tanpura_finetune: 'ફાઇન ટ્યુન',
+    tanpura_tempo: 'પ્લક સ્પીડ',
+    tanpura_volume: 'વોલ્યુમ',
+    tanpura_play: 'તાનપુરો ચાલુ કરો',
+    tanpura_stop: 'તાનપુરો બંધ કરો',
+    drone_mode: 'ડ્રોન પ્રકાર',
+    status_default: 'માઇક એક્સેસ જરૂરી છે — "સાંભળવાનું શરૂ કરો" દબાવો',
+    footer_note: 'મફત ટૂલ — કોઈને પણ શેર કરો. અવાજ ફક્ત બ્રાઉઝરમાં જ પ્રોસેસ થાય છે, ક્યાંય સેવ થતો નથી.',
+    install_btn: 'ઇન્સ્ટોલ કરો',
+    rotate_fail_installed: 'આ ડિવાઇસ પર Rotate feature કામ નથી કરતું. ફોનનું "Auto-rotate" સેટિંગ ON રાખો અને ફોનને હાથથી તિરછું કરો.',
+    rotate_fail_browser: 'Chrome browser ટેબમાં rotate lock કામ નથી કરતું (એ browser ની મર્યાદા છે). આ app ને પહેલા "Install" કરો — install કરેલી app માં rotate બરાબર કામ કરશે. ત્યાં સુધી ફોનનું "Auto-rotate" ON રાખીને હાથથી તિરછું કરો.',
+    tonic_0: 'સફેદ ૧ (C)',
+    tonic_1: 'કાળી ૧ (C#)',
+    tonic_2: 'સફેદ ૨ (D)',
+    tonic_3: 'કાળી ૨ (D#)',
+    tonic_4: 'સફેદ ૩ (E)',
+    tonic_5: 'સફેદ ૪ (F)',
+    tonic_6: 'કાળી ૩ (F#)',
+    tonic_7: 'સફેદ ૫ (G)',
+    tonic_8: 'કાળી ૪ (G#)',
+    tonic_9: 'સફેદ ૬ (A)',
+    tonic_10: 'કાળી ૫ (A#)',
+    tonic_11: 'સફેદ ૭ (B)'
+  },
+  hi: {
+    subtitle: 'गाओ और लाइव पिच देखो — पियानो की पर क्लिक करके सुर सुनो',
+    sa_label: 'अपना सा (Sa) चुनें:',
+    instrument_label: 'की बजाने पर कौन सा वाद्य सुनाई दे:',
+    inst_harmonium: 'हारमोनियम',
+    inst_piano: 'पियानो',
+    inst_tanpura: 'तानपुरा',
+    start_listening: 'सुनना शुरू करें',
+    stop_listening: 'रोकें',
+    tanpura_tuning: 'ट्यूनिंग',
+    tanpura_finetune: 'फाइन ट्यून',
+    tanpura_tempo: 'प्लक स्पीड',
+    tanpura_volume: 'वॉल्यूम',
+    tanpura_play: 'तानपुरा चालू करें',
+    tanpura_stop: 'तानपुरा बंद करें',
+    drone_mode: 'ड्रोन का प्रकार',
+    status_default: 'माइक एक्सेस ज़रूरी है — "सुनना शुरू करें" दबाएं',
+    footer_note: 'मुफ़्त टूल — किसी को भी शेयर करें। आवाज़ सिर्फ़ ब्राउज़र में प्रोसेस होती है, कहीं सेव नहीं होती।',
+    install_btn: 'इंस्टॉल करें',
+    rotate_fail_installed: 'यह Rotate feature इस डिवाइस पर काम नहीं कर रहा। फ़ोन की "Auto-rotate" सेटिंग ON रखें और फ़ोन को हाथ से तिरछा करें।',
+    rotate_fail_browser: 'Chrome browser टैब में rotate lock काम नहीं करता (यह browser की सीमा है)। पहले इस app को "Install" करें — installed app में rotate ठीक से काम करेगा। तब तक फ़ोन का "Auto-rotate" ON रखकर हाथ से तिरछा करें।',
+    tonic_0: 'सफ़ेद १ (C)',
+    tonic_1: 'काली १ (C#)',
+    tonic_2: 'सफ़ेद २ (D)',
+    tonic_3: 'काली २ (D#)',
+    tonic_4: 'सफ़ेद ३ (E)',
+    tonic_5: 'सफ़ेद ४ (F)',
+    tonic_6: 'काली ३ (F#)',
+    tonic_7: 'सफ़ेद ५ (G)',
+    tonic_8: 'काली ४ (G#)',
+    tonic_9: 'सफ़ेद ६ (A)',
+    tonic_10: 'काली ५ (A#)',
+    tonic_11: 'सफ़ेद ७ (B)'
+  },
+  en: {
+    subtitle: 'Sing and see your live pitch — click a piano key to hear the note',
+    sa_label: 'Choose your Sa:',
+    instrument_label: 'Instrument sound when you press a key:',
+    inst_harmonium: 'Harmonium',
+    inst_piano: 'Piano',
+    inst_tanpura: 'Tanpura',
+    start_listening: 'Start Listening',
+    stop_listening: 'Stop',
+    tanpura_tuning: 'Tuning',
+    tanpura_finetune: 'Fine Tune',
+    tanpura_tempo: 'Pluck Speed',
+    tanpura_volume: 'Volume',
+    tanpura_play: 'Start Tanpura',
+    tanpura_stop: 'Stop Tanpura',
+    drone_mode: 'Drone Mode',
+    status_default: 'Mic access needed — press "Start Listening"',
+    footer_note: 'Free tool — share with anyone. Audio is processed only in the browser, nothing is saved anywhere.',
+    install_btn: 'Install',
+    rotate_fail_installed: 'The rotate feature isn\u2019t working on this device. Turn on your phone\u2019s "Auto-rotate" setting and turn the phone by hand.',
+    rotate_fail_browser: 'Rotate lock doesn\u2019t work in a Chrome browser tab (a browser limitation). Install this app first — rotate works properly in the installed app. Until then, keep "Auto-rotate" on and turn the phone by hand.',
+    tonic_0: 'White 1 (C)',
+    tonic_1: 'Black 1 (C#)',
+    tonic_2: 'White 2 (D)',
+    tonic_3: 'Black 2 (D#)',
+    tonic_4: 'White 3 (E)',
+    tonic_5: 'White 4 (F)',
+    tonic_6: 'Black 3 (F#)',
+    tonic_7: 'White 5 (G)',
+    tonic_8: 'Black 4 (G#)',
+    tonic_9: 'White 6 (A)',
+    tonic_10: 'Black 5 (A#)',
+    tonic_11: 'White 7 (B)'
+  }
+};
+// Sargam base letters per language (musical syllables, komal/tivra suffix only in gu/hi text form)
+// ---------- Onboarding / Info content (3 languages, shared by "i" button and first-visit walkthrough) ----------
+const ONBOARDING_STEPS = {
+  gu: [
+    { title: '🎤 Harmony Music માં સ્વાગત છે', body: 'આ એક free Vocal Pitch Monitor છે — તમે ગાઓ, અને app તમારો સૂર live piano keyboard પર બતાવે. Sargam (સા રે ગ મ) notation, harmonium/piano/tanpura sound, ane વધુ — બધું આ short guide માં સમજાવીએ.' },
+    { title: 'તમારો સા (Sa) પસંદ કરો', body: '"તમારો સા પસંદ કરો" dropdown માંથી harmonium-style (સફેદ/કાળી) numbering વાપરીને તમારો સા set કરો. બધા સ્વરોના નામ (સા રે ગ...) એ પ્રમાણે automatically shift થશે.' },
+    { title: 'Instrument પસંદ કરો', body: 'હાર્મોનિયમ, પિયાનો, ke તાનપુરો — ત્રણમાંથી પસંદ કરો. Harmonium ma fixed 3 saptak (C2-C4), Piano ma પૂરું 88-key range, ane Tanpura ma keyboard ni jagyae drone-tuning controls દેખાય.' },
+    { title: 'Piano Keyboard ane Sargam', body: 'દરેક key ni niche સ્વર નું નામ (સા/રે/ગ) દેખાય. કોમળ સ્વર ni niche લીટી, તીવ્ર મ ni "મ\u2019" nishani. Saptak batavva mate niche bindi (મંદ્ર) ke upar bindi (તાર) hoy chhe.' },
+    { title: 'Mic thi Gaao', body: '"Start Listening" dabao, mic permission aapo, pachi gaao — piano par red marker line tamaro exact sur batavse, ane niche history graph tamara sur nu movement (wavy line) batavse.' },
+    { title: 'તાનપુરો Drone', body: 'Tanpura mode ma ટ્યુનિંગ (પ/મ/ની-સા-સા-સા), Fine Tune, Pluck Speed, ane Volume set kari ne "તાનપુરો ચાલુ કરો" dabao — continuous background drone vagshe, jyar sudhi band na karo.' },
+    { title: 'Top na Buttons', body: '🎨 Theme (Light/Dark), 🌐 Language (Gujarati/Hindi/English), 🔄 Rotate (landscape/portrait), ⬇️ Install (app tarike home screen par ume). Aa "ℹ️" button gamme tyare pachi phari aa guide batavse.' }
+  ],
+  hi: [
+    { title: '🎤 Harmony Music में स्वागत है', body: 'यह एक मुफ़्त Vocal Pitch Monitor है — आप गाएं, और app आपका सुर live पियानो कीबोर्ड पर दिखाएगा। सरगम (सा रे ग म) notation, हारमोनियम/पियानो/तानपुरा साउंड, और भी बहुत कुछ — यह छोटी guide में समझाते हैं।' },
+    { title: 'अपना सा (Sa) चुनें', body: '"अपना सा चुनें" dropdown से हारमोनियम-स्टाइल (सफ़ेद/काली) नंबरिंग से अपना सा सेट करें। सभी स्वरों के नाम (सा रे ग...) उसी अनुसार अपने आप बदल जाएंगे।' },
+    { title: 'वाद्य चुनें', body: 'हारमोनियम, पियानो, या तानपुरा — तीनों में से चुनें। हारमोनियम में fixed 3 सप्तक (C2-C4), पियानो में पूरी 88-key रेंज, और तानपुरा में कीबोर्ड की जगह ड्रोन-ट्यूनिंग कंट्रोल दिखते हैं।' },
+    { title: 'पियानो कीबोर्ड और सरगम', body: 'हर key के नीचे स्वर का नाम (सा/रे/ग) दिखता है। कोमल स्वर के नीचे लाइन, तीव्र म के लिए "म\u2019" निशानी। सप्तक दिखाने के लिए नीचे बिंदी (मंद्र) या ऊपर बिंदी (तार) होती है।' },
+    { title: 'माइक से गाएं', body: '"Start Listening" दबाएं, माइक अनुमति दें, फिर गाएं — पियानो पर लाल मार्कर लाइन आपका सटीक सुर दिखाएगी, और नीचे history graph आपके सुर की गति (लहरदार रेखा) दिखाएगा।' },
+    { title: 'तानपुरा ड्रोन', body: 'Tanpura मोड में ट्यूनिंग (प/म/नी-सा-सा-सा), Fine Tune, Pluck Speed, और Volume सेट करके "तानपुरा चालू करें" दबाएं — लगातार background drone बजेगा, जब तक बंद न करें।' },
+    { title: 'ऊपर के बटन', body: '🎨 Theme (Light/Dark), 🌐 Language (Gujarati/Hindi/English), 🔄 Rotate (landscape/portrait), ⬇️ Install (app को home screen पर जोड़ें)। यह "ℹ️" बटन कभी भी फिर से यह guide दिखाएगा।' }
+  ],
+  en: [
+    { title: '🎤 Welcome to Harmony Music', body: 'This is a free Vocal Pitch Monitor — sing, and the app shows your pitch live on a piano keyboard. Sargam (Sa Re Ga Ma) notation, harmonium/piano/tanpura sounds, and more — this short guide covers it all.' },
+    { title: 'Choose your Sa', body: 'Use the "Choose your Sa" dropdown with harmonium-style (white/black key) numbering to set your Sa. All swar names (Sa Re Ga...) shift automatically to match.' },
+    { title: 'Choose an Instrument', body: 'Pick Harmonium, Piano, or Tanpura. Harmonium has a fixed 3-saptak range (C2-C4), Piano shows the full 88-key range, and Tanpura replaces the keyboard with drone-tuning controls.' },
+    { title: 'Piano Keyboard & Sargam', body: 'Each key shows its swar name (Sa/Re/Ga) below it. Komal swars get an underline, tivra Ma is marked "Ma\u2019". A dot below marks mandra saptak, a dot above marks taar saptak.' },
+    { title: 'Sing into the Mic', body: 'Press "Start Listening", allow mic access, then sing — a red marker line on the piano shows your exact pitch, and the history graph below traces your pitch movement as a wavy line.' },
+    { title: 'Tanpura Drone', body: 'In Tanpura mode, set the Tuning (Pa/Ma/Ni-Sa-Sa-Sa), Fine Tune, Pluck Speed, and Volume, then press "Start Tanpura" — a continuous background drone plays until you stop it.' },
+    { title: 'Top Buttons', body: '🎨 Theme (Light/Dark), 🌐 Language (Gujarati/Hindi/English), 🔄 Rotate (landscape/portrait), ⬇️ Install (add app to home screen). This "ℹ️" button brings back this guide anytime.' }
+  ]
+};
+
+let onboardingStepIndex = 0;
+const onboardingOverlay = document.getElementById('onboardingOverlay');
+const onboardingTitle = document.getElementById('onboardingTitle');
+const onboardingBody = document.getElementById('onboardingBody');
+const onboardingStepNum = document.getElementById('onboardingStepNum');
+const onboardingPrev = document.getElementById('onboardingPrev');
+const onboardingNext = document.getElementById('onboardingNext');
+const onboardingSkip = document.getElementById('onboardingSkip');
+const onboardingClose = document.getElementById('onboardingClose');
+const SKIP_LABEL = { gu: 'પૂરું કરો', hi: 'समाप्त करें', en: 'Done' };
+const NEXT_LABEL_LAST = { gu: 'પૂરું', hi: 'समाप्त', en: 'Done' };
+
+function renderOnboardingStep() {
+  const steps = ONBOARDING_STEPS[currentLang] || ONBOARDING_STEPS.gu;
+  const step = steps[onboardingStepIndex];
+  onboardingTitle.textContent = step.title;
+  onboardingBody.textContent = step.body;
+  onboardingStepNum.textContent = (onboardingStepIndex + 1) + ' / ' + steps.length;
+  onboardingPrev.style.visibility = onboardingStepIndex === 0 ? 'hidden' : 'visible';
+  onboardingSkip.textContent = (SKIP_LABEL[currentLang] || SKIP_LABEL.gu);
+  onboardingNext.textContent = onboardingStepIndex === steps.length - 1 ? '✓' : '›';
+}
+
+function openOnboarding(fromStart) {
+  onboardingStepIndex = fromStart ? 0 : onboardingStepIndex;
+  renderOnboardingStep();
+  onboardingOverlay.style.display = 'flex';
+}
+
+function closeOnboarding() {
+  onboardingOverlay.style.display = 'none';
+  try { localStorage.setItem('harmonyAppOnboarded', '1'); } catch (e) {}
+}
+
+onboardingNext.addEventListener('click', () => {
+  const steps = ONBOARDING_STEPS[currentLang] || ONBOARDING_STEPS.gu;
+  if (onboardingStepIndex < steps.length - 1) {
+    onboardingStepIndex++;
+    renderOnboardingStep();
+  } else {
+    closeOnboarding();
+  }
+});
+onboardingPrev.addEventListener('click', () => {
+  if (onboardingStepIndex > 0) {
+    onboardingStepIndex--;
+    renderOnboardingStep();
+  }
+});
+onboardingSkip.addEventListener('click', closeOnboarding);
+onboardingClose.addEventListener('click', closeOnboarding);
+
+
+
+const SARGAM_BASE_BY_LANG = {
+  gu: ['સા','રે કો','રે','ગ કો','ગ','મ','મ','પા','ધ કો','ધ','ની કો','ની'],
+  hi: ['सा','रे को','रे','ग को','ग','म','म','पा','ध को','ध','नी को','नी'],
+  en: ['Sa','Re(k)','Re','Ga(k)','Ga','Ma','Ma','Pa','Dha(k)','Dha','Ni(k)','Ni']
+};
+
+let currentLang = (() => {
+  try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch (e) { return 'gu'; }
+})();
+
+function applyTranslations() {
+  const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.gu;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key] !== undefined) el.textContent = dict[key];
+  });
+  // dynamic-state buttons that aren't plain data-i18n (depend on runtime state)
+  if (typeof listening !== 'undefined') {
+    startBtn.textContent = listening ? dict.stop_listening : dict.start_listening;
+  }
+  if (typeof tanpuraPlaying !== 'undefined' && tanpuraPlayBtn) {
+    tanpuraPlayBtn.innerHTML = '▶ <span>' + (tanpuraPlaying ? dict.tanpura_stop : dict.tanpura_play) + '</span>';
+  }
+  SARGAM_BASE.splice(0, SARGAM_BASE.length, ...(SARGAM_BASE_BY_LANG[currentLang] || SARGAM_BASE_BY_LANG.gu));
+  if (typeof buildPiano === 'function' && piano) buildPiano();
+  document.documentElement.lang = currentLang;
+  if (typeof onboardingOverlay !== 'undefined' && onboardingOverlay && onboardingOverlay.style.display === 'flex') {
+    renderOnboardingStep();
+  }
+}
+
+// Theme and language are managed globally by app-shell.js
+
+
+
+// apply saved language/theme once DOM + all functions are ready
+applyTranslations();
+
+// auto-show onboarding only on the very first visit (placed here so currentLang/translations are ready)
+(() => {
+  let alreadyOnboarded = false;
+  try { alreadyOnboarded = localStorage.getItem('harmonyAppOnboarded') === '1'; } catch (e) {}
+  if (!alreadyOnboarded) openOnboarding(true);
+})();
+
+
+
+// ---------- PWA Install button ----------
+let deferredInstallPrompt = null;
+const installBtn = document.getElementById('installBtn');
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+
+function hideInstallBtn() {
+  installBtn.style.display = 'none';
+}
+
+function showInstallBtnIfNeeded() {
+  // isStandalone is checked live every time — never gets permanently "stuck" hidden across deploys/devices
+  installBtn.style.display = isStandalone ? 'none' : 'block';
+}
+
+// show immediately on load (don't wait for beforeinstallprompt — some browsers delay/never fire it)
+showInstallBtnIfNeeded();
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallBtnIfNeeded();
+});
+
+installBtn.addEventListener('click', async () => {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    if (choice && choice.outcome === 'accepted') hideInstallBtn();
+  } else if (isIOS) {
+    alert('iPhone/iPad par install karva mate: niche Share button (⬆️) dabao, pachi "Add to Home Screen" select karo.');
+  } else {
+    alert('Aa browser ma direct install available nathi. Chrome address bar ma install icon (⊕) check karo, ke browser menu ma "Add to Home screen" shodho.');
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  hideInstallBtn();
+});
+
+// if opened as an already-installed standalone app, never show the button
+if (isStandalone) hideInstallBtn();
+</script>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+  const INFO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-info" style="pointer-events:none;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+  const ROTATE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rotate-cw" style="pointer-events:none;"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>`;
+
+  initAppShell({
+    title: document.querySelector('h1') ? document.querySelector('h1').textContent : 'Vocal Pitch Monitor',
+    customHeaderButtons: [
+      { id: 'infoBtn', title: 'Info', html: INFO_SVG },
+      { id: 'rotateBtn', title: 'Rotate', html: ROTATE_SVG }
+    ]
+  });
+
+  // Bind info and rotate event listeners dynamically after shell elements are built
+  const infoBtn = document.getElementById('infoBtn');
+  if (infoBtn) {
+    infoBtn.addEventListener('click', () => openOnboarding(true));
+  }
+
+  const rotateBtn = document.getElementById('rotateBtn');
+  if (rotateBtn) {
+    rotateBtn.addEventListener('click', async () => {
+      const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.gu;
+      try {
+        if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+          try { await document.documentElement.requestFullscreen(); } catch (fsErr) { /* ignore */ }
+        }
+        if (screen.orientation && screen.orientation.lock) {
+          const isLandscape = (screen.orientation.type || '').includes('landscape');
+          await screen.orientation.lock(isLandscape ? 'portrait' : 'landscape');
+        } else {
+          throw new Error('orientation lock unsupported');
+        }
+      } catch (err) {
+        if (isStandalone) {
+          alert(dict.rotate_fail_installed || 'Rotate feature aa device par kaam nathi karta. Phone na "Auto-rotate" setting ON rakho ane phone ne haath thi tirchu karo.');
+        } else {
+          alert(dict.rotate_fail_browser || 'Chrome browser tab ma rotate lock kaam nathi kartu (browser ni limitation chhe). Aa app ne pehla "Install" karo — install kareli app ma rotate barabar kaam karse. Tyar sudhi phone na "Auto-rotate" ON rakhi ne haath thi tirchu karo.');
+        }
+      }
+    });
+  }
+</script>
+</body>
+</html>

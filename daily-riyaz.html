@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Riyaz - Harmony Music</title>
+  <link rel="stylesheet" href="shared/theme.css">
+  <link rel="stylesheet" href="shared/app-shell.css">
+  <link rel="stylesheet" href="shared/components.css">
+  <style>
+    .riyaz-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 600px;
+      margin: 20px auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .riyaz-form {
+      margin-top: 15px;
+    }
+    .form-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; gap: 10px; }
+    }
+    .form-field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .form-field label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+    .form-field input, .form-field select {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--bg-body);
+      color: var(--text);
+      outline: none;
+    }
+    .record-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .record-btn.recording {
+      background: #2ecc71;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .riyaz-save-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.2s;
+    }
+    .riyaz-save-btn:hover { background: var(--accent-hover, #c0392b); }
+    .status-msg { text-align: center; margin-top: 10px; font-weight: 600; font-size: 0.9rem; }
+    .status-msg.ok { color: var(--accent-green); }
+    .status-msg.err { color: var(--accent); }
+  </style>
+</head>
+<body data-page="daily-riyaz">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+
+    <!-- Daily Riyaz Practice Log Card -->
+    <div class="riyaz-card" id="riyazCardSection">
+      <div style="display:flex; align-items:center; margin-bottom:8px; gap:8px;">
+        <span style="font-size:1.5rem;">📅</span>
+        <h3 style="margin:0;" id="riyazTitle">આજનો રિયાઝ લોગ (Daily Riyaz Practice Log)</h3>
+      </div>
+      <p style="color:var(--subtitle); font-size:0.82rem; margin-top:0;" id="riyazDesc">તમારી આજની પ્રેક્ટિસનો સમય અને વિગતો અહીં સબમિટ કરો.</p>
+      
+      <div class="riyaz-form">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="riyazCatSelect" id="lblRiyazCat">સંગીત શ્રેણી / વાદ્ય</label>
+            <select id="riyazCatSelect">
+              <option value="Vocal">Vocal (ગાયકી)</option>
+              <option value="Guitar">Guitar (ગીતાર)</option>
+              <option value="Piano">Piano (પિયાનો)</option>
+              <option value="Tabla">Tabla (તબલા)</option>
+              <option value="Harmonium">Harmonium (હાર્મોનિયમ)</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="riyazTopicInput" id="lblRiyazTopic">ટોપિક / રાગ</label>
+            <input type="text" id="riyazTopicInput" placeholder="દા.ત. રાગ યમન, અલંકાર">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="riyazHours" id="lblRiyazHours">સમય (કલાક)</label>
+            <input type="number" id="riyazHours" min="0" max="24" value="0">
+          </div>
+          <div class="form-field">
+            <label for="riyazMins" id="lblRiyazMins">સમય (મિનિટ)</label>
+            <input type="number" id="riyazMins" min="0" max="59" value="30">
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-top:12px;">
+          <label id="lblAudioVerification" style="font-weight:600;">🎙️ વાલી કન્ફર્મેશન ઓડિયો (Parent Voice Note Confirmation)</label>
+          <div style="display:flex; align-items:center; gap:12px; margin-top:8px; flex-wrap:wrap;">
+            <button class="record-btn" id="recordBtn">Record</button>
+            <span id="recordStatus" style="font-size:0.85rem; color:var(--subtitle);">Not Recording</span>
+            <audio id="audioPreview" controls style="display:none; height:32px;"></audio>
+          </div>
+        </div>
+
+        <button class="riyaz-save-btn" id="saveRiyazBtn">રિયાઝ સબમિટ કરો</button>
+        <div id="riyazStatus" class="status-msg"></div>
+
+        <!-- Student's Own Recent Riyaz History -->
+        <div style="margin-top:25px; border-top:1px solid var(--border); padding-top:15px;">
+          <h4 style="margin:0 0 12px 0; color:var(--text);" id="lblRiyazHistory">તમારો રિયાઝ ઇતિહાસ (Your Practice History)</h4>
+          <div id="studentRiyazHistoryList" style="display:flex; flex-direction:column; gap:8px;">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+  const RIYAZ_PAGE_TEXT = {
+    gu: {
+      title: 'ડેઇલી રિયાઝ',
+      riyazTitle: 'આજનો રિયાઝ લોગ (Daily Riyaz Practice Log)',
+      riyazDesc: 'તમારી આજની પ્રેક્ટિસનો સમય અને વિગતો અહીં સબમિટ કરો.',
+      lblRiyazCat: 'સંગીત શ્રેણી / વાદ્ય',
+      lblRiyazTopic: 'ટોપિક / રાગ',
+      lblRiyazHours: 'સમય (કલાક)',
+      lblRiyazMins: 'સમય (મિનિટ)',
+      lblAudioVerification: '🎙️ વાલી કન્ફર્મેશન ઓડિયો (Parent Voice Note Confirmation)',
+      btnSave: 'રિયાઝ સબમિટ કરો',
+      lblRiyazHistory: 'તમારો રિયાઝ ઇતિહાસ (Your Practice History)',
+      recording: '🔴 રેકોર્ડિંગ ચાલુ છે...',
+      notRecording: 'રેકોર્ડિંગ બંધ છે (વાલીનો અવાજ રેકોર્ડ કરો)',
+      recordLabel: '🎙️ રેકોર્ડ કરો',
+      stopLabel: '⏹️ રેકોર્ડિંગ બંધ કરો',
+      submitSuccess: 'રિયાઝ સફળતાપૂર્વક સબમિટ થઈ ગયો છે! ✅',
+      submitErr: 'રિયાઝ સબમિટ કરવામાં ભૂલ આવી.',
+      alreadyDone: 'તમે આજનો રિયાઝ સબમિટ કરી દીધો છે! 🌟',
+      placeholderTopic: 'દા.ત. રાગ યમન, અલંકાર',
+      submitting: 'સબમિટ થઈ રહ્યું છે...',
+      alertTopic: 'કૃપા કરીને ટોપિક અથવા રાગનું નામ લખો!',
+      noHistory: 'કોઈ ઇતિહાસ મળ્યો નથી (No history found).',
+      parentAudio: '🎙️ વાલી કન્ફર્મેશન ઓડિયો:',
+      micError: 'માઇક્રોફોન એક્સેસ આપી શક્યા નથી: ',
+      catVocal: 'Vocal (ગાયકી)',
+      catGuitar: 'Guitar (ગીતાર)',
+      catPiano: 'Piano (પિયાનો)',
+      catTabla: 'Tabla (તબલા)',
+      catHarmonium: 'Harmonium (હાર્મોનિયમ)'
+    },
+    hi: {
+      title: 'डेली रियाज़',
+      riyazTitle: 'आज का रियाज़ लॉग (Daily Riyaz Practice Log)',
+      riyazDesc: 'अपनी आज की प्रैक्टिस का समय और विवरण यहाँ सबमिट करें।',
+      lblRiyazCat: 'संगीत श्रेणी / वाद्य',
+      lblRiyazTopic: 'विषय / राग',
+      lblRiyazHours: 'समय (घंटे)',
+      lblRiyazMins: 'समय (मिनट)',
+      lblAudioVerification: '🎙️ अभिभावक पुष्टि ऑडियो (Parent Voice Note Confirmation)',
+      btnSave: 'रियाज़ सबमिट करें',
+      lblRiyazHistory: 'आपका रियाज़ इतिहास (Your Practice History)',
+      recording: '🔴 रिकॉर्डिंग चालू है...',
+      notRecording: 'रिकॉर्डिंग बंद है (अभिभावक की आवाज़ रिकॉर्ड करें)',
+      recordLabel: '🎙️ रिकॉर्ड करें',
+      stopLabel: '⏹️ रिकॉर्डिंग बंद करें',
+      submitSuccess: 'रियाज़ सफलतापूर्वक सबमिट हो गया है! ✅',
+      submitErr: 'रियाज़ सबमिट करने में त्रुटि आई।',
+      alreadyDone: 'आपने आज का रियाज़ सबमिट कर दिया है! 🌟',
+      placeholderTopic: 'जैसे राग यमन, अलंकार',
+      submitting: 'सबमिट हो रहा है...',
+      alertTopic: 'कृपया विषय या राग का नाम लिखें!',
+      noHistory: 'कोई इतिहास नहीं मिला (No history found)।',
+      parentAudio: '🎙️ अभिभावक पुष्टि ऑडियो:',
+      micError: 'माइक्रोफ़ोन एक्सेस प्रदान नहीं किया जा सका: ',
+      catVocal: 'Vocal (गायन)',
+      catGuitar: 'Guitar (गिटार)',
+      catPiano: 'Piano (पियानो)',
+      catTabla: 'Tabla (तबला)',
+      catHarmonium: 'Harmonium (हारमोनियम)'
+    },
+    en: {
+      title: 'Daily Riyaz',
+      riyazTitle: 'Daily Riyaz Practice Log',
+      riyazDesc: 'Submit your practice topic, duration, and parental voice note here.',
+      lblRiyazCat: 'Category / Instrument',
+      lblRiyazTopic: 'Topic / Raga',
+      lblRiyazHours: 'Hours',
+      lblRiyazMins: 'Minutes',
+      lblAudioVerification: '🎙️ Parent Voice Note Confirmation',
+      btnSave: 'Submit Riyaz Log',
+      lblRiyazHistory: 'Your Practice History',
+      recording: '🔴 Recording...',
+      notRecording: 'Not Recording (Record parent voice confirmation)',
+      recordLabel: '🎙️ Record',
+      stopLabel: '⏹️ Stop Recording',
+      submitSuccess: 'Riyaz log submitted successfully! ✅',
+      submitErr: 'Error submitting Riyaz log.',
+      alreadyDone: 'You have already submitted today\'s Riyaz! 🌟',
+      placeholderTopic: 'e.g. Raga Yaman, Alankars',
+      submitting: 'Submitting...',
+      alertTopic: 'Please write a topic or raga name!',
+      noHistory: 'No history found.',
+      parentAudio: '🎙️ Parent Confirmation Audio:',
+      micError: 'Could not grant microphone access: ',
+      catVocal: 'Vocal (Singing)',
+      catGuitar: 'Guitar',
+      catPiano: 'Piano',
+      catTabla: 'Tabla',
+      catHarmonium: 'Harmonium'
+    }
+  };
+
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+  const t = RIYAZ_PAGE_TEXT[lang] || RIYAZ_PAGE_TEXT.gu;
+
+  function applyPageTranslations() {
+    document.getElementById('riyazTitle').textContent = t.riyazTitle;
+    document.getElementById('riyazDesc').textContent = t.riyazDesc;
+    document.getElementById('lblRiyazCat').textContent = t.lblRiyazCat;
+    document.getElementById('lblRiyazTopic').textContent = t.lblRiyazTopic;
+    document.getElementById('lblRiyazHours').textContent = t.lblRiyazHours;
+    document.getElementById('lblRiyazMins').textContent = t.lblRiyazMins;
+    document.getElementById('lblAudioVerification').textContent = t.lblAudioVerification;
+    document.getElementById('saveRiyazBtn').textContent = t.btnSave;
+    document.getElementById('lblRiyazHistory').textContent = t.lblRiyazHistory;
+    document.getElementById('riyazTopicInput').placeholder = t.placeholderTopic;
+    
+    // Translate category select
+    const riyazCatSelect = document.getElementById('riyazCatSelect');
+    riyazCatSelect.options[0].text = t.catVocal;
+    riyazCatSelect.options[1].text = t.catGuitar;
+    riyazCatSelect.options[2].text = t.catPiano;
+    riyazCatSelect.options[3].text = t.catTabla;
+    riyazCatSelect.options[4].text = t.catHarmonium;
+  }
+
+  applyPageTranslations();
+
+  const riyazHoursInput = document.getElementById('riyazHours');
+  const riyazMinsInput = document.getElementById('riyazMins');
+  const riyazTopicInput = document.getElementById('riyazTopicInput');
+  const riyazCatSelect = document.getElementById('riyazCatSelect');
+  const recordBtn = document.getElementById('recordBtn');
+  const recordStatus = document.getElementById('recordStatus');
+  const audioPreview = document.getElementById('audioPreview');
+  const saveRiyazBtn = document.getElementById('saveRiyazBtn');
+  const riyazStatus = document.getElementById('riyazStatus');
+
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let audioBlob = null;
+  let isRecording = false;
+
+  recordStatus.textContent = t.notRecording;
+  recordBtn.innerHTML = t.recordLabel;
+
+  // Setup Audio Recording with Low Bitrate (16kbps)
+  recordBtn.addEventListener('click', async () => {
+    if (!isRecording) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream, { audioBitsPerSecond: 16000 });
+        audioChunks = [];
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunks.push(event.data);
+        };
+        mediaRecorder.onstop = () => {
+          audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          audioPreview.src = audioUrl;
+          audioPreview.style.display = 'block';
+        };
+        mediaRecorder.start();
+        isRecording = true;
+        recordBtn.classList.add('recording');
+        recordBtn.textContent = t.stopLabel;
+        recordStatus.textContent = t.recording;
+      } catch (err) {
+        alert(t.micError + err.message);
+      }
+    } else {
+      if (mediaRecorder) {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      }
+      isRecording = false;
+      recordBtn.classList.remove('recording');
+      recordBtn.innerHTML = t.recordLabel;
+      recordStatus.textContent = t.notRecording;
+    }
+  });
+
+  const session = (typeof readMockSession === 'function') ? readMockSession() : null;
+
+  // Load Today's Riyaz log if exists
+  async function loadTodayRiyaz() {
+    if (session && session.phone) {
+      try {
+        const data = await getRiyazLogToday(session.phone);
+        if (data) {
+          riyazCatSelect.value = data.category;
+          riyazTopicInput.value = data.topic;
+          riyazHoursInput.value = data.hours;
+          riyazMinsInput.value = data.minutes;
+          if (data.audio_url) {
+            audioPreview.src = data.audio_url;
+            audioPreview.style.display = 'block';
+          }
+          saveRiyazBtn.disabled = true;
+          saveRiyazBtn.style.opacity = '0.6';
+          saveRiyazBtn.textContent = t.alreadyDone;
+        }
+      } catch(e) {
+        console.error('Error fetching today\'s Riyaz log:', e);
+      }
+    }
+  }
+
+  // Render Student's Own Riyaz History
+  async function renderStudentRiyazHistory() {
+    const listContainer = document.getElementById('studentRiyazHistoryList');
+    if (!listContainer) return;
+    listContainer.innerHTML = '';
+    
+    if (session && session.phone) {
+      let logs = [];
+      const sb = getSupabase();
+      const { data: { user } } = sb ? await sb.auth.getUser() : { data: {} };
+      
+      if (user) {
+        const { data, error } = await sb
+          .from('daily_riyaz')
+          .select('*')
+          .eq('phone', session.phone)
+          .order('practice_date', { ascending: false })
+          .limit(7);
+        if (!error && data) logs = data;
+      }
+      
+      if (logs.length === 0) {
+        try {
+          const prefix = `harmonyRiyazLog:${session.phone}:`;
+          const localLogs = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(prefix)) {
+              try {
+                localLogs.push(JSON.parse(localStorage.getItem(key)));
+              } catch(e) {}
+            }
+          }
+          localLogs.sort((a, b) => b.practice_date.localeCompare(a.practice_date));
+          logs = localLogs.slice(0, 7);
+        } catch(e) {}
+      }
+      
+      if (logs.length === 0) {
+        listContainer.innerHTML = `<div style="text-align:center; font-size:0.85rem; color:var(--subtitle); padding:10px 0;">${t.noHistory}</div>`;
+        return;
+      }
+      
+      logs.forEach(log => {
+        const item = document.createElement('div');
+        item.style.background = 'var(--bg)';
+        item.style.border = '1px solid var(--border)';
+        item.style.borderRadius = '8px';
+        item.style.padding = '10px';
+        item.style.fontSize = '0.85rem';
+        item.style.display = 'flex';
+        item.style.flexDirection = 'column';
+        item.style.gap = '6px';
+        
+        let audioHtml = '';
+        if (log.audio_url) {
+          audioHtml = `
+            <div style="margin-top:4px; width:100%;">
+              <span style="font-size:0.75rem; font-weight:600; display:block; margin-bottom:4px; color:var(--subtitle);">${t.parentAudio}</span>
+              <audio src="${log.audio_url}" controls style="width:100%; height:28px;"></audio>
+            </div>
+          `;
+        }
+        
+        item.innerHTML = `
+          <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+            <div style="text-align:left;">
+              <div style="font-weight:700; color:var(--accent);">${log.practice_date}</div>
+              <div style="color:var(--text); margin-top:2px;">${log.category} - ${log.topic}</div>
+            </div>
+            <div style="text-align:right; font-weight:600;">
+              <div>${log.hours}h ${log.minutes}m</div>
+            </div>
+          </div>
+          ${audioHtml}
+        `;
+        listContainer.appendChild(item);
+      });
+    }
+  }
+
+  saveRiyazBtn.addEventListener('click', async () => {
+    riyazStatus.textContent = '';
+    riyazStatus.className = 'status-msg';
+
+    const category = riyazCatSelect.value;
+    const topic = riyazTopicInput.value.trim();
+    const hours = riyazHoursInput.value;
+    const minutes = riyazMinsInput.value;
+
+    if (!topic) {
+      alert(t.alertTopic);
+      return;
+    }
+
+    if (session && session.phone) {
+      saveRiyazBtn.disabled = true;
+      saveRiyazBtn.textContent = t.submitting;
+
+      try {
+        let audioUrl = null;
+        if (audioBlob) {
+          const filename = `riyaz_${Date.now()}.mp3`;
+          try {
+            audioUrl = await uploadRiyazAudio(session.phone, audioBlob, filename);
+          } catch(err) {
+            console.error('Audio upload failed, proceeding without audio:', err);
+          }
+        }
+
+        await saveRiyazLog(session.phone, category, topic, hours, minutes, audioUrl);
+        
+        riyazStatus.textContent = t.submitSuccess;
+        riyazStatus.className = 'status-msg ok';
+        
+        saveRiyazBtn.textContent = t.alreadyDone;
+        saveRiyazBtn.style.opacity = '0.6';
+        
+        await renderStudentRiyazHistory();
+      } catch(err) {
+        console.error('Error saving Riyaz log:', err);
+        riyazStatus.textContent = t.submitErr;
+        riyazStatus.className = 'status-msg err';
+        saveRiyazBtn.disabled = false;
+        saveRiyazBtn.textContent = t.btnSave;
+      }
+    }
+  });
+
+  loadTodayRiyaz();
+  renderStudentRiyazHistory();
+  initAppShell({ title: t.title });
+</script>
+</body>
+</html>

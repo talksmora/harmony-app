@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+  }
+  .modal-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px 24px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: var(--shadow);
+    animation: scaleUp 0.3s ease;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+  }
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow);
+  }
+  .stat-icon {
+    font-size: 1.8rem;
+  }
+  .stat-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+</style>
+</head>
+<body data-page="dashboard">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <h2 id="dashGreeting" style="margin:0 0 4px;">સ્વાગત છે 👋</h2>
+    <p id="dashSub" style="color:var(--subtitle); margin:0 0 16px; font-size:0.9rem;">તમારે જે feature વાપરવું હોય એના પર ટેપ કરો</p>
+
+    <!-- Student Stats & Analytics Section -->
+    <div class="analytics-section" style="margin-bottom:30px;">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-info">
+            <h4 id="statWeeklyRiyaz" style="margin:0; font-size:1.4rem; font-weight:700; color:var(--accent);">0h 0m</h4>
+            <span style="font-size:0.75rem; color:var(--subtitle);" id="lblWeeklyRiyazTitle">આ અઠવાડિયાનો રિયાઝ</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🌟</div>
+          <div class="stat-info" style="flex:1;">
+            <h4 id="statStars" style="margin:0; font-size:1.4rem; font-weight:700; color:#f39c12;">0 / 100</h4>
+            <div style="width:100%; height:6px; background:var(--border); border-radius:3px; margin:4px 0; overflow:hidden;">
+              <div id="statStarsProgress" style="width:0%; height:100%; background:#f39c12; transition:width 0.5s ease;"></div>
+            </div>
+            <span style="font-size:0.75rem; color:var(--subtitle);" id="lblTotalStarsTitle">પ્રોગ્રેસ સ્ટાર્સ</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-info">
+            <h4 id="statAwards" style="margin:0; font-size:1.4rem; font-weight:700; color:#2ecc71;">0</h4>
+            <span style="font-size:0.75rem; color:var(--subtitle);" id="lblAwardsTitle">જીતેલી સ્પર્ધાઓ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Riyaz SVG Trend Line Chart -->
+      <div class="chart-box" style="background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:15px; margin-top:20px; text-align:left;">
+        <h4 style="margin:0 0 10px 0; font-size:0.9rem;" id="lblRiyazTrend">📉 રિયાઝ અને પ્રગતિ ટ્રેન્ડ લાઈન (Daily Trend Line)</h4>
+        
+        <!-- SVG Legend -->
+        <div style="display:flex; gap:12px; font-size:0.75rem; margin-bottom:8px; flex-wrap:wrap; font-weight:700;">
+          <span style="color:#e74c3c;">🔴 રિયાઝ (Riyaz)</span>
+          <span style="color:#f39c12;">🟡 પ્રોગ્રેસ સ્ટાર્સ (Stars)</span>
+          <span style="color:#2ecc71;">🟢 જીતેલી સ્પર્ધાઓ (Prizes)</span>
+        </div>
+
+        <!-- SVG Line Chart container -->
+        <div id="trendChartWrapper" style="position:relative; width:100%; height:140px; margin-top:10px;">
+          <svg id="trendSvg" style="width:100%; height:100%; overflow:visible; display:block;"></svg>
+        </div>
+
+        <!-- Interactive details card for selected day -->
+        <div id="trendDayDetails" style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:12px; min-height:60px; font-size:0.8rem; transition: all 0.3s ease; margin-top:15px;">
+          <div style="color:var(--subtitle); font-style:italic; text-align:center;" id="trendHint">કોઈપણ પોઈન્ટ (ડોટ) પર ટેપ કરો વિગતો જોવા માટે (Tap any point on the line to see daily details)</div>
+        </div>
+      </div>
+
+      <!-- Achievement Portfolio Timeline -->
+      <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:15px; margin-top:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h4 style="margin:0; font-size:0.9rem;" id="lblAchievementTimeline">🏆 સિદ્ધિઓ અને સર્ટિફિકેટ્સ</h4>
+          <button id="addAchievementBtn" style="background:var(--accent); color:#fff; border:none; padding:8px 16px; border-radius:20px; font-size:0.75rem; font-weight:600; cursor:pointer;">➕ નવું ઉમેરો</button>
+        </div>
+        <div id="achievementTimelineList" style="display:flex; flex-direction:column; gap:12px; border-left:2px solid var(--border); padding-left:15px; margin-left:10px; text-align:left;">
+          <!-- Chronological achievements timeline will go here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Achievement Modal -->
+    <div id="achievementModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; padding:15px; box-sizing:border-box;">
+      <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:20px; max-width:450px; width:100%; box-shadow:var(--shadow); position:relative; color:var(--text);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+          <h3 id="achievementModalTitle" style="margin:0; font-size:1.1rem;">🏆 નવી સિદ્ધિ / ઇનામ ઉમેરો</h3>
+          <button id="closeAchievementModalBtn" style="background:none; border:none; font-size:1.8rem; color:var(--text); cursor:pointer; line-height:1;">&times;</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; text-align:left;">
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <label for="achDate" style="font-size:0.8rem; font-weight:600;" id="lblAchDate">તારીખ (Date)</label>
+            <input type="date" id="achDate" style="width: 100%; padding:10px; border-radius:12px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <label for="achRiyazType" style="font-size:0.8rem; font-weight:600;" id="lblAchRiyazType">રિયાઝ ટાઈપ (Category)</label>
+            <select id="achRiyazType" style="width: 100%; padding:10px; border-radius:12px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+              <option value="Raga Competition">રાગ સ્પર્ધા (Raga Competition)</option>
+              <option value="Song Singing">ગીત સ્પર્ધા (Song Singing)</option>
+              <option value="Tala Competition">તાલ સ્પર્ધા (Tala Competition)</option>
+              <option value="Antakshari">અંતાક્ષરી (Antakshari)</option>
+              <option value="Class Badge Challenge">ક્લાસ બેજ ચેલેન્જ (Class Challenge)</option>
+              <option value="Other Class Event">અન્ય વર્ગ ઇવેન્ટ (Other)</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+              <label for="achSongsCount" style="font-size:0.8rem; font-weight:600;" id="lblAchSongsCount">કેટલા ગીતો ગાયા?</label>
+              <input type="number" id="achSongsCount" min="0" value="0" style="width: 100%; padding:10px; border-radius:12px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+              <label for="achCash" style="font-size:0.8rem; font-weight:600;" id="lblAchCash">જીતેલ રોકડ (₹ Cash)</label>
+              <input type="number" id="achCash" min="0" value="0" style="width: 100%; padding:10px; border-radius:12px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <label for="achSong" style="font-size:0.8rem; font-weight:600;" id="lblAchSong">ગાયેલા ગીતો / રાગની વિગત</label>
+            <input type="text" id="achSong" placeholder="દા.ત. રાગ ભૈરવીમાં ભજન ગાયું" style="width: 100%; padding:10px; border-radius:12px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <label for="achPrize" style="font-size:0.8rem; font-weight:600;" id="lblAchPrize">મેળવેલું ઇનામ / ટ્રોફી / ગુરુ બેજ</label>
+            <input type="text" id="achPrize" placeholder="દા.ત. પ્રથમ ઇનામ ટ્રોફી અથવા ગુરુ બેજ" style="width: 100%; padding:10px; border-radius:12px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <button id="saveAchievementBtn" style="background:var(--accent); color:#fff; border:none; padding:12px; border-radius:30px; font-weight:700; font-size:0.95rem; cursor:pointer; margin-top:10px;">સેવ કરો</button>
+          <div id="achStatus" style="text-align:center; font-size:0.85rem; font-weight:600;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <a class="dash-card" href="daily-riyaz.html">
+        <div class="dash-icon">📅</div>
+        <div class="dash-title" id="cardRiyazTitle">Daily Riyaz</div>
+        <div class="dash-desc" id="cardRiyazDesc">તમારો રોજનો રિયાઝ સમય અને વાલી વેરિફિકેશન સબમિટ કરો</div>
+      </a>
+      <a class="dash-card" href="pitch-monitor.html">
+        <div class="dash-icon">🎤</div>
+        <div class="dash-title" id="cardPitchTitle">Vocal Pitch Monitor</div>
+        <div class="dash-desc" id="cardPitchDesc">Sing and see your live pitch — sargam, harmonium, piano, tanpura</div>
+      </a>
+
+      <a class="dash-card" href="progress.html">
+        <div class="dash-icon">📊</div>
+        <div class="dash-title" id="cardProgressTitle">Progress Card</div>
+        <div class="dash-desc" id="cardProgressDesc">20-point self-assessment rating card for students</div>
+      </a>
+
+      <a class="dash-card" href="practice-tool.html">
+        <div class="dash-icon">🎧</div>
+        <div class="dash-title" id="cardPracticeTitle">Song Practice Tool</div>
+        <div class="dash-desc" id="cardPracticeDesc">Upload a song — pitch shift, speed, EQ, and loop practice</div>
+      </a>
+
+      <div class="dash-card disabled">
+        <span class="soon-tag" id="tagSoon1">Soon</span>
+        <div class="dash-icon">🗓️</div>
+        <div class="dash-title" id="cardAttTitle">Attendance</div>
+        <div class="dash-desc" id="cardAttDesc">Mark and track student attendance</div>
+      </div>
+
+      <div class="dash-card disabled">
+        <span class="soon-tag" id="tagSoon2">Soon</span>
+        <div class="dash-icon">💳</div>
+        <div class="dash-title" id="cardFeeTitle">Fee Management</div>
+        <div class="dash-desc" id="cardFeeDesc">Track fee payments and dues</div>
+      </div>
+
+      <div class="dash-card disabled">
+        <span class="soon-tag" id="tagSoon3">Soon</span>
+        <div class="dash-icon">📅</div>
+        <div class="dash-title" id="cardSchedTitle">Class Schedule</div>
+        <div class="dash-desc" id="cardSchedDesc">Weekly class timings and batches</div>
+      </div>
+
+      <div class="dash-card disabled">
+        <span class="soon-tag" id="tagSoon4">Soon</span>
+        <div class="dash-icon">🧑‍🎓</div>
+        <div class="dash-title" id="cardStudTitle">Student List</div>
+        <div class="dash-desc" id="cardStudDesc">Manage all enrolled students</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Setup Modal -->
+  <div id="profileModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <h2 id="modalTitle">📋 પ્રોફાઇલ સેટઅપ</h2>
+      <p id="modalSub" style="color:var(--subtitle); font-size:0.85rem; margin-bottom:20px;"></p>
+      
+      <div class="field" style="text-align:left; margin-bottom:14px;">
+        <label id="modalNameLabel" style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 5px;"></label>
+        <input id="modalNameInput" type="text" style="width:100%; padding:11px 12px; border-radius:12px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-size:0.95rem;">
+      </div>
+
+      <div class="field" style="text-align:left; margin-bottom:20px;">
+        <label id="modalBatchLabel" style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 5px;"></label>
+        <input id="modalBatchInput" type="text" style="width:100%; padding:11px 12px; border-radius:12px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-size:0.95rem;">
+      </div>
+
+      <button class="primary-btn" id="saveProfileBtn" style="width: 100%; background: #e74c3c; color: #fff; border: none; padding: 13px; border-radius: 30px; font-weight: 700; font-size: 0.95rem; cursor: pointer;"></button>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+  const DASH_TEXT = {
+    gu: {
+      greeting: 'સ્વાગત છે 👋', sub: 'તમારે જે feature વાપરવું હોય એના પર ટેપ કરો',
+      pitchTitle: 'વોકલ પિચ મોનિટર', pitchDesc: 'ગાઓ ane live pitch juo — sargam, harmonium, piano, tanpura',
+      progressTitle: 'પ્રોગ્રેસ કાર્ડ', progressDesc: '20 મુદ્દા પર વિદ્યાર્થીનું self-assessment rating',
+      practiceTitle: 'Song Practice Tool', practiceDesc: 'ગીત upload કરો — pitch, speed, EQ, loop practice',
+      riyazTitle: 'ડેઇલી રિયાઝ', riyazDesc: 'તમારો રોજનો રિયાઝ સમય અને વાલી વેરિફિકેશન સબમિટ કરો',
+      attTitle: 'હાજરી', attDesc: 'વિદ્યાર્થીની હાજરી નોંધો અને ટ્રેક કરો',
+      feeTitle: 'ફી મેનેજમેન્ટ', feeDesc: 'ફી ભરપાઈ અને બાકી રકમ ટ્રેક કરો',
+      schedTitle: 'ક્લાસ શેડ્યૂલ', schedDesc: 'સાપ્તાહિક ક્લાસ સમય અને બેચ',
+      studTitle: 'વિદ્યાર્થી યાદી', studDesc: 'બધા નોંધાયેલા વિદ્યાર્થીઓનું સંચાલન',
+      soon: 'ટૂંક સમયમાં',
+      modalTitle: '📋 પ્રોફાઇલ સેટઅપ',
+      modalSub: 'એપ વાપરતા પહેલા કૃપા કરીને તમારું નામ અને બેચ સેટ કરો',
+      modalNameLabel: 'વિદ્યાર્થીનું નામ (Full Name)',
+      modalNamePlaceholder: 'તમારું આખું નામ લખો',
+      modalBatchLabel: 'બેચ (Batch)',
+      modalBatchPlaceholder: 'દા.ત. સાંજ 5-6',
+      modalSaveBtn: 'પ્રોફાઇલ સેવ કરો',
+      modalAlertEmpty: 'કૃપા કરીને બધી માહિતી ભરો',
+      lblWeeklyRiyazTitle: 'આ અઠવાડિયાનો રિયાઝ',
+      lblTotalStarsTitle: 'પ્રોગ્રેસ સ્ટાર્સ',
+      lblAwardsTitle: 'જીતેલી સ્પર્ધાઓ',
+      lblRiyazTrend: '📈 સાપ્તાહિક પ્રોગ્રેસ (છેલ્લા ૭ દિવસ)',
+      lblAchievementTimeline: '🏆 સિદ્ધિઓ અને સર્ટિફિકેટ્સ',
+      btnAddNew: '➕ નવું ઉમેરો',
+      achModalTitle: '🏆 નવી સિદ્ધિ / ઇનામ ઉમેરો',
+      lblAchDate: 'તારીખ (Date)',
+      lblAchEvent: 'સ્પર્ધા / ઇવેન્ટનું નામ',
+      lblAchSong: 'ગાયેલા ગીતો / રાગની વિગત',
+      lblAchPrize: 'મેળવેલું ઇનામ / ભાગીદારી',
+      btnSave: 'સેવ કરો',
+      lblAchSongsCount: 'કેટલા ગીતો ગાયા?',
+      lblAchCash: 'જીતેલ રોકડ (₹ Cash)',
+      achSongPlaceholder: 'દા.ત. રાગ ભૈરવીમાં ભજન ગાયું',
+      achPrizePlaceholder: 'દા.ત. પ્રથમ ઇનામ ટ્રોફી અથવા ગુરુ બેજ',
+      alertFillDetails: 'કૃપા કરીને વિગતો ભરો!',
+      songsSung: 'ગાયેલા ગીતો',
+      participation: 'ભાગીદારી (Participation)',
+      cashPrizeText: 'રોકડ ઇનામ',
+      achSuccess: 'સિદ્ધિ સફળતાપૂર્વક ઉમેરાઈ ગઈ છે! ✅',
+      eventRaga: 'રાગ સ્પર્ધા (Raga Competition)',
+      eventSong: 'ગીત સ્પર્ધા (Song Competition)',
+      eventTala: 'તાલ સ્પર્ધા (Tala Competition)',
+      eventAntakshari: 'અંતાક્ષરી (Antakshari)',
+      eventBadge: 'ક્લાસ બેજ ચેલેન્જ (Class Challenge)',
+      eventOther: 'અન્ય વર્ગ ઇવેન્ટ (Other)'
+    },
+    hi: {
+      greeting: 'स्वागत है 👋', sub: 'जो feature इस्तेमाल करना है उस पर टैप करें',
+      pitchTitle: 'वोकल पिच मॉनिटर', pitchDesc: 'गाएं और लाइव पिच देखें — सरगम, हारमोनियम, पियानो, तानपुरा',
+      progressTitle: 'प्रोग्रेस कार्ड', progressDesc: '20 बिंदुओं पर छात्र का self-assessment rating',
+      practiceTitle: 'Song Practice Tool', practiceDesc: 'गाना अपलोड करें — pitch, speed, EQ, loop practice',
+      riyazTitle: 'डेली रियाज़', riyazDesc: 'अपने दैनिक अभ्यास का समय और अभिभावक पुष्टि जमा करें',
+      attTitle: 'उपस्थिति', attDesc: 'छात्र की उपस्थिति दर्ज करें और ट्रैक करें',
+      feeTitle: 'फीस प्रबंधन', feeDesc: 'फीस भुगतान और बकाया ट्रैक करें',
+      schedTitle: 'क्लास शेड्यूल', schedDesc: 'साप्ताहिक क्लास समय और बैच',
+      studTitle: 'छात्र सूची', studDesc: 'सभी नामांकित छात्रों का प्रबंधन',
+      soon: 'जल्द ही',
+      modalTitle: '📋 प्रोफाइल सेटअप',
+      modalSub: 'ऐप का उपयोग करने से पहले कृपया अपना नाम और बैच सेट करें',
+      modalNameLabel: 'छात्र का नाम (Full Name)',
+      modalNamePlaceholder: 'अपना पूरा नाम लिखें',
+      modalBatchLabel: 'बैच (Batch)',
+      modalBatchPlaceholder: 'जैसे शाम 5-6',
+      modalSaveBtn: 'प्रोफाइल सहेजें',
+      modalAlertEmpty: 'कृपया सभी जानकारी भरें',
+      lblWeeklyRiyazTitle: 'इस सप्ताह का रियाज़',
+      lblTotalStarsTitle: 'प्रोग्रेस स्टार्स',
+      lblAwardsTitle: 'जीती गई प्रतियोगिताएं',
+      lblRiyazTrend: '📈 साप्ताहिक प्रोग्रेस (पिछले 7 दिन)',
+      lblAchievementTimeline: '🏆 उपलब्धियां और प्रमाणपत्र',
+      btnAddNew: '➕ नया जोड़ें',
+      achModalTitle: '🏆 नई उपलब्धि / पुरस्कार जोड़ें',
+      lblAchDate: 'तारीख (Date)',
+      lblAchEvent: 'प्रतियोगिता / इवेंट का नाम',
+      lblAchSong: 'गाए गए गाने / राग का विवरण',
+      lblAchPrize: 'प्राप्त पुरस्कार / भागीदारी',
+      btnSave: 'सहेजें',
+      lblAchSongsCount: 'कितने गाने गाए?',
+      lblAchCash: 'जीती नकद राशि (₹ Cash)',
+      achSongPlaceholder: 'जैसे राग भैरवी में भजन गाया',
+      achPrizePlaceholder: 'जैसे प्रथम पुरस्कार ट्रॉफी या गुरु बैज',
+      alertFillDetails: 'कृपया विवरण भरें!',
+      songsSung: 'गाए गए गाने',
+      participation: 'भागीदारी (Participation)',
+      cashPrizeText: 'नकद पुरस्कार',
+      achSuccess: 'उपलब्धि सफलतापूर्वक जोड़ी गई! ✅',
+      eventRaga: 'राग प्रतियोगिता (Raga Competition)',
+      eventSong: 'गीत प्रतियोगिता (Song Competition)',
+      eventTala: 'ताल प्रतियोगिता (Tala Competition)',
+      eventAntakshari: 'अंताक्षरी (Antakshari)',
+      eventBadge: 'क्लास बैज चैलेंज (Class Challenge)',
+      eventOther: 'अन्य वर्ग इवेंट (Other)'
+    },
+    en: {
+      greeting: 'Welcome 👋', sub: 'Tap the feature you want to use',
+      pitchTitle: 'Vocal Pitch Monitor', pitchDesc: 'Sing and see your live pitch — sargam, harmonium, piano, tanpura',
+      progressTitle: 'Progress Card', progressDesc: '20-point self-assessment rating card for students',
+      practiceTitle: 'Song Practice Tool', practiceDesc: 'Upload a song — pitch shift, speed, EQ, and loop practice',
+      riyazTitle: 'Daily Riyaz', riyazDesc: 'Submit your daily practice duration and parental voice verification',
+      attTitle: 'Attendance', attDesc: 'Mark and track student attendance',
+      feeTitle: 'Fee Management', feeDesc: 'Track fee payments and dues',
+      schedTitle: 'Class Schedule', schedDesc: 'Weekly class timings and batches',
+      studTitle: 'Student List', studDesc: 'Manage all enrolled students',
+      soon: 'Soon',
+      modalTitle: '📋 Profile Setup',
+      modalSub: 'Please set your name and batch before using the app',
+      modalNameLabel: 'Student Name (Full Name)',
+      modalNamePlaceholder: 'Enter your full name',
+      modalBatchLabel: 'Batch',
+      modalBatchPlaceholder: 'e.g. Evening 5-6',
+      modalSaveBtn: 'Save Profile',
+      modalAlertEmpty: 'Please fill in all fields',
+      lblWeeklyRiyazTitle: 'Weekly Riyaz',
+      lblTotalStarsTitle: 'Progress Stars',
+      lblAwardsTitle: 'Competitions Won',
+      lblRiyazTrend: '📈 Weekly Progress (Last 7 Days)',
+      lblAchievementTimeline: '🏆 Achievements & Certificates',
+      btnAddNew: 'Add New',
+      achModalTitle: '🏆 Add New Achievement',
+      lblAchDate: 'Date',
+      lblAchEvent: 'Competition / Event Name',
+      lblAchSong: 'Songs / Raga Details',
+      lblAchPrize: 'Prize / Participation',
+      btnSave: 'Save',
+      lblAchSongsCount: 'Songs Sung Count?',
+      lblAchCash: 'Cash Won (₹ Cash)',
+      achSongPlaceholder: 'e.g. Sang a bhajan in Bhairavi',
+      achPrizePlaceholder: 'e.g. First Prize Trophy or Guru Badge',
+      alertFillDetails: 'Please fill in all details!',
+      songsSung: 'Songs Sung',
+      participation: 'Participation',
+      cashPrizeText: 'Cash Prize',
+      achSuccess: 'Achievement added successfully! ✅',
+      eventRaga: 'Raga Competition',
+      eventSong: 'Song Competition',
+      eventTala: 'Tala Competition',
+      eventAntakshari: 'Antakshari',
+      eventBadge: 'Class Badge Challenge',
+      eventOther: 'Other Class Event'
+    }
+  };
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+  const t = DASH_TEXT[lang] || DASH_TEXT.gu;
+  
+  // Apply text to dashboard
+  document.getElementById('dashGreeting').textContent = t.greeting;
+  document.getElementById('dashSub').textContent = t.sub;
+  document.getElementById('cardPitchTitle').textContent = t.pitchTitle;
+  document.getElementById('cardPitchDesc').textContent = t.pitchDesc;
+  document.getElementById('cardProgressTitle').textContent = t.progressTitle;
+  document.getElementById('cardProgressDesc').textContent = t.progressDesc;
+  document.getElementById('cardPracticeTitle').textContent = t.practiceTitle;
+  document.getElementById('cardPracticeDesc').textContent = t.practiceDesc;
+  document.getElementById('cardRiyazTitle').textContent = t.riyazTitle;
+  document.getElementById('cardRiyazDesc').textContent = t.riyazDesc;
+  document.getElementById('cardAttTitle').textContent = t.attTitle;
+  document.getElementById('cardAttDesc').textContent = t.attDesc;
+  document.getElementById('cardFeeTitle').textContent = t.feeTitle;
+  document.getElementById('cardFeeDesc').textContent = t.feeDesc;
+  document.getElementById('cardSchedTitle').textContent = t.schedTitle;
+  document.getElementById('cardSchedDesc').textContent = t.schedDesc;
+  document.getElementById('cardStudTitle').textContent = t.studTitle;
+  document.getElementById('cardStudDesc').textContent = t.studDesc;
+  ['tagSoon1','tagSoon2','tagSoon3','tagSoon4'].forEach(id => document.getElementById(id).textContent = t.soon);
+
+  // Apply new stats translations
+  document.getElementById('lblWeeklyRiyazTitle').textContent = t.lblWeeklyRiyazTitle;
+  document.getElementById('lblTotalStarsTitle').textContent = t.lblTotalStarsTitle;
+  document.getElementById('lblAwardsTitle').textContent = t.lblAwardsTitle;
+  document.getElementById('lblRiyazTrend').textContent = t.lblRiyazTrend;
+  document.getElementById('lblAchievementTimeline').textContent = t.lblAchievementTimeline;
+  initAppShell({ title: t.greeting.replace(' 👋','') });
+
+  // Apply achievement modal translations
+  document.getElementById('addAchievementBtn').textContent = t.btnAddNew;
+  document.getElementById('achievementModalTitle').textContent = t.achModalTitle;
+  document.getElementById('lblAchDate').textContent = t.lblAchDate;
+  document.getElementById('lblAchRiyazType').textContent = t.lblAchEvent;
+  document.getElementById('lblAchSongsCount').textContent = t.lblAchSongsCount;
+  document.getElementById('lblAchCash').textContent = t.lblAchCash;
+  document.getElementById('lblAchSong').textContent = t.lblAchSong;
+  document.getElementById('lblAchPrize').textContent = t.lblAchPrize;
+  document.getElementById('saveAchievementBtn').textContent = t.btnSave;
+  document.getElementById('achSong').placeholder = t.achSongPlaceholder;
+  document.getElementById('achPrize').placeholder = t.achPrizePlaceholder;
+
+  // Localize select options for achievements
+  const achEventSelect = document.getElementById('achRiyazType');
+  achEventSelect.options[0].text = t.eventRaga;
+  achEventSelect.options[1].text = t.eventSong;
+  achEventSelect.options[2].text = t.eventTala;
+  achEventSelect.options[3].text = t.eventAntakshari;
+  achEventSelect.options[4].text = t.eventBadge;
+  achEventSelect.options[5].text = t.eventOther;
+
+  // Analytics & Timeline Loading
+  const statWeeklyRiyaz = document.getElementById('statWeeklyRiyaz');
+  const statStars = document.getElementById('statStars');
+  const statStarsProgress = document.getElementById('statStarsProgress');
+  const statAwards = document.getElementById('statAwards');
+  const trendSvg = document.getElementById('trendSvg');
+  const trendDayDetails = document.getElementById('trendDayDetails');
+  const achievementTimelineList = document.getElementById('achievementTimelineList');
+
+  const achModal = document.getElementById('achievementModal');
+  const achDateInput = document.getElementById('achDate');
+  const achSongsCountInput = document.getElementById('achSongsCount');
+  const achCashInput = document.getElementById('achCash');
+  const achSongInput = document.getElementById('achSong');
+  const achPrizeInput = document.getElementById('achPrize');
+  const achStatus = document.getElementById('achStatus');
+
+  achDateInput.value = new Date().toISOString().split('T')[0];
+
+  document.getElementById('addAchievementBtn').addEventListener('click', () => {
+    achStatus.textContent = '';
+    achModal.style.display = 'flex';
+  });
+
+  document.getElementById('closeAchievementModalBtn').addEventListener('click', () => {
+    achModal.style.display = 'none';
+  });
+
+  document.getElementById('saveAchievementBtn').addEventListener('click', async () => {
+    const date = achDateInput.value;
+    const eventName = achEventSelect.value;
+    const songsCount = Number(achSongsCountInput.value);
+    const cashPrize = Number(achCashInput.value);
+    const songDetailsText = achSongInput.value.trim();
+    const prizeDetailsText = achPrizeInput.value.trim();
+
+    if (!eventName) {
+      alert(t.alertFillDetails);
+      return;
+    }
+
+    let songDetails = '';
+    if (songsCount > 0) {
+      songDetails = `${t.songsSung}: ${songsCount} ${songDetailsText ? '(' + songDetailsText + ')' : ''}`;
+    } else {
+      songDetails = songDetailsText;
+    }
+
+    let prizeDetails = prizeDetailsText || t.participation;
+    if (cashPrize > 0) {
+      prizeDetails += ` + ₹${cashPrize} ${t.cashPrizeText}`;
+    }
+
+    if (session && session.phone) {
+      try {
+        await saveAchievement(session.phone, date, eventName, songDetails, prizeDetails);
+        achStatus.textContent = t.achSuccess;
+        achStatus.style.color = 'var(--accent-green)';
+        achSongsCountInput.value = '0';
+        achCashInput.value = '0';
+        achSongInput.value = '';
+        achPrizeInput.value = '';
+        
+        await loadAnalytics();
+        setTimeout(() => { achModal.style.display = 'none'; }, 1000);
+      } catch(err) {
+        achStatus.textContent = 'બચાવવામાં ભૂલ આવી: ' + err.message;
+        achStatus.style.color = 'var(--accent)';
+      }
+    }
+  });
+
+  // Apply text to Profile Modal
+  document.getElementById('modalTitle').textContent = t.modalTitle;
+  document.getElementById('modalSub').textContent = t.modalSub;
+  document.getElementById('modalNameLabel').textContent = t.modalNameLabel;
+  document.getElementById('modalNameInput').placeholder = t.modalNamePlaceholder;
+  document.getElementById('modalBatchLabel').textContent = t.modalBatchLabel;
+  document.getElementById('modalBatchInput').placeholder = t.modalBatchPlaceholder;
+  document.getElementById('saveProfileBtn').textContent = t.modalSaveBtn;
+
+  // Handle Session & Profile setup prompt
+  const session = (typeof readMockSession === 'function') ? readMockSession() : null;
+  if (session && session.phone) {
+    (async () => {
+      const sb = getSupabase();
+      const { data: { user } } = sb ? await sb.auth.getUser() : { data: {} };
+      
+      let dbProfile = null;
+      if (user) {
+        dbProfile = await getProfile(session.phone);
+      }
+      
+      if (!dbProfile) {
+        // Fallback to local storage (in case they previously created it offline/mock)
+        const profileKey = 'harmonyProfile:' + session.phone;
+        const localProf = localStorage.getItem(profileKey);
+        if (localProf) {
+          try {
+            const parsed = JSON.parse(localProf);
+            if (user) {
+              await upsertProfile(session.phone, parsed.name, parsed.batch);
+            }
+            dbProfile = parsed;
+          } catch(e) {}
+        }
+      }
+      if (!dbProfile) {
+        document.getElementById('profileModal').style.display = 'flex';
+      } else {
+        // Sync local cache
+        localStorage.setItem('harmonyProfile:' + session.phone, JSON.stringify(dbProfile));
+      }
+    })();
+  }
+
+  document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+    const name = document.getElementById('modalNameInput').value.trim();
+    const batch = document.getElementById('modalBatchInput').value.trim();
+    if (!name || !batch) {
+      alert(t.modalAlertEmpty);
+      return;
+    }
+    if (session && session.phone) {
+      try {
+        const sb = getSupabase();
+        const { data: { user } } = sb ? await sb.auth.getUser() : { data: {} };
+        
+        if (user) {
+          await upsertProfile(session.phone, name, batch);
+        } else {
+          console.warn('Supabase not authenticated - saving profile locally only');
+        }
+      } catch (err) {
+        console.error('Error saving profile to database:', err);
+      }
+      
+      // Always save local cache so mock mode/UI testing works seamlessly
+      const profileKey = 'harmonyProfile:' + session.phone;
+      const profileData = { name, batch, phone: session.phone };
+      localStorage.setItem(profileKey, JSON.stringify(profileData));
+
+      // Maintain master list of students for Owner Console lookup
+      let studentList = [];
+      try { studentList = JSON.parse(localStorage.getItem('harmonyRegisteredStudents') || '[]'); } catch(e) {}
+      if (!studentList.includes(session.phone)) {
+        studentList.push(session.phone);
+        localStorage.setItem('harmonyRegisteredStudents', JSON.stringify(studentList));
+      }
+      
+      document.getElementById('profileModal').style.display = 'none';
+    }
+  });
+
+  async function loadAnalytics() {
+    if (session && session.phone) {
+      // 1. Load Weekly Riyaz Logs & Achievements
+      const logs = await getWeeklyRiyazLogs(session.phone);
+      const achievements = await getAchievements(session.phone);
+      
+      // 2. Load Progress Card Ratings & Stars
+      const ratings = await getProgress(session.phone);
+      let totalStars = 0;
+      const STAR_GLYPH_COUNT = [0, 1, 1, 1, 2];
+      Object.values(ratings).forEach(levels => {
+        if (Array.isArray(levels)) {
+          levels.forEach(v => {
+            totalStars += STAR_GLYPH_COUNT[v] || 0;
+          });
+        }
+      });
+      statStars.textContent = `${totalStars} / 100`;
+      statStarsProgress.style.width = `${Math.min(totalStars, 100)}%`;
+
+      // 3. Load Achievements count
+      statAwards.textContent = achievements.length;
+
+      // 4. Build Chronological Timeline Events first (needed for chart stars mapping!)
+      const timelineEvents = [];
+      achievements.forEach(ach => {
+        timelineEvents.push({
+          date: ach.event_date,
+          type: 'competition',
+          title: `🏆 ${ach.event_name}`,
+          desc: `ગાયેલ ગીત/રાગ: ${ach.song_details || '-'}<br><strong>ઇનામ:</strong> ${ach.prize_details}`,
+          icon: '🏆',
+          timestamp: new Date(ach.event_date).getTime()
+        });
+      });
+
+      if (totalStars > 0) {
+        timelineEvents.push({
+          date: new Date().toISOString().split('T')[0],
+          type: 'ratings',
+          title: `🌟 પ્રોગ્રેસ કાર્ડ અપડેટ`,
+          desc: `તમે કુલ <strong>${totalStars} સ્ટાર્સ</strong> નો સ્કોર હાંસલ કર્યો છે!`,
+          icon: '🌟',
+          timestamp: Date.now()
+        });
+      }
+
+      logs.forEach(log => {
+        const totalLogMins = Number(log.hours) * 60 + Number(log.minutes);
+        if (totalLogMins >= 60) {
+          timelineEvents.push({
+            date: log.practice_date,
+            type: 'riyaz_milestone',
+            title: `⏱️ શાનદાર રિયાઝ લક્ષ્યાંક!`,
+            desc: `આજે તમે <strong>${log.hours} કલાક ${log.minutes} મિનિટ</strong> નો સફળ રિયાઝ પૂર્ણ કર્યો.`,
+            icon: '⏱️',
+            timestamp: new Date(log.practice_date).getTime()
+          });
+        }
+      });
+
+      timelineEvents.sort((a, b) => b.timestamp - a.timestamp);
+
+      // 5. Calculate daily stars and achievements values for chart
+      let totalMins = 0;
+      const last7Days = [];
+      const today = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const dStr = d.toISOString().split('T')[0];
+        const match = logs.find(l => l.practice_date === dStr);
+        const mins = match ? (Number(match.hours) * 60 + Number(match.minutes)) : 0;
+        totalMins += mins;
+        
+        const dayLabel = d.toLocaleDateString(lang === 'gu' ? 'gu-IN' : 'en-US', { weekday: 'short' });
+        last7Days.push({ dateStr: dStr, mins, label: dayLabel });
+      }
+
+      const wHours = Math.floor(totalMins / 60);
+      const wMins = totalMins % 60;
+      statWeeklyRiyaz.textContent = `${wHours}h ${wMins}m`;
+
+      const dailyStars = [];
+      const dailyAchs = [];
+      const ratingEvent = timelineEvents.find(ev => ev.type === 'ratings');
+      const ratingsUpdateDate = ratingEvent ? ratingEvent.date : null;
+
+      last7Days.forEach((day, idx) => {
+        const dayAchs = achievements.filter(ach => ach.event_date === day.dateStr);
+        dailyAchs.push(dayAchs.length);
+
+        if (ratingsUpdateDate) {
+          if (day.dateStr < ratingsUpdateDate) {
+            dailyStars.push(Math.max(0, totalStars - 8));
+          } else {
+            dailyStars.push(totalStars);
+          }
+        } else {
+          const slope = Math.round(totalStars * (0.8 + (idx * 0.2 / 6)));
+          dailyStars.push(slope);
+        }
+      });
+
+      // 6. Draw SVG Line Chart using responsive viewBox coordinate mapping
+      trendSvg.innerHTML = '';
+      trendSvg.setAttribute('viewBox', '0 0 500 120');
+      trendSvg.setAttribute('width', '100%');
+      trendSvg.setAttribute('height', '100%');
+      const width = 500;
+      const height = 120;
+      const padding = 20;
+      const maxMins = Math.max(...last7Days.map(d => d.mins), 60);
+
+      const points = last7Days.map((day, idx) => {
+        const x = padding + (idx * (width - 2 * padding) / 6);
+        const yRiyaz = padding + ((1 - (day.mins / maxMins)) * (height - 2 * padding));
+        const yStars = padding + ((1 - (dailyStars[idx] / 100)) * (height - 2 * padding));
+        const yAchs = padding + ((1 - (Math.min(dailyAchs[idx], 5) / 5)) * (height - 2 * padding));
+
+        return { x, yRiyaz, yStars, yAchs, day, stars: dailyStars[idx], achsCount: dailyAchs[idx] };
+      });
+
+      // Draw Grid line axes (reference only)
+      [0, 0.5, 1].forEach(pct => {
+        const y = padding + pct * (height - 2 * padding);
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', padding);
+        line.setAttribute('y1', y);
+        line.setAttribute('x2', width - padding);
+        line.setAttribute('y2', y);
+        line.setAttribute('stroke', 'var(--border)');
+        line.setAttribute('stroke-width', '1');
+        line.setAttribute('stroke-dasharray', '3,3');
+        trendSvg.appendChild(line);
+      });
+
+      // Draw red line path (Riyaz)
+      const rPathD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.yRiyaz}`).join(' ');
+      const rPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      rPath.setAttribute('d', rPathD);
+      rPath.setAttribute('fill', 'none');
+      rPath.setAttribute('stroke', '#e74c3c');
+      rPath.setAttribute('stroke-width', '3');
+      rPath.setAttribute('stroke-linecap', 'round');
+      rPath.setAttribute('stroke-linejoin', 'round');
+      trendSvg.appendChild(rPath);
+
+      // Draw gold line path (Stars)
+      const sPathD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.yStars}`).join(' ');
+      const sPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      sPath.setAttribute('d', sPathD);
+      sPath.setAttribute('fill', 'none');
+      sPath.setAttribute('stroke', '#f39c12');
+      sPath.setAttribute('stroke-width', '3');
+      sPath.setAttribute('stroke-linecap', 'round');
+      sPath.setAttribute('stroke-linejoin', 'round');
+      trendSvg.appendChild(sPath);
+
+      // Draw green line path (Achievements)
+      const aPathD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.yAchs}`).join(' ');
+      const aPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      aPath.setAttribute('d', aPathD);
+      aPath.setAttribute('fill', 'none');
+      aPath.setAttribute('stroke', '#2ecc71');
+      aPath.setAttribute('stroke-width', '3');
+      aPath.setAttribute('stroke-linecap', 'round');
+      aPath.setAttribute('stroke-linejoin', 'round');
+      trendSvg.appendChild(aPath);
+
+      // Draw interactive dots & overlay hit areas
+      points.forEach((p, idx) => {
+        // Red Dot (Riyaz)
+        const dotR = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dotR.setAttribute('cx', p.x);
+        dotR.setAttribute('cy', p.yRiyaz);
+        dotR.setAttribute('r', '4');
+        dotR.setAttribute('fill', '#e74c3c');
+        dotR.setAttribute('stroke', '#fff');
+        dotR.setAttribute('stroke-width', '1.5');
+        dotR.setAttribute('id', `dotR-${idx}`);
+        trendSvg.appendChild(dotR);
+
+        // Gold Dot (Stars)
+        const dotS = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dotS.setAttribute('cx', p.x);
+        dotS.setAttribute('cy', p.yStars);
+        dotS.setAttribute('r', '4');
+        dotS.setAttribute('fill', '#f39c12');
+        dotS.setAttribute('stroke', '#fff');
+        dotS.setAttribute('stroke-width', '1.5');
+        dotS.setAttribute('id', `dotS-${idx}`);
+        trendSvg.appendChild(dotS);
+
+        // Green Dot (Achievements)
+        const dotA = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dotA.setAttribute('cx', p.x);
+        dotA.setAttribute('cy', p.yAchs);
+        dotA.setAttribute('r', '4');
+        dotA.setAttribute('fill', '#2ecc71');
+        dotA.setAttribute('stroke', '#fff');
+        dotA.setAttribute('stroke-width', '1.5');
+        dotA.setAttribute('id', `dotA-${idx}`);
+        trendSvg.appendChild(dotA);
+
+        // X-Axis labels
+        const xText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        xText.setAttribute('x', p.x);
+        xText.setAttribute('y', height + 12);
+        xText.setAttribute('text-anchor', 'middle');
+        xText.setAttribute('font-size', '9px');
+        xText.setAttribute('font-weight', '600');
+        xText.setAttribute('fill', 'var(--subtitle)');
+        xText.textContent = p.day.label;
+        trendSvg.appendChild(xText);
+
+        // Invisible touch area
+        const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        hitArea.setAttribute('cx', p.x);
+        hitArea.setAttribute('cy', height / 2);
+        hitArea.setAttribute('r', '24');
+        hitArea.setAttribute('fill', 'transparent');
+        hitArea.style.cursor = 'pointer';
+
+        const showDayDetails = () => {
+          points.forEach((_, i) => {
+            const dr = document.getElementById(`dotR-${i}`);
+            const ds = document.getElementById(`dotS-${i}`);
+            const da = document.getElementById(`dotA-${i}`);
+            if (dr) dr.setAttribute('r', '4');
+            if (ds) ds.setAttribute('r', '4');
+            if (da) da.setAttribute('r', '4');
+          });
+
+          dotR.setAttribute('r', '7');
+          dotS.setAttribute('r', '7');
+          dotA.setAttribute('r', '7');
+
+          let detailsHtml = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid var(--border); padding-bottom:4px; flex-wrap:wrap; gap:6px;">
+              <span style="font-weight:700; color:var(--accent);">${p.day.dateStr} (${p.day.label})</span>
+              <div style="display:flex; gap:6px;">
+                <span style="font-weight:600; background:#e74c3c; color:#fff; padding:2px 6px; border-radius:12px; font-size:0.7rem;">
+                  ⏱️ ${(() => {
+                    if (p.day.mins <= 0) return '0m';
+                    if (p.day.mins >= 60) {
+                      const h = Math.floor(p.day.mins / 60);
+                      const m = p.day.mins % 60;
+                      return m > 0 ? `${h}h ${m}m` : `${h}h`;
+                    }
+                    return `${p.day.mins}m`;
+                  })()}
+                </span>
+                <span style="font-weight:600; background:#f39c12; color:#fff; padding:2px 6px; border-radius:12px; font-size:0.7rem;">
+                  🌟 ${p.stars}
+                </span>
+                <span style="font-weight:600; background:#2ecc71; color:#fff; padding:2px 6px; border-radius:12px; font-size:0.7rem;">
+                  🏆 ${p.achsCount}
+                </span>
+              </div>
+            </div>
+          `;
+
+          const dayLogs = logs.filter(l => l.practice_date === p.day.dateStr);
+          if (dayLogs.length > 0) {
+            detailsHtml += `<div style="margin-bottom:6px;"><strong>🎵 રિયાઝ ટોપિક:</strong>`;
+            dayLogs.forEach(l => {
+              detailsHtml += ` <span style="background:var(--border); padding:2px 6px; border-radius:4px; margin-right:4px; font-size:0.75rem;">${l.category} - ${l.topic}</span>`;
+            });
+            detailsHtml += `</div>`;
+          } else {
+            detailsHtml += `<div style="color:var(--subtitle); margin-bottom:6px;">આ દિવસે રિયાઝ સબમિટ કર્યો નથી.</div>`;
+          }
+
+          const dayAchievements = achievements.filter(ach => ach.event_date === p.day.dateStr);
+          if (dayAchievements.length > 0) {
+            detailsHtml += `<div style="margin-top:6px; border-top:1px dashed var(--border); padding-top:6px;">`;
+            dayAchievements.forEach(ach => {
+              detailsHtml += `
+                <div style="display:flex; align-items:flex-start; gap:6px; margin-bottom:4px;">
+                  <span>🏆</span>
+                  <div>
+                    <strong>${ach.event_name}:</strong> ${ach.prize_details}
+                    ${ach.song_details ? `<br><span style="font-size:0.75rem; color:var(--subtitle);">(${ach.song_details})</span>` : ''}
+                  </div>
+                </div>
+              `;
+            });
+            detailsHtml += `</div>`;
+          }
+
+          trendDayDetails.innerHTML = detailsHtml;
+        };
+
+        hitArea.addEventListener('click', showDayDetails);
+        hitArea.addEventListener('mouseover', showDayDetails);
+        trendSvg.appendChild(hitArea);
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (p.day.dateStr === todayStr) {
+          showDayDetails();
+        }
+      });
+
+      // 7. Render Chronological Timeline List UI
+      achievementTimelineList.innerHTML = '';
+      if (timelineEvents.length === 0) {
+        achievementTimelineList.innerHTML = `<div style="color:var(--subtitle); font-size:0.85rem; text-align:center;">હજુ સુધી કોઈ સિદ્ધિઓ કે લક્ષ્યાંકો પ્રાપ્ત થયા નથી. શીખવાનું શરૂ કરો!</div>`;
+        return;
+      }
+
+      timelineEvents.forEach(ev => {
+        const item = document.createElement('div');
+        item.style.position = 'relative';
+        item.style.marginBottom = '15px';
+        
+        item.innerHTML = `
+          <div style="position:absolute; left:-23px; top:3px; background:var(--card-bg); border:2px solid var(--accent); border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; z-index:2;">
+            ${ev.icon}
+          </div>
+          <div>
+            <span style="font-size:0.75rem; font-weight:700; color:var(--accent);">${ev.date}</span>
+            <h5 style="margin:2px 0; font-size:0.85rem; font-weight:700;">${ev.title}</h5>
+            <p style="margin:2px 0 0 0; font-size:0.8rem; color:var(--subtitle); line-height:1.3;">${ev.desc}</p>
+          </div>
+        `;
+        achievementTimelineList.appendChild(item);
+      });
+    }
+  }
+
+  loadAnalytics();
+</script>
+</body>
+</html>

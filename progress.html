@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>હાર્મોની મ્યુઝિક — સેલ્ફ પ્રોગ્રેસ કાર્ડ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/theme.css">
+<style>
+  :root {
+    --ink: var(--text);
+    --parchment: var(--bg);
+    --parchment-deep: var(--bg);
+    --card-bg: var(--surface);
+    --maroon: var(--progress-accent);
+    --maroon-deep: var(--progress-accent-deep);
+    --brass: var(--progress-brass);
+    --brass-bright: var(--progress-brass-bright);
+    --sitar-green: var(--progress-green);
+    --line: var(--border);
+    --shadow: var(--shadow);
+    --star-empty: var(--star-empty);
+    --star-empty-sub: var(--star-empty-sub);
+    --muted: var(--muted);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--bg);
+    font-family: 'Segoe UI', 'Noto Sans Gujarati', sans-serif;
+    color: var(--text);
+    min-height:100vh;
+    padding-bottom:60px;
+    transition:background .3s ease, color .3s ease;
+  }
+  .theme-toggle{
+    position:fixed; top:14px; right:14px; z-index:50;
+    width:42px; height:42px; border-radius:50%;
+    background:var(--card-bg); border:1.5px solid var(--brass);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; cursor:pointer; box-shadow:var(--shadow);
+  }
+  .back-link{
+    position:fixed; top:18px; left:14px; z-index:50;
+    background:var(--card-bg); border:1.5px solid var(--brass);
+    border-radius:20px; padding:8px 14px; font-size:12.5px; font-weight:700;
+    color:var(--maroon-deep); text-decoration:none; box-shadow:var(--shadow);
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 0;}
+
+  .setup{
+    background:var(--card-bg);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px;
+    margin-top:8px;
+    box-shadow:var(--shadow);
+  }
+  .setup label{display:block; font-size:12.5px; font-weight:600; color:var(--text); margin-bottom:4px;}
+  .setup .row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .setup input, .setup select{
+    width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line);
+    background:var(--bg); font-family:inherit; font-size:15px; color:var(--text);
+  }
+  .setup input:focus, .setup select:focus{outline:2px solid var(--accent); outline-offset:1px;}
+
+  .dial-section{
+    margin-top:18px;
+    display:flex; align-items:center; gap:18px;
+    background:var(--card-bg); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:var(--shadow);
+  }
+  .dial{
+    width:92px; height:92px; flex:0 0 auto; position:relative;
+  }
+  .dial svg{width:100%; height:100%; transform:rotate(-90deg); display:block;}
+  .dial-track{fill:none; stroke:var(--bg); stroke-width:9;}
+  .dial-progress{
+    fill:none; stroke:var(--accent-gold); stroke-width:9; stroke-linecap:round;
+    transition:stroke-dashoffset 0.4s ease, stroke 0.3s ease;
+  }
+  .dial span{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Segoe UI', sans-serif; font-weight:700; font-size:17px; color:var(--text);
+  }
+  .dial-meta{flex:1;}
+  .dial-meta .tot{font-size:13.5px; color:var(--text); font-weight:600;}
+  .dial-meta .grade{font-size:12px; color:var(--subtitle); margin-top:2px;}
+
+  .criteria{margin-top:20px;}
+  .crit-card{
+    background:var(--card-bg); border:1px solid var(--line); border-radius:16px;
+    padding:14px 14px 10px; margin-bottom:12px; box-shadow:var(--shadow);
+  }
+  .crit-head{display:flex; align-items:baseline; gap:8px; margin-bottom:8px;}
+  .crit-num{
+    font-family:'Segoe UI', sans-serif; font-weight:700; color:var(--accent); font-size:14px; flex:0 0 auto;
+  }
+  .crit-title{font-weight:600; font-size:15px; color:var(--text);}
+
+  .stars{display:flex; gap:6px; margin:6px 0 8px;}
+  .star-btn{
+    flex:1; min-width:0;
+    border:1.5px solid var(--line); background:var(--bg);
+    border-radius:10px; padding:8px 4px; cursor:pointer;
+    text-align:center; font-size:16px; color:var(--subtitle);
+    transition:all .15s ease;
+    font-family:inherit;
+  }
+  .star-btn .n{display:block; font-size:10px; margin-top:2px; color:var(--subtitle);}
+  .star-btn.selected{
+    background:linear-gradient(160deg, var(--accent-gold), #f39c12);
+    border-color:var(--accent-gold);
+    color:#2c3e50;
+    box-shadow:0 3px 10px rgba(244,197,66,0.3);
+    transform:translateY(-1px);
+  }
+  .star-btn.selected .n{color:#2c3e50;}
+  .star-btn:active{transform:scale(0.96);}
+
+  .level-desc{
+    font-size:12.5px; line-height:1.5; color:var(--text); background:var(--bg);
+    border-left:3px solid var(--accent); border-radius:6px; padding:8px 10px; min-height:20px;
+  }
+  .level-desc .lvl-tag{font-weight:700; color:var(--accent); margin-right:4px;}
+  .level-desc.empty{color:var(--subtitle); font-style:italic;}
+
+  .crit-checklist{
+    list-style:none; margin:8px 0 0; padding:0;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .crit-checklist li{
+    font-size:12px; line-height:1.5; color:var(--text);
+    background:var(--bg); border-radius:8px; padding:6px 10px;
+    display:flex; gap:6px; align-items:baseline;
+  }
+  .crit-checklist li::before{content:"✓"; color:var(--accent-green); font-weight:700; flex:0 0 auto;}
+  .crit-checklist .lvl-tag{font-weight:700; color:var(--accent); flex:0 0 auto;}
+
+  .footer-actions{
+    position:sticky; bottom:0; margin-top:20px;
+    background:linear-gradient(180deg, transparent, var(--bg) 30%);
+    padding:16px 0 6px;
+    display:flex; gap:10px;
+  }
+  .btn{
+    flex:1; padding:13px; border-radius:12px; border:none; font-family:inherit;
+    font-weight:700; font-size:14.5px; cursor:pointer; transition:transform .12s ease;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-save{background:var(--accent); color:#fff;}
+  .btn-save:hover{opacity:0.9;}
+  .btn-print{background:var(--surface); color:var(--text); border:1.5px solid var(--border);}
+  .btn-print:hover{background:var(--bg);}
+
+  .status-msg{
+    text-align:center; font-size:12.5px; color:var(--accent-green); font-weight:600; min-height:18px; margin-top:6px;
+  }
+
+  .hint{
+    text-align:center; font-size:11.5px; color:var(--subtitle); margin:14px 0 4px; line-height:1.5;
+  }
+
+  @media print{
+    .footer-actions, .setup, .hint{display:none;}
+    body{background:#fff;}
+  }
+</style>
+<link rel="stylesheet" href="shared/app-shell.css">
+</head>
+<body data-page="progress">
+<div id="appShellRoot"></div>
+<div id="pageBody">
+<div class="wrap">
+
+  <div class="page-header" style="margin-bottom: 20px;">
+    <h2 id="pageTitle" style="margin:0 0 4px;">📊 મારું પ્રોગ્રેસ કાર્ડ</h2>
+    <p id="pageSub" style="color:var(--subtitle); font-size:0.9rem; margin:0 0 8px;">તમારો પોતાનો ★ પસંદ કરો — 20 મુદ્દા પર તમારું પ્રામાણિક સેલ્ફ-રેટિંગ</p>
+    <div id="studentHeader" style="display: flex; gap: 16px; font-size: 0.95rem; font-weight: 700; color: var(--accent); background: var(--card-bg); padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); width: fit-content; margin-top: 8px;">
+      <span id="headerName">👤 -</span>
+      <span id="headerBatch">📅 -</span>
+    </div>
+  </div>
+
+  <div class="dial-section">
+    <div class="dial" id="dial">
+      <svg viewBox="0 0 100 100">
+        <circle class="dial-track" cx="50" cy="50" r="42"></circle>
+        <circle class="dial-progress" id="dialProgress" cx="50" cy="50" r="42"></circle>
+      </svg>
+      <span id="dialPct">0%</span>
+    </div>
+    <div class="dial-meta">
+      <div class="tot"><span id="totalStarsLabel">કુલ સ્ટાર:</span> <span id="totStars">0</span> / <span id="maxStars">100</span></div>
+      <div class="grade" id="gradeLine">હજુ કોઈ ★ પસંદ કર્યો નથી</div>
+    </div>
+  </div>
+
+  <div class="criteria" id="criteriaContainer"></div>
+
+  <div class="status-msg" id="statusMsg"></div>
+
+  <p class="hint" id="hintText">📌 જે ★ પર તમે ક્લિક કરો છો, એ જ તમારું ફાઇનલ સેલ્ફ-રેટિંગ ગણાય છે — ટીચર નહીં, વિદ્યાર્થી પોતે પસંદ કરે છે.</p>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+
+<script>
+const CRITERIA_BY_LANG = {
+  gu: [
+    {t:"સૂર", levels:["—","મૂળ સૂરની ઓળખ અને સ્થિરતા","સૂર ના સીધા અને આડા અવળા Distance","60% speed • આડા અવળા (અલંકાર/રાગ પ્રમાણે)","100% speed • Harmonium/Tanpura સાથે"]},
+    {t:"તાલ / લય", levels:["—","100% સ્પીડ તાલ માં અલંકાર","રાગ / વિલંબિત દુગુન અને ધૃત લય માં","ગીત કે તબલા સાંભળતા જ બધા તાલ-લય ની ઓળખ","તાલ ના બધા પ્રકાર • વેસ્ટર્ન બીટ • એડવાન્સ લય ની સમજણ"]},
+    {t:"થિયરી", levels:["—","10 અલંકાર • સપ્તક • 12 સ્વર • basic grammar","12 સ્કેલ / વેસ્ટર્ન નોટ ની ઓળખ","5 રાગની ઓળખ • 10 થાટ & આશ્રય રાગોની ઓળખ","Classical + Western + ઘરાના ની ઊંડાણપૂર્વક સમજણ"]},
+    {t:"રાગ", levels:["—","બેસિક","10 થાટ","20 મોસ્ટ યુસફૂલ રાગ & રાગિણી ની આવડત","કોઈ પણ ગીત સાંભળતા જ બારીક રાગ ની ઓળખ"]},
+    {t:"ગીતોની શોધ", levels:["—","રાગ પ્રમાણે નોર્મલ ગીતો","રાગ પ્રમાણે મીડિયમ અઘરા ગીતો શોધી શકે","મનપસંદ ગીત શોધી, પ્રોપર સૂર-તાલ-લય માં વગાડી શકે","એડવાન્સ વેરીએશન વાળા ગીતો, કોડ-આરપીજીયોસ સાથે ગાય ને વગાડી શકે"]},
+    {t:"ફિંગર મુવમેન્ટ", levels:["—","100% સ્પીડ માં અલંકાર","100% સ્પીડ માં રાગ આડા અવળા વગાડી શકે","કોર્ડસ-આરપીજીઓસ ની 80% સ્પીડ સાથે એપ્લાય","ડીપ વેસ્ટર્ન કોર્ડ સાથે પરફેક્ટ ફિંગર (રાગ-વેરીએશન માં પણ)"]},
+    {t:"ગાયકી અને વેરીએશન (આભૂષણ)", levels:["—","અલંકાર માં 60% ખટકા વાળો આલાપ","આડા અવળા રાગ માં 60% સ્પીડ માં ખટકા","80% સ્પીડ માં ન્યાસ, મીંડ, કણ સ્વર આભૂષણો","સપાટ • મુરકી • આંદોલન • ગમક • તાન • વીબ્રાટો પર સંપૂર્ણ પક્કડ"]},
+    {t:"વોઇસ કંટ્રોલ અને મોડ્યુલેશન", levels:["—","વોઇસ કંટ્રોલ નું બેસિક સેન્સ","સોફ્ટનેસ અને લાઉડનેસ પર કંટ્રોલ","ચેષ્ટ/થ્રોટ/હેડ/નેઝલ વોઇસ પર સંપૂર્ણ કંટ્રોલ","ડાયનામિક્સ થ્રો, ઇમ્પેક્ટ, વિસપરિંગ, ફોલસેટો પર સંપૂર્ણ કંટ્રોલ"]},
+    {t:"વોઇસ ટોન - ટીમ્બર & રેન્જ", levels:["—","નોર્મલ બેસિક ટોન સેન્સ","ફૂલ ફિલ ટોનાલિટી, ક્લિયર સાઉન્ડેબલ વોઇસ","EQ ફ્રિકવેન્સી લો-મિડ-હાઇ સાથે ફૂલ સાઉન્ડ","મંદ્ર ના ગ થી તાર ના કોમળ ધ સુધી ક્લિયર (નોન બ્રેકેબલ)"]},
+    {t:"Preparation / Genre", levels:["—","20 સોંગ લેખિત | મૌખિક","100 સોંગ લેખિત | મૌખિક","20+ પર્ફોર્મન્સ રાઉન્ડ (સા \\ પંચમ)","50+ પર્ફોર્મન્સ રાઉન્ડ (સા \\ પંચમ)"]},
+    {t:"Technical Knowledge", levels:["—","માઇક પકડવાની સાચી રીત","માઇક સેટ અપ, રિવર્બ-ડિલે = આઉટપુટ","સ્ટેજ સ્પીકર પ્લેસમેન્ટ (પોપ સાઉન્ડ કંટ્રોલ)","5 શો સિંગિંગ વિથ 2 ઇન ઈયર"]},
+    {t:"ભાષા & શબ્દ શુદ્ધિકરણ", levels:["—","શુદ્ધ શબ્દ ઉચ્ચારણ","1 genre પ્રમાણે ઉચ્ચારણ","2 genre & પબ્લિક સ્પીકિંગ સ્કિલ","તમામ જોનર માં નિપુણ, પબ્લિક સ્પીકિંગ નિષ્ણાંત"]},
+    {t:"રિયાજ માં મહેનત અને ધીરજ", levels:["—","1 વીક 3:30 કલાક (દરરોજ 30 મિનિટ)","1 વીક 7:00 કલાક (દરરોજ 1 કલાક)","1 વીક 14:00 કલાક (દરરોજ 2 કલાક)","1 વીક 21:00 કલાક (દરરોજ 3 કલાક)"]},
+    {t:"મલ્ટી ટેલેન્ટ", levels:["—","હાર્મોનિયમ અને સિંગિંગ","પિયાનો & હાર્મોનિયમ & સિંગિંગ","+ તબલા","+ ગિટાર"]},
+    {t:"સ્ટેજ અનુભવ", levels:["—","(કોરસ લીડ) 5 Stage Show","10 Show, ₹5000/Show (Lead)","10 Show, ₹10,000/Show, 5 નામાંકિત કલાકાર સાથે","3 Show, ₹1 લાખ/Show (ગુજરાત+ઈન્ડિયા બહાર)"]},
+    {t:"કોન્ફિડન્સ & પર્ફોર્મન્સ", levels:["—","નોર્મલ","મીડિયમ પર્ફોર્મન્સ, ભૂલ વગર","3000 ઓડિયન્સ સામે પર્ફેક્ટ સિંગિંગ","એનર્જેટિક પર્ફોર્મર, વન મેન શો"]},
+    {t:"વ્યવહાર & સંબંધ", levels:["—","વર્તણૂક સારી","સંગીત પ્રત્યે સમર્પણ - ઈમાનદારી","1 ઓર્ગેનાઈઝર, 5 સંગીતકારો સાથે પર્ફોર્મ","3 ઓર્ગેનાઈઝર, 10 સંગીતકારો, 3 સ્ટુડિયો"]},
+    {t:"સેલ્ફ ડિસિપ્લિન & પર્સનાલિટી", levels:["—","આધ્યાત્મિકતા & ભગવદભક્તિ","ગુડ ડ્રેસિંગ સેન્સ, ગ્રેટ હ્યુમન બિંગ","નિર્વ્યસની","તંદુરસ્ત અને ફિટ"]},
+    {t:"સોશિયલ મીડિયા", levels:["300 ફોલોવર થી નીચે, 20 પોસ્ટ","100 સબ | 1k ફોલો | 50+ પોસ્ટ","500 સબ | 5k ફોલો | 150 પોસ્ટ","1000 સબ મોનેટાઇઝ | 10k ફોલો | 300 પોસ્ટ","10k સબ | 100k ફોલો | 500 પોસ્ટ (20 આલ્બમ)"]},
+    {t:"પોટેન્શિયલ (ઓવરઓલ)", levels:["10 સ્ટાર (D grade)","20 સ્ટાર (C grade)","30 સ્ટાર (B grade)","40 સ્ટાર (A grade)","60 સ્ટાર (Super Star grade)"]},
+  ],
+  hi: [
+    {t:"सुर (Pitch)", levels:["—","मूल सुर की पहचान और स्थिरता","सुर का सीधा और आड़ा-तिरछा अंतराल","60% गति • आड़े-तिरछे पैटर्न (अलंकार/राग)","100% गति • हारमोनियम/तानपुरा के साथ"]},
+    {t:"ताल / लय", levels:["—","100% गति ताल में अलंकार","राग / विलंबित दुगुन और द्रुत लय में","गीत या तबला सुनते ही सभी ताल-लय की पहचान","ताल के सभी प्रकार • वेस्टर्न बीट • एडवांस लय की समझ"]},
+    {t:"थ्योरी (Theory)", levels:["—","10 अलंकार • सप्तक • 12 स्वर • बेसिक व्याकरण","12 स्केल / वेस्टर्न नोट की पहचान","5 रागों की पहचान • 10 थाट और आश्रय रागों की पहचान","शास्त्रीय + वेस्टर्न + घराने की गहन समझ"]},
+    {t:"राग (Raga)", levels:["—","बेसिक","10 थाट","20 सर्वाधिक उपयोगी राग और रागिनी का ज्ञान","कोई भी गीत सुनते ही सूक्ष्म राग की पहचान"]},
+    {t:"गीतों की खोज", levels:["—","राग के अनुसार सामान्य गीत","राग के अनुसार मध्यम कठिन गीत खोजना","पसंदीदा गीत ढूंढकर उचित सुर-ताल-लय में बजाना","एडवांस वेरिएशन वाले गीत, कॉर्ड्स-आर्पेगियो के साथ गाकर बजाना"]},
+    {t:"फिंगर मूवमेंट", levels:["—","100% गति में अलंकार","100% गति में राग आड़े-तिरछे बजाना","कॉर्ड्स-आर्पेगियो 80% गति के साथ लागू करना","डीप वेस्टर्न कॉर्ड के साथ परफेक्ट फिंगरिंग (राग-वेरिएशन में भी)"]},
+    {t:"गायकी और वेरिएशन (आभूषण)", levels:["—","अलंकार में 60% खटका युक्त आलाप","आड़े-तिरछे राग में 60% गति में खटका","80% गति में न्यास, मींड, कण स्वर आभूषण","सपाट • मुरकी • आंदोलन • गमक • तान • वाइब्रेटो पर पूर्ण पकड़"]},
+    {t:"वॉइस कंट्रोल और मॉड्यूलेशन", levels:["—","वॉइस कंट्रोल की बुनियादी समझ","सॉफ्टनेस और लाउडनेस पर नियंत्रण","चेस्ट/थ्रॉ़ट/हेड/नेज़ल वॉइस पर पूर्ण नियंत्रण","डायनेमिक्स थ्रो, इम्पैक्ट, व्हिस्परिंग, फाल्सेटो पर पूर्ण नियंत्रण"]},
+    {t:"वॉइस टोन - टिम्बर और रेंज", levels:["—","सामान्य बुनियादी टोन समझ","स्पष्ट टोनैलिटी, सुनने योग्य आवाज","EQ फ़्रीक्वेंसी लो-मिड-हाई के साथ पूर्ण ध्वनि","मंद्र ग से तार कोमल ध तक स्पष्ट (नॉन-ब्रेकेबल)"]},
+    {t:"तैयारी / शैली (Genre)", levels:["—","20 गीत लिखित | मौखिक","100 गीत लिखित | मौखिक","20+ प्रदर्शन राउंड (सा \\ पंचम)","50+ प्रदर्शन राउंड (सा \\ पंचम)"]},
+    {t:"तकनीकी ज्ञान (Technical)", levels:["—","माइक पकड़ने का सही तरीका","माइक सेटअप, रिवर्ब-डિલે = आउटपुट","स्टेज स्पीकर प्लेसमेंट (पॉप साउंड कंट्रोल)","5 शो सिंगिंग 2 इन-ईयर मॉनिटर के साथ"]},
+    {t:"भाषा और शब्द शुद्धिकरण", levels:["—","शुद्ध शब्द उच्चारण","1 शैली (genre) के अनुसार उच्चारण","2 शैली और पब्लिक स्पीकिंग कौशल","सभी शैलियों में निपुण, पब्लिक स्पीकिंग विशेषज्ञ"]},
+    {t:"रियाज़ में मेहनत और धैर्य", levels:["—","1 सप्ताह 3:30 घंटे (दैनिक 30 मिनट)","1 सप्ताह 7:00 घंटे (दैनिक 1 घंटा)","1 सप्ताह 14:00 घंटे (दैनिक 2 घंटे)","1 सप्ताह 21:00 घंटे (दैनिक 3 घंटे)"]},
+    {t:"मल्टी-टैलेंट", levels:["—","हारमोनियम और गायन","पियानो और हारमोनियम और गायन","+ तबला","+ गिटार"]},
+    {t:"स्टेज अनुभव", levels:["—","(कोरस लीड) 5 स्टेज शो","10 शो, ₹5000/शो (Lead)","10 शो, ₹10,000/शो, 5 प्रसिद्ध कलाकारों के साथ","3 शो, ₹1 लाख/शो (गुजरात + विदेश में)"]},
+    {t:"आत्मविश्वास और प्रदर्शन", levels:["—","सामान्य","मध्यम प्रदर्शन, बिना गलती के","3000 दर्शकों के सामने बेहतरीन गायन","ऊर्जावान परफॉर्मर, वन मैन शो"]},
+    {t:"व्यवहार और संबंध", levels:["—","अच्छा व्यवहार","संगीत के प्रति समर्पण - ईमानदारी","1 ऑर्गनाइज़र, 5 संगीतकारों के साथ प्रदर्शन","3 ऑर्गनाइज़र, 10 संगीतकार, 3 स्टूडियो"]},
+    {t:"आत्म-अनुशासन और व्यक्तित्व", levels:["—","आध्यात्मिकता और भगवद भक्ति","गुड ड्रेसिंग सेंस, अच्छे इंसान","व्यसनमुक्त","स्वस्थ और फिट"]},
+    {t:"सोशल मीडिया", levels:["300 फॉलोअर्स से कम, 20 पोस्ट","100 सब | 1k फॉलो | 50+ पोस्ट","500 सब | 5k फॉलो | 150 पोस्ट","1000 सब मोनेटाइज | 10k फॉलो | 300 पोस्ट","10k सब | 100k फॉलो | 500 पोस्ट (20 एल्बम)"]},
+    {t:"संभाव्यता (Overall)", levels:["10 स्टार (D ग्रेड)","20 स्टार (C ग्रेड)","30 स्टार (B ग्रेड)","40 स्टार (A ग्रेड)","60 स्टार (सुपर स्टार ग्रेड)"]}
+  ],
+  en: [
+    {t:"Pitch (Swara)", levels:["—","Note identification and pitch stability","Direct and interval distances between notes","60% speed • complex patterns (alankar/raga)","100% speed • with Harmonium/Tanpura"]},
+    {t:"Rhythm / Laya", levels:["—","100% speed alankars in rhythm","Raga / Vilambit, Dugun and Drut laya","Identify any rhythm/laya on hearing song/tabla","All types of talas • Western beats • Advance rhythm understanding"]},
+    {t:"Theory", levels:["—","10 alankars • Saptak • 12 notes • basic grammar","12 scales / Western note identification","Identify 5 ragas • 10 thaats & aashraya ragas","Deep understanding of Classical + Western + Gharanas"]},
+    {t:"Raga", levels:["—","Basic","10 Thaats","Knowledge of 20 most useful ragas & raginis","Identify intricate ragas upon hearing any song"]},
+    {t:"Song Finding", levels:["—","Normal songs according to raga","Medium difficult songs according to raga","Find favorite song and play in proper sur-tal-lay","Play advance variation songs, sing along with chords & arpeggios"]},
+    {t:"Finger Movement", levels:["—","Alankars at 100% speed","Play complex raga patterns at 100% speed","Apply chords & arpeggios at 80% speed","Perfect fingering with deep Western chords (even in raga variation)"]},
+    {t:"Singing & Variation (Ornaments)", levels:["—","60% Khatka-style alaap in alankars","Khatkas at 60% speed in complex ragas","Nyasa, Meend, Kan swara ornaments at 80% speed","Complete mastery over Sapaat • Murki • Andolan • Gamak • Taan • Vibrato"]},
+    {t:"Voice Control & Modulation", levels:["—","Basic sense of voice control","Control over softness and loudness","Complete control over Chest/Throat/Head/Nasal voice","Mastery over dynamics throw, impact, whispering, falsetto"]},
+    {t:"Voice Tone - Timbre & Range", levels:["—","Normal basic tone sense","Full tonality, clear projecting voice","Full sound with EQ frequency low-mid-high","Clear non-breaking voice from Mandra G to Taar Komal Dha"]},
+    {t:"Preparation / Genre", levels:["—","20 songs written | oral","100 songs written | oral","20+ performance rounds (Sa / Pa)","50+ performance rounds (Sa / Pa)"]},
+    {t:"Technical Knowledge", levels:["—","Correct way to hold mic","Mic setup, reverb-delay = output","Stage speaker placement (pop sound control)","Singing 5 shows with 2 In-Ear Monitors"]},
+    {t:"Language & Pronunciation", levels:["—","Pure word pronunciation","Pronunciation matching 1 genre","2 genres & public speaking skills","Expert in all genres, master public speaker"]},
+    {t:"Riyaz Dedication & Patience", levels:["—","1 week 3:30 hours (30 min daily)","1 week 7:00 hours (1 hour daily)","1 week 14:00 hours (2 hours daily)","1 week 21:00 hours (3 hours daily)"]},
+    {t:"Multi-Talent", levels:["—","Harmonium and Singing","Piano & Harmonium & Singing","+ Tabla","+ Guitar"]},
+    {t:"Stage Experience", levels:["—","(Chorus Lead) 5 Stage Shows","10 Shows, ₹5,000/Show (Lead)","10 Shows, ₹10,000/Show, with 5 renowned artists","3 Shows, ₹1 Lakh/Show (National/International)"]},
+    {t:"Confidence & Performance", levels:["—","Normal","Medium performance, error-free","Flawless singing before 3,000 audience","Energetic performer, one-man show"]},
+    {t:"Behavior & Relations", levels:["—","Good behavior","Dedication and honesty towards music","Perform with 1 organizer, 5 musicians","Connect with 3 organizers, 10 musicians, 3 studios"]},
+    {t:"Self-Discipline & Personality", levels:["—","Spirituality & devotion","Good dressing sense, great human being","Free from addictions","Healthy and fit"]},
+    {t:"Social Media", levels:["Under 300 followers, 20 posts","100 sub | 1k follow | 50+ posts","500 sub | 5k follow | 150 posts","1000 sub monetized | 10k follow | 300 posts","10k sub | 100k follow | 500 posts (20 albums)"]},
+    {t:"Overall Potential", levels:["10 stars (D grade)","20 stars (C grade)","30 stars (B grade)","40 stars (A grade)","60 stars (Super Star grade)"]}
+  ]
+};
+
+const UI_TEXT = {
+  gu: {
+    title: "📊 મારું પ્રોગ્રેસ કાર્ડ",
+    desc: "તમારો પોતાનો ★ પસંદ કરો — 20 મુદ્દા પર તમારું પ્રામાણિક સેલ્ફ-રેટિંગ",
+    totalStarsLabel: "કુલ સ્ટાર:",
+    noStars: "હજુ કોઈ ★ પસંદ કર્યો નથી",
+    hintText: "📌 જે ★ પર તમે ક્લિક કરો છો, એ જ તમારું ફાઇનલ સેલ્ફ-રેટિંગ ગણાય છે — ટીચર નહીં, વિદ્યાર્થી પોતે પસંદ કરે છે.",
+    defaultInstruction: "★ પસંદ કરો — જે લેવલ પસંદ કરશો એ ટોગલ થઈને lit રહેશે",
+    starEarned: "★ મળ્યા",
+    selectedLevels: "પસંદ કરેલા લેવલ: ",
+    gradeD: "🔴 D grade (10-19 stars)",
+    gradeC: "🟠 C grade (20-29 stars)",
+    gradeB: "🔵 B grade (30-39 stars)",
+    gradeA: "🟢 A grade (40-59 stars)",
+    gradeSuper: "👑 Super Star grade (60+ stars)",
+    underD: "⚪ D Grade થી નીચે",
+    pointsTouched: "મુદ્દા સ્પર્શાયા",
+    confirmHonesty: "શું તમે આ સ્ટાર પ્રામાણિકતાથી આપી રહ્યા છો?"
+  },
+  hi: {
+    title: "📊 मेरा प्रोग्रेस कार्ड",
+    desc: "अपना खुद का ★ चुनें — 20 बिंदुओं पर आपका ईमानदार स्व-मूल्यांकन",
+    totalStarsLabel: "कुल स्टार:",
+    noStars: "अभी तक कोई ★ नहीं चुना गया",
+    hintText: "📌 आप जिस ★ पर क्लिक करते हैं, वही आपका अंतिम स्व-रेटिंग माना जाता है — शिक्षक नहीं, छात्र स्वयं चुनता है।",
+    defaultInstruction: "★ चुनें — जो स्तर आप चुनेंगे वह सक्रिय रहेगा",
+    starEarned: "★ मिले",
+    selectedLevels: "चुने गए स्तर: ",
+    gradeD: "🔴 D ग्रेड (10-19 stars)",
+    gradeC: "🟠 C ग्रेड (20-29 stars)",
+    gradeB: "🔵 B ग्रेड (30-39 stars)",
+    gradeA: "🟢 A ग्रेड (40-59 stars)",
+    gradeSuper: "👑 सुपर स्टार ग्रेड (60+ stars)",
+    underD: "⚪ D ग्रेड से नीचे",
+    pointsTouched: "बिंदु छुए गए",
+    confirmHonesty: "क्या आप यह स्टार पूरी ईमानदारी से दे रहे हैं?"
+  },
+  en: {
+    title: "📊 My Progress Card",
+    desc: "Select your own ★ — honest 20-point self-assessment rating",
+    totalStarsLabel: "Total Stars:",
+    noStars: "No ★ selected yet",
+    hintText: "📌 The ★ you click is considered your final self-rating — selected by the student, not the teacher.",
+    defaultInstruction: "Select ★ — the chosen levels will toggle and stay active",
+    starEarned: "★ earned",
+    selectedLevels: "Selected levels: ",
+    gradeD: "🔴 D grade (10-19 stars)",
+    gradeC: "🟠 C grade (20-29 stars)",
+    gradeB: "🔵 B grade (30-39 stars)",
+    gradeA: "🟢 A grade (40-59 stars)",
+    gradeSuper: "👑 Super Star grade (60+ stars)",
+    underD: "⚪ Below D Grade",
+    pointsTouched: "points assessed",
+    confirmHonesty: "Are you giving this star honestly?"
+  }
+};
+
+const lang = (() => {
+  try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch (e) { return 'gu'; }
+})();
+const t = UI_TEXT[lang] || UI_TEXT.gu;
+const CRITERIA = CRITERIA_BY_LANG[lang] || CRITERIA_BY_LANG.gu;
+
+function applyPageTranslations() {
+  document.getElementById('pageTitle').textContent = t.title;
+  document.getElementById('pageSub').textContent = t.desc;
+  document.getElementById('totalStarsLabel').textContent = t.totalStarsLabel;
+  document.getElementById('hintText').textContent = t.hintText;
+  initAppShell({ title: t.title.replace(' 📊','') });
+}
+
+const STAR_LABEL = ["0★","1★","2★","3★","4★"];
+const STAR_GLYPH_COUNT = [0,1,1,1,2]; // level -> number of ★ glyphs shown on the button
+const MAX_PER_CRIT = STAR_GLYPH_COUNT.reduce((a,b)=>a+b,0); // 5
+let ratings = {}; // idx -> array of independently-toggled levels, e.g. [1,2,4]
+let currentKey = null;
+
+const container = document.getElementById('criteriaContainer');
+
+function buildCards(){
+  container.innerHTML = "";
+  CRITERIA.forEach((c, idx) => {
+    const card = document.createElement('div');
+    card.className = 'crit-card';
+
+    const head = document.createElement('div');
+    head.className = 'crit-head';
+    head.innerHTML = `<span class="crit-num">${idx+1}.</span><span class="crit-title">${c.t}</span>`;
+    card.appendChild(head);
+
+    const starsRow = document.createElement('div');
+    starsRow.className = 'stars';
+    for(let s=0; s<=4; s++){
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'star-btn';
+      b.dataset.idx = idx;
+      b.dataset.star = s;
+      const glyphs = '★'.repeat(STAR_GLYPH_COUNT[s]) || '☆';
+      b.innerHTML = `${glyphs}<span class="n">${STAR_LABEL[s]}</span>`;
+      b.addEventListener('click', () => selectStar(idx, s));
+      starsRow.appendChild(b);
+    }
+    card.appendChild(starsRow);
+
+    const desc = document.createElement('div');
+    desc.className = 'level-desc empty';
+    desc.id = `desc-${idx}`;
+    desc.textContent = t.defaultInstruction;
+    card.appendChild(desc);
+
+    const checklist = document.createElement('ul');
+    checklist.className = 'crit-checklist';
+    checklist.id = `checklist-${idx}`;
+    card.appendChild(checklist);
+
+    container.appendChild(card);
+  });
+}
+
+async function selectStar(idx, star){
+  if (!confirm(t.confirmHonesty)) return;
+
+  if(!ratings[idx]) ratings[idx] = [];
+  const pos = ratings[idx].indexOf(star);
+  if(pos === -1){
+    ratings[idx].push(star);
+  } else {
+    ratings[idx].splice(pos, 1);
+  }
+
+  if (currentKey) {
+    try {
+      localStorage.setItem(currentKey, JSON.stringify(ratings));
+    } catch(e) {}
+  }
+
+  if (session && session.phone) {
+    try {
+      await saveProgress(session.phone, ratings);
+    } catch(e) {
+      console.error('Database auto-save failed:', e);
+    }
+  }
+
+  refreshCard(idx);
+  refreshDial();
+}
+
+function refreshCard(idx){
+  const selected = ratings[idx] || [];
+  const buttons = container.querySelectorAll(`.star-btn[data-idx="${idx}"]`);
+  buttons.forEach(b => {
+    b.classList.toggle('selected', selected.includes(Number(b.dataset.star)));
+  });
+
+  const desc = document.getElementById(`desc-${idx}`);
+  const checklist = document.getElementById(`checklist-${idx}`);
+  checklist.innerHTML = "";
+
+  if(selected.length === 0){
+    desc.className = 'level-desc empty';
+    desc.textContent = t.defaultInstruction;
+    return;
+  }
+
+  desc.className = 'level-desc';
+  const sortedSel = [...selected].sort((a,b)=>a-b);
+  const totalHere = sortedSel.reduce((s,v)=>s+STAR_GLYPH_COUNT[v],0);
+  desc.innerHTML = `<span class="lvl-tag">${totalHere}${t.starEarned}</span>${t.selectedLevels}${sortedSel.map(v=>STAR_LABEL[v]).join(', ')}`;
+
+  sortedSel.forEach(v => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="lvl-tag">${STAR_LABEL[v]}</span> ${CRITERIA[idx].levels[v]}`;
+    checklist.appendChild(li);
+  });
+}
+
+const DIAL_R = 42;
+const DIAL_CIRC = 2 * Math.PI * DIAL_R;
+const dialProgressEl = document.getElementById('dialProgress');
+dialProgressEl.style.strokeDasharray = `${DIAL_CIRC}`;
+dialProgressEl.style.strokeDashoffset = `${DIAL_CIRC}`;
+
+function refreshDial(){
+  const total = Object.values(ratings).reduce((sum, levels) => {
+    return sum + levels.reduce((s,v) => s + STAR_GLYPH_COUNT[v], 0);
+  }, 0);
+  const maxTotal = CRITERIA.length * MAX_PER_CRIT;
+  const pct = Math.round((total / maxTotal) * 100);
+  const offset = DIAL_CIRC - (pct / 100) * DIAL_CIRC;
+  dialProgressEl.style.strokeDashoffset = `${offset}`;
+  document.getElementById('dialPct').textContent = pct + '%';
+  document.getElementById('totStars').textContent = total;
+  document.getElementById('maxStars').textContent = maxTotal;
+
+  let gradeText = t.noStars;
+  const filledCount = Object.values(ratings).filter(levels => levels.some(v => v > 0)).length;
+  if(filledCount > 0){
+    if (total < 10) gradeText = t.underD;
+    else if (total < 20) gradeText = t.gradeD;
+    else if (total < 30) gradeText = t.gradeC;
+    else if (total < 40) gradeText = t.gradeB;
+    else if (total < 60) gradeText = t.gradeA;
+    else gradeText = t.gradeSuper;
+    gradeText += ` (${filledCount}/${CRITERIA.length} ${t.pointsTouched})`;
+  }
+  document.getElementById('gradeLine').textContent = gradeText;
+}
+
+function setStatus(msg){
+  document.getElementById('statusMsg').textContent = msg;
+}
+
+// Load student details from active session
+const session = (typeof readMockSession === 'function') ? readMockSession() : null;
+let profile = {};
+
+async function initProgress() {
+  if (session && session.phone) {
+    const sb = getSupabase();
+    const { data: { user } } = sb ? await sb.auth.getUser() : { data: {} };
+
+    // 1. Fetch profile
+    let dbProfile = null;
+    if (user) {
+      dbProfile = await getProfile(session.phone);
+    }
+    
+    if (!dbProfile) {
+      const profileKey = 'harmonyProfile:' + session.phone;
+      try { profile = JSON.parse(localStorage.getItem(profileKey) || '{}'); } catch(e) {}
+    } else {
+      profile = dbProfile;
+      try { localStorage.setItem('harmonyProfile:' + session.phone, JSON.stringify(profile)); } catch(e) {}
+    }
+    
+    document.getElementById('headerName').textContent = '👤 ' + (profile.name || '-');
+    document.getElementById('headerBatch').textContent = '📅 ' + (profile.batch || '-');
+
+    // 2. Fetch ratings
+    let dbRatings = null;
+    if (user) {
+      dbRatings = await getProgress(session.phone);
+    }
+    
+    if (!dbRatings || Object.keys(dbRatings).length === 0) {
+      currentKey = 'progress:' + session.phone;
+      try {
+        const raw = localStorage.getItem(currentKey);
+        ratings = raw ? JSON.parse(raw) : {};
+      } catch(e) {
+        ratings = {};
+      }
+    } else {
+      ratings = dbRatings;
+      try { localStorage.setItem('progress:' + session.phone, JSON.stringify(ratings)); } catch(e) {}
+    }
+  }
+  
+  applyPageTranslations();
+  buildCards();
+  CRITERIA.forEach((c, idx) => refreshCard(idx));
+  refreshDial();
+}
+
+initProgress();
+</script>
+</div>
+</body>
+</html>

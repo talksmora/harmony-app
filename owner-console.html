@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner Console - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .owner-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .owner-box h3 { margin: 0 0 10px; font-size: 1rem; }
+  .owner-box p { color: var(--subtitle); font-size: 0.85rem; margin: 0 0 12px; }
+  .allow-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .allow-row input {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+  .allow-row button {
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .allow-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .allow-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 0.88rem;
+  }
+  .allow-list button {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .dev-note {
+    font-size: 0.75rem;
+    color: var(--subtitle);
+    background: var(--bg);
+    border-left: 3px solid #e74c3c;
+    padding: 10px 12px;
+    border-radius: 6px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body data-page="owner-console">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <h2 id="consoleTitle" style="margin:0 0 4px;">🛡️ Owner Console</h2>
+    <p id="consoleSub" style="color:var(--subtitle); font-size:0.9rem; margin:0 0 16px;">Access-control &amp; app management (owner only)</p>
+ 
+    <div class="owner-box">
+      <h3 id="allowedTitle">📱 મંજૂર મોબાઈલ નંબર (Allowed Numbers)</h3>
+      <p id="allowedDesc">અહીં તમે જેટલા numbers add કરશો, ફક્ત એ j numbers app માં login કરી શકશે.</p>
+      <div class="allow-row">
+        <input id="newNumberInput" type="tel" placeholder="+91 9XXXXXXXXX">
+        <button id="addNumberBtn">Add</button>
+      </div>
+      <ul class="allow-list" id="allowList"></ul>
+      <div class="dev-note" id="devNote1">
+        <strong>Dev note:</strong> અત્યારે આ list ફક્ત આ browser ના localStorage માં save થાય છે (demo purpose).
+      </div>
+    </div>
+
+    <div class="owner-box">
+      <h3 id="progressReportTitle">🧑‍🎓 વિદ્યાર્થી પ્રોગ્રેસ રિપોર્ટ (Student Progress Report)</h3>
+      <p id="progressReportDesc">બધા નોંધાયેલા વિદ્યાર્થીઓનો લાઈવ પ્રોગ્રેસ અને સ્કોર અહીં જુઓ.</p>
+      
+      <div style="overflow-x: auto; margin-top: 14px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border); color: var(--subtitle);">
+              <th id="thName" style="padding: 10px 8px;">વિદ્યાર્થી</th>
+              <th id="thPhone" style="padding: 10px 8px;">મોબાઇલ</th>
+              <th id="thBatch" style="padding: 10px 8px;">બેચ</th>
+              <th id="thStars" style="padding: 10px 8px; text-align: center;">કુલ સ્ટાર</th>
+              <th id="thProgress" style="padding: 10px 8px; text-align: center;">પ્રોગ્રેસ</th>
+              <th id="thActions" style="padding: 10px 8px; text-align: right;">રેટિંગ્સ</th>
+            </tr>
+          </thead>
+          <tbody id="studentProgressBody">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+ 
+    <div class="owner-box">
+      <h3 id="infoTitle">⚙️ Owner Info</h3>
+      <p id="infoDesc">Owner Console ફક્ત એ j phone + email pair થી ખૂલે છે જે <code>shared/supabase-client.js</code> ના <code>isOwner()</code> function માં set કરેલું હોય.</p>
+      <div class="dev-note" id="devNote2">
+        Antigravity માં <code>OWNER_PHONE</code> અને <code>OWNER_EMAIL</code> ને તમારા સાચા details સાથે બદલો.
+      </div>
+    </div>
+  </div>
+
+  <!-- Riyaz Logs Modal -->
+  <div id="riyazModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; padding:15px; box-sizing:border-box;">
+    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:20px; max-width:600px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:var(--shadow); position:relative; color:var(--text);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+        <h3 id="riyazModalTitle" style="margin:0; font-size:1.2rem;">Riyaz Logs</h3>
+        <button id="closeRiyazModalBtn" style="background:none; border:none; font-size:1.8rem; color:var(--text); cursor:pointer; line-height:1;">&times;</button>
+      </div>
+      <div id="riyazModalContent" style="display:flex; flex-direction:column; gap:12px;">
+        <!-- Dynamically populated daily logs -->
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+  const CONSOLE_TEXT = {
+    gu: {
+      title: '🛡️ ઓનર કન્સોલ',
+      sub: 'એક્સેસ-કંટ્રોલ અને એપ મેનેજમેન્ટ (ફક્ત ઓનર માટે)',
+      allowedTitle: '📱 મંજૂર મોબાઈલ નંબર (Allowed Numbers)',
+      allowedDesc: 'અહીં તમે જેટલા નંબર્સ ઉમેરશો, ફક્ત તે જ નંબર્સ એપમાં લોગિન કરી શકશે.',
+      addBtn: 'Add',
+      noNumbers: 'કોઈ નંબર ઉમેર્યો નથી',
+      removeBtn: '✕ Remove',
+      alertValidPhone: 'માન્ય ફોન નંબર લખો (E.164 format: +919876543210)',
+      infoTitle: '⚙️ ઓનર માહિતી (Owner Info)',
+      infoDesc: 'ઓનર કન્સોલ ફક્ત તે જ ફોન અને ઈમેઈલ પેરથી ખૂલશે જે `shared/supabase-client.js` ના `isOwner()` ફંક્શનમાં સેટ કરેલું હોય.',
+      devNote1: '<strong>Dev note:</strong> અત્યારે આ લિસ્ટ ફક્ત આ બ્રાઉઝરના localStorage માં સેવ થાય છે (demo purpose).',
+      devNote2: 'Antigravity માં <code>OWNER_PHONE</code> અને <code>OWNER_EMAIL</code> ને તમારા સાચા ડીટેલ્સ સાથે બદલો.',
+      progressReportTitle: '🧑‍🎓 વિદ્યાર્થી પ્રોગ્રેસ રિપોર્ટ',
+      progressReportDesc: 'બધા નોંધાયેલા વિદ્યાર્થીઓનો લાઈવ પ્રોગ્રેસ અને સ્કોર અહીં જુઓ.',
+      thName: 'વિદ્યાર્થી',
+      thPhone: 'મોબાઇલ',
+      thBatch: 'બેચ',
+      thStars: 'કુલ સ્ટાર',
+      thProgress: 'પ્રોગ્રેસ',
+      thActions: 'રેટિંગ્સ',
+      noStudents: 'કોઈ વિદ્યાર્થી હજુ નોંધાયેલ નથી',
+      viewDetails: 'જુઓ (View)',
+      riyazLogsTitle: 'રિયાઝ લોગ',
+      noRiyazLogs: 'કોઈ રિયાઝ લોગ મળ્યા નથી.',
+      parentVoiceNotRecorded: '🎙️ વાલી કન્ફર્મેશન ઓડિયો રેકોર્ડ કરેલ નથી.',
+      parentVoice: '🎙️ વાલી કન્ફર્મેશન ઓડિયો:',
+      topicRaga: 'ટોપિક/રાગ',
+      duration: 'સમયગાળો',
+      hoursText: 'કલાક',
+      minsText: 'મિનિટ'
+    },
+    hi: {
+      title: '🛡️ ओनर कंसोल',
+      sub: 'एक्सेस-कंट्रोल और ऐप प्रबंधन (केवल ओनर के लिए)',
+      allowedTitle: '📱 स्वीकृत मोबाइल नंबर (Allowed Numbers)',
+      allowedDesc: 'यहां आप जितने नंबर जोड़ेंगे, केवल वे ही नंबर ऐप में लॉग इन कर सकेंगे।',
+      addBtn: 'Add',
+      noNumbers: 'कोई नंबर नहीं जोड़ा गया',
+      removeBtn: '✕ Remove',
+      alertValidPhone: 'मान्य फोन नंबर दर्ज करें (E.164 format: +919876543210)',
+      infoTitle: '⚙️ ओनर जानकारी (Owner Info)',
+      infoDesc: 'ओनर कंसोल केवल उसी फोन और ईमेल जोड़ी से खुलेगा जो `shared/supabase-client.js` के `isOwner()` फ़ंक्शन में सेट किया गया हो.',
+      devNote1: '<strong>Dev note:</strong> वर्तमान में यह सूची केवल इस ब्राउज़र के localStorage में सहेजी गई है (demo purpose)।',
+      devNote2: 'Antigravity में <code>OWNER_PHONE</code> और <code>OWNER_EMAIL</code> को अपने सही विवरण के साथ बदलें।',
+      progressReportTitle: '🧑‍🎓 छात्र प्रगति रिपोर्ट',
+      progressReportDesc: 'सभी नामांकित छात्रों की लाइव प्रगति और कुल स्टार यहां देखें।',
+      thName: 'छात्र',
+      thPhone: 'मोबाइल',
+      thBatch: 'बैच',
+      thStars: 'कुल स्टार',
+      thProgress: 'प्रगति',
+      thActions: 'रेटिंग्स',
+      noStudents: 'कोई छात्र अभी नामांकित नहीं है',
+      viewDetails: 'देखें (View)',
+      riyazLogsTitle: 'रियाज़ लॉग',
+      noRiyazLogs: 'कोई रियाज़ लॉग नहीं मिला।',
+      parentVoiceNotRecorded: '🎙️ अभिभावक पुष्टि ऑडियो रिकॉर्ड नहीं किया गया है।',
+      parentVoice: '🎙️ अभिभावक पुष्टि ऑडियो:',
+      topicRaga: 'विषय/राग',
+      duration: 'अवधि',
+      hoursText: 'घंटे',
+      minsText: 'मिनट'
+    },
+    en: {
+      title: '🛡️ Owner Console',
+      sub: 'Access-control & app management (owner only)',
+      allowedTitle: '📱 Allowed Mobile Numbers',
+      allowedDesc: 'Only the phone numbers added to this list will be allowed to log in to the app.',
+      addBtn: 'Add',
+      noNumbers: 'No numbers added yet',
+      removeBtn: '✕ Remove',
+      alertValidPhone: 'Please enter a valid phone number (E.164 format: +919876543210)',
+      infoTitle: '⚙️ Owner Info',
+      infoDesc: 'The Owner Console will only open for the phone + email pair configured in the `isOwner()` function of `shared/supabase-client.js`.',
+      devNote1: '<strong>Dev note:</strong> Currently this list is only saved in this browser\'s localStorage (demo purpose).',
+      devNote2: 'Change <code>OWNER_PHONE</code> and <code>OWNER_EMAIL</code> in Antigravity to your actual details.',
+      progressReportTitle: '🧑‍🎓 Student Progress Report',
+      progressReportDesc: 'Track live progress and total stars of all registered students.',
+      thName: 'Student',
+      thPhone: 'Phone',
+      thBatch: 'Batch',
+      thStars: 'Total Stars',
+      thProgress: 'Progress',
+      thActions: 'Ratings',
+      noStudents: 'No students registered yet',
+      viewDetails: 'View'
+    }
+  };
+
+  const lang = (() => {
+    try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch (e) { return 'gu'; }
+  })();
+  const t = CONSOLE_TEXT[lang] || CONSOLE_TEXT.gu;
+
+  function applyPageTranslations() {
+    document.getElementById('consoleTitle').textContent = t.title;
+    document.getElementById('consoleSub').textContent = t.sub;
+    document.getElementById('allowedTitle').textContent = t.allowedTitle;
+    document.getElementById('allowedDesc').textContent = t.allowedDesc;
+    document.getElementById('addNumberBtn').textContent = t.addBtn;
+    document.getElementById('infoTitle').textContent = t.infoTitle;
+    document.getElementById('infoDesc').innerHTML = t.infoDesc;
+    document.getElementById('devNote1').innerHTML = '<strong>Dev note:</strong> ' + t.devNote1;
+    document.getElementById('devNote2').innerHTML = t.devNote2;
+    document.getElementById('progressReportTitle').textContent = t.progressReportTitle;
+    document.getElementById('progressReportDesc').textContent = t.progressReportDesc;
+    document.getElementById('thName').textContent = t.thName;
+    document.getElementById('thPhone').textContent = t.thPhone;
+    document.getElementById('thBatch').textContent = t.thBatch;
+    document.getElementById('thStars').textContent = t.thStars;
+    document.getElementById('thProgress').textContent = t.thProgress;
+    document.getElementById('thActions').textContent = t.thActions;
+  }
+
+  // ---- Supabase-backed allowed-numbers list ----
+  async function loadNumbers() {
+    const sb = getSupabase();
+    if (!sb) return [];
+    const { data, error } = await sb
+      .from('allowed_numbers')
+      .select('phone, role')
+      .order('created_at', { ascending: true });
+    if (error) {
+      console.error('Error loading allowed numbers:', error);
+      return [];
+    }
+    // Filter out any other owner numbers except the main owner (+917016164239)
+    return data
+      .filter(row => row.role !== 'owner' || row.phone === '+917016164239')
+      .map(row => row.phone);
+  }
+
+  async function renderNumbers() {
+    const list = await loadNumbers();
+    const ul = document.getElementById('allowList');
+    ul.innerHTML = '';
+    if (list.length === 0) {
+      ul.innerHTML = `<li style="justify-content:center;color:var(--subtitle);">${t.noNumbers}</li>`;
+      return;
+    }
+    list.forEach((num) => {
+      const li = document.createElement('li');
+      const span = document.createElement('span');
+      span.textContent = num;
+      const btn = document.createElement('button');
+      btn.textContent = t.removeBtn;
+      btn.dataset.phone = num;
+      li.appendChild(span);
+      li.appendChild(btn);
+      ul.appendChild(li);
+    });
+    ul.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const phoneToRemove = btn.dataset.phone;
+        const sb = getSupabase();
+        if (sb) {
+          const { error } = await sb
+            .from('allowed_numbers')
+            .delete()
+            .eq('phone', phoneToRemove);
+          if (error) {
+            alert('Error removing number: ' + error.message);
+          } else {
+            await renderNumbers();
+          }
+        }
+      });
+    });
+  }
+
+  document.getElementById('addNumberBtn').addEventListener('click', async () => {
+    const input = document.getElementById('newNumberInput');
+    const val = input.value.trim();
+    if (!val) return;
+    // E.164 format validation: +91XXXXXXXXXX
+    const cleaned = val.replace(/\s/g, '');
+    const phoneRegex = /^\+?[1-9]\d{6,14}$/;
+    if (!phoneRegex.test(cleaned)) {
+      alert(t.alertValidPhone);
+      return;
+    }
+    // Auto-normalize: Add +91 prefix if it is a 10-digit number
+    let normalized = cleaned;
+    if (!normalized.startsWith('+')) {
+      if (normalized.length === 10) {
+        normalized = '+91' + normalized;
+      } else {
+        normalized = '+' + normalized;
+      }
+    }
+    const sb = getSupabase();
+    if (sb) {
+      const { error } = await sb
+        .from('allowed_numbers')
+        .insert([{ phone: normalized, role: 'student' }]);
+      if (error) {
+        alert('Error adding number: ' + error.message);
+      } else {
+        input.value = '';
+        await renderNumbers();
+      }
+    }
+  });
+
+  const SHORT_CRITERIA = {
+    gu: ['સૂર', 'તાલ / લય', 'થિયરી', 'રાગ', 'ગીતોની શોધ', 'ફિંગર મુવમેન્ટ', 'ગાયકી અને વેરીએશન', 'વોઇસ કંટ્રોલ', 'વોઇસ ટોન', 'Preparation', 'Technical', 'ભાષા શુદ્ધિકરણ', 'રિયાજ', 'મલ્ટી ટેલેન્ટ', 'સ્ટેજ અનુભવ', 'કોન્ફિડન્સ', 'વ્યવહાર', 'સેલ્ફ ડિસિપ્લિન', 'સોશિયલ મીડિયા', 'પોટેન્શિયલ'],
+    hi: ['सुर', 'ताल / लय', 'थ्योरी', 'राग', 'गीतों की खोज', 'फिंगर मूवमेंट', 'गायकी और वेरिएशन', 'वॉइस कंट्रोल', 'वॉइस टोन', 'Preparation', 'Technical', 'भाषा शुद्धिकरण', 'रियाज़', 'मल्टी-टैलेंट', 'स्टेज अनुभव', 'आत्मविश्वास', 'व्यवहार', 'आत्म-अनुशासन', 'सोशल मीडिया', 'संभाव्यता'],
+    en: ['Pitch', 'Rhythm', 'Theory', 'Raga', 'Song Finding', 'Finger Movement', 'Singing & Ornaments', 'Voice Control', 'Voice Tone', 'Preparation', 'Technical', 'Language', 'Riyaz', 'Multi-Talent', 'Stage Exp', 'Confidence', 'Relations', 'Self-Discipline', 'Social Media', 'Potential']
+  };
+
+  async function renderStudentProgress() {
+    const sb = getSupabase();
+    if (!sb) return;
+
+    // Purge old riyaz audio files (older than 7 days) to conserve storage space
+    try { await sb.rpc('purge_old_riyaz_logs'); } catch(e) {}
+
+    const tbody = document.getElementById('studentProgressBody');
+    tbody.innerHTML = '';
+    
+    // Fetch profiles and progress in parallel
+    const [profilesRes, progressRes] = await Promise.all([
+      sb.from('profiles').select('*'),
+      sb.from('progress').select('*')
+    ]);
+    
+    if (profilesRes.error || progressRes.error) {
+      console.error('Error fetching student progress report:', profilesRes.error || progressRes.error);
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:red;">Error loading student progress.</td></tr>`;
+      return;
+    }
+    
+    const ownerPhonesToHide = ['+918160709046', '+919687582252'];
+    const students = (profilesRes.data || []).filter(p => !ownerPhonesToHide.includes(p.phone));
+    const progressMap = {};
+    (progressRes.data || []).forEach(row => {
+      progressMap[row.phone] = row.ratings || {};
+    });
+    
+    if (students.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--subtitle);">${t.noStudents}</td></tr>`;
+      return;
+    }
+    
+    const STAR_GLYPH_COUNT = [0,1,1,1,2];
+    const STAR_LABEL = ["0★","1★","2★","3★","4★"];
+    
+    students.forEach(student => {
+      const phone = student.phone;
+      const name = student.name || '-';
+      const batch = student.batch || '-';
+      const ratings = progressMap[phone] || {};
+      
+      let totalStars = 0;
+      Object.values(ratings).forEach(levels => {
+        if (Array.isArray(levels)) {
+          levels.forEach(v => {
+            totalStars += STAR_GLYPH_COUNT[v] || 0;
+          });
+        }
+      });
+      const pct = Math.round((totalStars / 100) * 100);
+      
+      const tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid var(--border)';
+      
+      tr.innerHTML = `
+        <td style="padding:10px 8px; font-weight:700;">${name}</td>
+        <td style="padding:10px 8px; color:var(--subtitle);">${phone}</td>
+        <td style="padding:10px 8px;">${batch}</td>
+        <td style="padding:10px 8px; text-align:center; font-weight:700; color:var(--accent);">${totalStars}</td>
+        <td style="padding:10px 8px; text-align:center; font-weight:700; color:var(--accent-green);">${pct}%</td>
+        <td style="padding:10px 8px; text-align:right; display:flex; gap:6px; justify-content:flex-end; align-items:center;">
+          <button class="view-btn" style="background:#e74c3c; color:#fff; border:none; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">${t.viewDetails}</button>
+          <button class="riyaz-btn" style="background:#3498db; color:#fff; border:none; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">🎙️ રિયાઝ</button>
+        </td>
+      `;
+      
+      tr.querySelector('.riyaz-btn').addEventListener('click', async () => {
+        const sb = getSupabase();
+        if (!sb) return;
+        
+        // Show loading state
+        const originalText = tr.querySelector('.riyaz-btn').textContent;
+        tr.querySelector('.riyaz-btn').textContent = 'Loading...';
+        
+        const { data, error } = await sb
+          .from('daily_riyaz')
+          .select('*')
+          .eq('phone', phone)
+          .order('practice_date', { ascending: false });
+          
+        tr.querySelector('.riyaz-btn').textContent = originalText;
+        
+        if (error) {
+          alert('Error loading Riyaz logs: ' + error.message);
+          return;
+        }
+        
+        openRiyazModal(name, data);
+      });
+      
+      tr.querySelector('.view-btn').addEventListener('click', () => {
+        const critNames = SHORT_CRITERIA[lang] || SHORT_CRITERIA.gu;
+        let summary = `${name} (${batch})\n`;
+        summary += `Total Stars: ${totalStars} | Progress: ${pct}%\n`;
+        summary += `-------------------------------------------\n\n`;
+        
+        let hasRatings = false;
+        critNames.forEach((critName, idx) => {
+          const selected = ratings[idx] || [];
+          if (selected.length > 0) {
+            hasRatings = true;
+            summary += `• ${critName}: ${selected.map(v => STAR_LABEL[v]).join(', ')}\n`;
+          }
+        });
+        
+        if (!hasRatings) {
+          summary += `No stars selected yet.`;
+        }
+        
+        alert(summary);
+      });
+      
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Riyaz Modal control
+  const riyazModal = document.getElementById('riyazModal');
+  const riyazModalTitle = document.getElementById('riyazModalTitle');
+  const riyazModalContent = document.getElementById('riyazModalContent');
+  
+  document.getElementById('closeRiyazModalBtn').addEventListener('click', () => {
+    riyazModal.style.display = 'none';
+  });
+
+  function openRiyazModal(studentName, logs) {
+    riyazModalTitle.textContent = `${studentName} - ${t.riyazLogsTitle}`;
+    riyazModalContent.innerHTML = '';
+    
+    if (!logs || logs.length === 0) {
+      riyazModalContent.innerHTML = `<div style="text-align:center; color:var(--subtitle); padding:20px 0;">${t.noRiyazLogs}</div>`;
+    } else {
+      logs.forEach(log => {
+        const div = document.createElement('div');
+        div.style.background = 'var(--bg)';
+        div.style.border = '1px solid var(--border)';
+        div.style.borderRadius = '8px';
+        div.style.padding = '12px';
+        div.style.display = 'flex';
+        div.style.flexDirection = 'column';
+        div.style.gap = '6px';
+        div.style.textAlign = 'left';
+        
+        let audioHtml = `<span style="font-size:0.85rem; color:var(--subtitle);">${t.parentVoiceNotRecorded}</span>`;
+        if (log.audio_url) {
+          audioHtml = `
+            <div style="margin-top:4px;">
+              <span style="font-size:0.85rem; font-weight:600; display:block; margin-bottom:4px;">${t.parentVoice}</span>
+              <audio src="${log.audio_url}" controls style="width:100%; height:32px;"></audio>
+            </div>
+          `;
+        }
+        
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed var(--border); padding-bottom:6px; margin-bottom:4px;">
+            <span style="font-weight:700; color:var(--accent);">${log.practice_date}</span>
+            <span style="background:var(--accent-alpha, rgba(231,76,60,0.1)); padding:2px 8px; border-radius:12px; font-size:0.8rem; font-weight:600; border:1px solid var(--border);">${log.category}</span>
+          </div>
+          <div><strong style="font-size:0.9rem;">${t.topicRaga}:</strong> ${log.topic}</div>
+          <div><strong style="font-size:0.9rem;">${t.duration}:</strong> ${log.hours} ${t.hoursText} ${log.minutes} ${t.minsText}</div>
+          ${audioHtml}
+        `;
+        riyazModalContent.appendChild(div);
+      });
+    }
+    
+    riyazModal.style.display = 'flex';
+  }
+
+  applyPageTranslations();
+  renderNumbers();
+  renderStudentProgress();
+
+  initAppShell({ title: t.title });
+</script>
+</body>
+</html>

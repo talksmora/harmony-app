@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>હાર્મોની મ્યુઝિક — લયબદ્ધ મેટ્રોનોમ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/theme.css">
+<style>
+  :root {
+    --card-bg: var(--surface);
+    --line: var(--border);
+    --accent-red: #e74c3c;
+    --accent-gold: #f39c12;
+    --accent-green: #2ecc71;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    font-family: 'Outfit', 'Noto Sans Gujarati', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 16px 0;
+  }
+
+  /* Pendulum container */
+  .pendulum-box {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .pendulum-bar {
+    width: 6px;
+    height: 90px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent-gold));
+    border-radius: 3px;
+    transform-origin: top center;
+    position: absolute;
+    top: 10px;
+    transform: rotate(0deg);
+    transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .pendulum-bob {
+    width: 22px;
+    height: 22px;
+    background: var(--accent-gold);
+    border-radius: 50%;
+    position: absolute;
+    bottom: 0;
+    left: -8px;
+    box-shadow: 0 4px 10px rgba(243,156,18,0.4);
+  }
+
+  /* LED Beat Lights */
+  .lights-container {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .light-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.08s ease, transform 0.08s ease;
+  }
+  .light-dot.active {
+    background: var(--accent-gold);
+    transform: scale(1.2);
+    box-shadow: 0 0 12px var(--accent-gold);
+  }
+  .light-dot.accent {
+    background: var(--accent-red);
+    transform: scale(1.25);
+    box-shadow: 0 0 14px var(--accent-red);
+  }
+
+  /* Tempo Display Circle */
+  /* Live Bol Display */
+  .bol-display {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 10px 8px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .bol-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 4px 3px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--subtitle);
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+    transition: all 0.08s ease;
+    min-width: 32px;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .bol-item .bol-num {
+    font-size: 9px;
+    font-weight: 600;
+    opacity: 0.5;
+    margin-top: 2px;
+  }
+  /* <=10 beats: slightly bigger items */
+  .bol-display.compact-sm .bol-item { min-width: 40px; font-size: 14.5px; padding: 7px 6px 4px; }
+  /* 11-16 beats: medium */
+  .bol-display.compact-md .bol-item { min-width: 34px; font-size: 13px; padding: 5px 5px 3px; }
+  /* 17+ beats: tight fit */
+  .bol-display.compact-lg .bol-item { min-width: 28px; font-size: 11.5px; padding: 4px 3px 2px; }
+
+  .bol-item.current {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    transform: scale(1.12);
+    box-shadow: 0 2px 10px rgba(231,76,60,0.4);
+    z-index: 2;
+  }
+  .bol-item.sam {
+    background: var(--accent-gold);
+    color: #fff;
+    border-color: var(--accent-gold);
+    transform: scale(1.12);
+    box-shadow: 0 2px 10px rgba(243,156,18,0.4);
+    z-index: 2;
+  }
+  .bol-item.current .bol-num,
+  .bol-item.sam .bol-num {
+    opacity: 0.85;
+    color: #fff;
+  }
+  /* Vibhag divider */
+  .bol-divider {
+    width: 2px;
+    height: 28px;
+    background: var(--line);
+    border-radius: 1px;
+    flex: 0 0 2px;
+    opacity: 0.5;
+  }
+
+  .tempo-main {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px 30px 30px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .tempo-circle {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    border: 6px solid var(--border);
+    margin: 0 auto 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  .tempo-circle .bpm-val {
+    font-size: 46px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    font-family: sans-serif;
+  }
+  .tempo-circle .bpm-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--subtitle);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .slider-row {
+    margin: 20px 0;
+  }
+  .tempo-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--border);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .tempo-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  /* Controls grid */
+  .control-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .ctrl-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .ctrl-card label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--subtitle);
+    margin-bottom: 8px;
+  }
+  .ctrl-card select, .ctrl-card input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--line);
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14.5px;
+    outline: none;
+  }
+
+  /* Tap tempo pad */
+  .tap-pad {
+    background: linear-gradient(145deg, var(--card-bg), var(--bg));
+    border: 2px dashed var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent);
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    user-select: none;
+    transition: transform 0.1s ease, border-color 0.2s ease;
+  }
+  .tap-pad:active {
+    transform: scale(0.97);
+    border-color: var(--accent);
+  }
+
+  /* Pills selectors */
+  .pills {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .pills::-webkit-scrollbar {
+    height: 4px;
+  }
+  .pills::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
+  .pill-btn {
+    flex: 0 0 auto;
+    border: 1.5px solid var(--line);
+    background: var(--bg);
+    color: var(--subtitle);
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+  }
+  .pill-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(231,76,60,0.25);
+  }
+
+  /* Big Play Button */
+  .play-bar {
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(180deg, transparent, var(--bg) 30%);
+    padding: 16px 0 10px;
+    display: flex;
+    gap: 12px;
+    z-index: 10;
+  }
+  .play-btn {
+    flex: 1;
+    padding: 15px;
+    border-radius: 30px;
+    border: none;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 17px;
+    cursor: pointer;
+    color: #fff;
+    background: var(--accent);
+    box-shadow: 0 6px 16px rgba(231,76,60,0.3);
+    transition: transform 0.12s ease, opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .play-btn.playing {
+    background: var(--accent-red);
+    box-shadow: 0 6px 16px rgba(231,76,60,0.3);
+  }
+  .play-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* Fine tune buttons */
+  .fine-tune-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .tune-btn {
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+  }
+  .tune-btn:active {
+    background: var(--border);
+  }
+  @media (max-width: 480px) {
+    .control-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .tempo-main {
+      padding: 16px 16px 20px;
+    }
+    .wrap {
+      padding: 16px 12px 0;
+    }
+    .tempo-circle {
+      width: 150px;
+      height: 150px;
+      border-width: 5px;
+    }
+    .tempo-circle .bpm-val {
+      font-size: 38px;
+    }
+  }
+</style>
+<link rel="stylesheet" href="shared/app-shell.css">
+</head>
+<body data-page="metronome">
+<div id="appShellRoot"></div>
+<div id="pageBody">
+<div class="wrap">
+
+  <!-- Pendulum visualizer -->
+  <div class="pendulum-box">
+    <div class="pendulum-bar" id="pendulumBar">
+      <div class="pendulum-bob"></div>
+    </div>
+  </div>
+
+  <!-- LED Beat indicator dots -->
+  <div class="lights-container" id="visualLightsContainer"></div>
+
+  <!-- Live Bol Display Strip -->
+  <div class="bol-display" id="bolDisplayStrip" style="display:none;"></div>
+
+  <!-- Tempo & Dial Area -->
+  <div class="tempo-main">
+    <div style="font-size: 13.5px; font-weight: 800; color: var(--accent); margin-bottom: 8px;" id="barCounterRow">
+      <span id="lblBarCounter">બાર (Bar):</span> <span id="barCounterVal">0</span>
+    </div>
+    <div class="tempo-circle">
+      <span class="bpm-val" id="bpmVal">120</span>
+      <span class="bpm-lbl" id="lblBpmText">BPM</span>
+    </div>
+
+    <!-- Fine Tuning Buttons -->
+    <div class="fine-tune-row">
+      <button class="tune-btn" onclick="adjustBpm(-5)">-5</button>
+      <button class="tune-btn" onclick="adjustBpm(-1)">-1</button>
+      <button class="tune-btn" onclick="adjustBpm(1)">+1</button>
+      <button class="tune-btn" onclick="adjustBpm(5)">+5</button>
+    </div>
+
+    <!-- Slider -->
+    <div class="slider-row">
+      <input type="range" class="tempo-slider" id="tempoSlider" min="30" max="300" value="120">
+    </div>
+  </div>
+
+  <!-- Indian Rhythm / Taala Pattern Selector (Metronome Beats Pro feature) -->
+  <div class="ctrl-card" style="margin-bottom: 16px;">
+    <label id="lblRhythmPattern" for="rhythmSelect">તાલ / લય પેટર્ન (Taala / Rhythms)</label>
+    <select id="rhythmSelect" style="width:100%; padding:10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--text); font-family:inherit; font-size:14.5px;">
+      <option value="metronome" selected>સામાન્ય ક્લીક (Standard Metronome)</option>
+      <optgroup label="── શાસ્ત્રીય તાલ (Classical) ──" id="rgClassical">
+        <option value="teental">તીનતાલ (Teental - 16 માત્રા)</option>
+        <option value="jhaptaal">ઝપતાલ (Jhaptaal - 10 માત્રા)</option>
+        <option value="ektaal">એકતાલ (Ektaal - 12 માત્રા)</option>
+        <option value="chautaal">ચૌતાલ (Chautaal - 12 માત્રા)</option>
+        <option value="dhamar">ધમાર (Dhamar - 14 માત્રા)</option>
+        <option value="tilwada">તિલવાડા (Tilwada - 16 માત્રા)</option>
+        <option value="sooltaal">સૂલતાલ (Sooltaal - 10 માત્રા)</option>
+        <option value="tevra">તેવરા (Tevra - 7 માત્રા)</option>
+        <option value="jhumra">ઝુમરા (Jhumra - 14 માત્રા)</option>
+        <option value="ada_chautaal">આડા ચૌતાલ (Ada Chautaal - 14 માત્રા)</option>
+        <option value="chartal_ki_sawari">ચારતાલ કી સવારી (Chartal ki Sawari - 11 માત્રા)</option>
+        <option value="farodast">ફરોદસ્ત (Farodast - 14 માત્રા)</option>
+      </optgroup>
+      <optgroup label="── દુર્લભ / એડવાન્સ તાલ (Rare / Advanced) ──" id="rgRare">
+        <option value="matta">મત્તા તાલ (Matta - 9 માત્રા)</option>
+        <option value="pancham_sawari">પંચમ સવારી (Pancham Sawari - 15 માત્રા)</option>
+        <option value="shikar">શિકાર (Shikar - 17 માત્રા)</option>
+        <option value="brahmtaal">બ્રહ્મ તાલ (Brahmtaal - 28 માત્રા)</option>
+        <option value="ganesh">ગણેશ તાલ (Ganesh - 21 માત્રા)</option>
+      </optgroup>
+      <optgroup label="── લોક / લાઈટ તાલ (Folk / Light) ──" id="rgLight">
+        <option value="keharwa">કહરવા (Keharwa - 8 માત્રા)</option>
+        <option value="dadra">દાદરા (Dadra - 6 માત્રા)</option>
+        <option value="rupak">રૂપક (Rupak - 7 માત્રા)</option>
+        <option value="deepchandi">દીપચંદી (Deepchandi - 14 માત્રા)</option>
+        <option value="punjabi">પંજાબી ઠેકા (Punjabi - 8 માત્રા)</option>
+        <option value="slow_keharwa">ધીમો કહરવા (Slow Keharwa - 8 માત્રા)</option>
+        <option value="bhajani">ભજની ઠેકા (Bhajani - 8 માત્રા)</option>
+        <option value="pashto">પશ્તો (Pashto - 7 માત્રા)</option>
+      </optgroup>
+      <optgroup label="── Western Beats ──" id="rgWestern">
+        <option value="rock">Rock (4/4)</option>
+        <option value="pop">Pop / Disco (4/4)</option>
+        <option value="waltz">Waltz (3/4)</option>
+        <option value="bossa_nova">Bossa Nova (4/4)</option>
+        <option value="reggae">Reggae / Ska (4/4)</option>
+        <option value="shuffle">Shuffle / Swing (4/4)</option>
+        <option value="jazz_swing">Jazz Swing (4/4)</option>
+        <option value="samba">Samba (2/4)</option>
+        <option value="cha_cha">Cha-Cha (4/4)</option>
+        <option value="tango">Tango (4/4)</option>
+        <option value="polka">Polka (2/4)</option>
+        <option value="blues">Blues Shuffle (4/4)</option>
+        <option value="funk">Funk (4/4)</option>
+        <option value="country">Country (4/4)</option>
+        <option value="hiphop">Hip-Hop (4/4)</option>
+        <option value="march">March (2/4)</option>
+        <option value="six_eight">6/8 Feel (6/8)</option>
+        <option value="rumba">Rumba (4/4)</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <!-- Time Signatures & Subdivisions selectors -->
+  <div class="ctrl-card" style="margin-bottom: 16px;">
+    <label id="lblTimeSignature">બીટ્સ (Time Signature)</label>
+    <div class="pills" id="beatsContainer">
+      <button class="pill-btn" onclick="setTimeSignature(1)">1/4</button>
+      <button class="pill-btn" onclick="setTimeSignature(2)">2/4</button>
+      <button class="pill-btn" onclick="setTimeSignature(3)">3/4</button>
+      <button class="pill-btn active" onclick="setTimeSignature(4)">4/4</button>
+      <button class="pill-btn" onclick="setTimeSignature(5)">5/4</button>
+      <button class="pill-btn" onclick="setTimeSignature(6)">6/8</button>
+      <button class="pill-btn" onclick="setTimeSignature(7)">7/8</button>
+    </div>
+  </div>
+
+  <div class="ctrl-card" style="margin-bottom: 16px;">
+    <label id="lblSubdivision">પેટા-વિભાગો (Subdivision)</label>
+    <div class="pills" id="subsContainer">
+      <button class="pill-btn active" onclick="setSubdivision(1)">1x (Quarter)</button>
+      <button class="pill-btn" onclick="setSubdivision(2)">2x (Eighths)</button>
+      <button class="pill-btn" onclick="setSubdivision(3)">3x (Triplets)</button>
+      <button class="pill-btn" onclick="setSubdivision(4)">4x (Sixteenths)</button>
+    </div>
+  </div>
+
+  <!-- Sound & Timer Controls Grid -->
+  <div class="control-grid">
+    <div class="ctrl-card">
+      <label id="lblSoundProfile" for="soundSelect">અવાજનો પ્રકાર (Sounds)</label>
+      <select id="soundSelect">
+        <optgroup label="── ક્લાસિક ──" id="sgClassic">
+          <option value="woodblock" selected>Woodblock (ક્લાસિક)</option>
+          <option value="digital">Digital Beep (સિન્થ)</option>
+          <option value="rimshot">Rim Shot (રિમ શોટ)</option>
+          <option value="cowbell">Cowbell (કાઉબેલ)</option>
+          <option value="clap">Clap (તાળી)</option>
+        </optgroup>
+        <optgroup label="── ભારતીય ──" id="sgIndian">
+          <option value="tabla">Tabla (તબલા બોલ)</option>
+          <option value="dholak">Dholak (ઢોલક)</option>
+          <option value="pakhawaj">Pakhawaj (પખાવજ)</option>
+        </optgroup>
+        <optgroup label="── ડ્રમ કિટ ──" id="sgDrum">
+          <option value="snare">Snare (ડ્રમ સ્નેર)</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="ctrl-card">
+      <label id="lblRiyazTimer" for="timerSelect">રિયાઝ ટાઈમર (Timer)</label>
+      <select id="timerSelect">
+        <option value="0" selected>બંધ (Off)</option>
+        <option value="1">1 મિનિટ</option>
+        <option value="2">2 મિનિટ</option>
+        <option value="5">5 મિનિટ</option>
+        <option value="10">10 મિનિટ</option>
+        <option value="15">15 મિનિટ</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Advanced Practice Tools -->
+  <div class="ctrl-card" style="margin-bottom: 16px;">
+    <h3 style="margin: 0 0 12px 0; font-size: 15px; color: var(--accent); display: flex; align-items: center; gap: 6px;">⚙️ <span id="lblAdvancedTools">એડવાન્સ ટૂલ્સ (Advanced Tools)</span></h3>
+    
+    <!-- Mute Accent & Speed Trainer toggles -->
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; color: var(--text);">
+        <input type="checkbox" id="muteAccentCheck" style="width: auto; margin:0;">
+        <span id="lblMuteAccent">પ્રથમ બીટ મ્યુટ કરો (Mute Accent Beat)</span>
+      </label>
+      
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; color: var(--text);">
+        <input type="checkbox" id="speedTrainerCheck" style="width: auto; margin:0;">
+        <span id="lblSpeedTrainer">સ્પીડ ટ્રેનર સક્રિય કરો (Enable Speed Trainer)</span>
+      </label>
+    </div>
+
+    <!-- Speed Trainer settings (only visible if checked) -->
+    <div id="speedTrainerSettings" style="display:none; padding: 12px; background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; margin-bottom: 14px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--subtitle); display:block; margin-bottom:4px;" id="lblTrainerIncrement">વધારો (BPM +)</label>
+          <select id="trainerBpmInc" style="padding: 6px; font-size:13px;">
+            <option value="2">+2 BPM</option>
+            <option value="5" selected>+5 BPM</option>
+            <option value="10">+10 BPM</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--subtitle); display:block; margin-bottom:4px;" id="lblTrainerMeasures">આવર્તન (Measures)</label>
+          <select id="trainerMeasures" style="padding: 6px; font-size:13px;">
+            <option value="4">દરેક 4 આવર્તન</option>
+            <option value="8" selected>દરેક 8 આવર્તન</option>
+            <option value="12">દરેક 12 આવર્તન</option>
+            <option value="16">દરેક 16 આવર્તન</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size: 12px; font-weight: 700; color: var(--accent-gold); display: flex; justify-content: space-between; align-items: center;" id="trainerProgressRow">
+        <span id="lblTrainerStatus">પ્રગતિ (Progress):</span>
+        <span id="trainerProgressText">આવર્તન: 0 / 8</span>
+      </div>
+    </div>
+
+    <!-- Tuning Drone Generator -->
+    <div style="border-top: 1px solid var(--line); padding-top: 14px; margin-top: 10px;">
+      <h4 style="margin: 0 0 10px 0; font-size: 13.5px; color: var(--text);" id="lblDroneTitle">તાર સૂર ડ્રોન (Tuning Drone)</h4>
+      <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; align-items: center; margin-bottom: 8px;">
+        <select id="droneKeySelect" style="padding: 8px 10px; font-size: 13.5px;">
+          <option value="130.81">C3 (સા / Sa)</option>
+          <option value="138.59">C#3 (કોમળ રે / Re)</option>
+          <option value="146.83">D3 (શુદ્ધ રે / Re)</option>
+          <option value="155.56">D#3 (કોમળ ગ / Ga)</option>
+          <option value="164.81">E3 (શુદ્ધ ગ / Ga)</option>
+          <option value="174.61">F3 (શુદ્ધ મ / Ma)</option>
+          <option value="185.00">F#3 (તીવ્ર મ / Ma)</option>
+          <option value="196.00">G3 (પંચમ / Pa)</option>
+          <option value="207.65">G#3 (કોમળ ધ / Dha)</option>
+          <option value="220.00">A3 (શુદ્ધ ધ / Dha)</option>
+          <option value="233.08">A#3 (કોમળ નિ / Ni)</option>
+          <option value="246.94">B3 (શુદ્ધ નિ / Ni)</option>
+        </select>
+        <button id="dronePlayBtn" style="padding: 8px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--text); font-weight:700; font-size:13px; cursor:pointer;" class="tune-btn">▶ START</button>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px;">
+        <span style="font-size: 11.5px; color: var(--subtitle);" id="lblDroneVol">ડ્રોન વોલ્યુમ</span>
+        <input type="range" id="droneVolSlider" min="0" max="1" step="0.05" value="0.4" style="width: 70%; padding:0; height:5px;">
+      </div>
+      <!-- Drone Mode -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+        <div>
+          <label style="font-size:10px; font-weight:700; color:var(--subtitle); display:block; margin-bottom:3px;" id="lblDroneMode">ડ્રોન મોડ</label>
+          <select id="droneModeSelect" style="padding:6px; font-size:12px; width:100%;">
+            <option value="simple">Simple (સાદું)</option>
+            <option value="tanpura" selected>Tanpura (તાનપુરા)</option>
+            <option value="harmonium">Harmonium (હાર્મોનિયમ)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px; font-weight:700; color:var(--subtitle); display:block; margin-bottom:3px;" id="lblSaPa">સા + પા સાથે</label>
+          <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; cursor:pointer; margin-top:2px;">
+            <input type="checkbox" id="droneSaPaCheck" style="width:auto; margin:0;">
+            <span id="lblSaPaCheckboxText">સા + પા (Sa + Pa)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Presets Manager (Metronome Beats Pro feature) -->
+  <div class="ctrl-card" style="margin-bottom: 20px;">
+    <h3 style="margin: 0 0 12px 0; font-size: 15px; color: var(--accent);" id="lblPresetsHeader">સાચવેલા પ્રીસેટ્સ (Saved Presets)</h3>
+    <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+      <input type="text" id="presetNameInput" placeholder="પ્રીસેટ નામ (e.g. પિયાનો રિયાઝ)" style="flex:1; padding:10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--text); font-family:inherit;">
+      <button onclick="savePreset()" style="padding: 10px 16px; border:none; background:var(--accent); color:#fff; font-weight:700; border-radius:10px; cursor:pointer;" id="lblSaveBtn">સાચવો</button>
+    </div>
+    <div id="presetsListContainer" style="max-height: 200px; overflow-y: auto;"></div>
+  </div>
+
+  <!-- Tap Tempo Pad -->
+  <div class="tap-pad" id="tapTempoBtn">
+    🥁 TAP TEMPO (લય ટેપ કરો)
+  </div>
+
+  <!-- Volume Slider -->
+  <div class="ctrl-card" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+    <label id="lblVolume" style="margin:0;">અવાજ (Volume)</label>
+    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.8" style="width: 70%; padding:0; height:6px;">
+  </div>
+
+  <!-- Sticky footer Play Bar -->
+  <div class="play-bar">
+    <button class="play-btn" id="playBtn">
+      <span class="icon" id="playIcon">▶</span> <span id="lblPlayBtn">ચાલુ કરો (Start)</span>
+    </button>
+  </div>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+  const METRONOME_TEXT = {
+    gu: {
+      title: "લયબદ્ધ મેટ્રોનોમ",
+      lblBpmText: "BPM",
+      lblTimeSignature: "બીટ્સ (Time Signature)",
+      lblSubdivision: "પેટા-વિભાગો (Subdivision)",
+      lblSoundProfile: "અવાજનો પ્રકાર (Sounds)",
+      lblRiyazTimer: "રિયાઝ ટાઈમર (Timer)",
+      lblVolume: "અવાજ (Volume)",
+      tapTempoBtn: "🥁 TAP TEMPO (લય ટેપ કરો)",
+      startBtn: "ચાલુ કરો (Start)",
+      stopBtn: "બંધ કરો (Stop)",
+      soundWood: "Woodblock (ક્લાસિક)",
+      soundDigi: "Digital Beep (સિન્થ)",
+      soundRim: "Rim Shot (રિમ શોટ)",
+      soundCow: "Cowbell (કાઉબેલ)",
+      soundClap: "Clap (તાળી)",
+      soundTabla: "Tabla (તબલા બોલ)",
+      soundDholak: "Dholak (ઢોલક)",
+      soundPakhawaj: "Pakhawaj (પખાવજ)",
+      soundSnare: "Snare (ડ્રમ સ્નેર)",
+      timerOff: "બંધ (Off)",
+      timerMin: "મિનિટ",
+      lblAdvancedTools: "એડવાન્સ ટૂલ્સ",
+      lblMuteAccent: "પ્રથમ બીટ મ્યુટ કરો",
+      lblSpeedTrainer: "સ્પીડ ટ્રેનર સક્રિય કરો",
+      lblTrainerIncrement: "વધારો (BPM +)",
+      lblTrainerMeasures: "આવર્તન (Measures)",
+      lblTrainerStatus: "પ્રગતિ (Progress):",
+      lblDroneTitle: "તાર સૂર ડ્રોન (Tuning Drone)",
+      lblDroneVol: "ડ્રોન વોલ્યુમ",
+      trainerMeasureText: "આવર્તન",
+      trainerEveryMeasures: "દરેક",
+      droneStart: "▶ START",
+      droneStop: "⏹ STOP",
+      lblBarCounter: "આવર્તન બાર (Bar):",
+      lblRhythmPattern: "લય પેટર્ન / તાલ (Taala / Rhythms)",
+      lblPresetsHeader: "સાચવેલા પ્રીસેટ્સ (Saved Presets)",
+      lblSaveBtn: "સાચવો",
+      lblNoPresets: "કોઈ સાચવેલા પ્રીસેટ્સ નથી",
+      presetPlaceholder: "પ્રીસેટ નામ (e.g. તીનતાલ રિયાઝ)",
+      lblDroneMode: "ડ્રોન મોડ",
+      lblSaPa: "સા + પા સાથે",
+      droneSimple: "Simple (સાદું)",
+      droneTanpura: "Tanpura (તાનપુરા)",
+      droneHarmonium: "Harmonium (હાર્મોનિયમ)",
+      sgClassic: "── ક્લાસિક ──",
+      sgIndian: "── ભારતીય ──",
+      sgDrum: "── ડ્રમ કિટ ──",
+      rgClassical: "── શાસ્ત્રીય તાલ (Classical) ──",
+      rgRare: "── દુર્લભ / એડવાન્સ તાલ (Rare / Advanced) ──",
+      rgLight: "── લોક / લાઈટ તાલ (Folk / Light) ──",
+      rgWestern: "── પશ્ચિમી બીટ્સ (Western Beats) ──",
+      lblSaPaOption: "સા + પા (Sa + Pa)",
+      notes: {
+        'c3': 'C3 (સા / Sa)',
+        'cs3': 'C#3 (કોમળ રે / Re)',
+        'd3': 'D3 (શુદ્ધ રે / Re)',
+        'ds3': 'D#3 (કોમળ ગ / Ga)',
+        'e3': 'E3 (શુદ્ધ ગ / Ga)',
+        'f3': 'F3 (શુદ્ધ મ / Ma)',
+        'fs3': 'F#3 (તીવ્ર મ / Ma)',
+        'g3': 'G3 (પંચમ / Pa)',
+        'gs3': 'G#3 (કોમળ ધ / Dha)',
+        'a3': 'A3 (શુદ્ધ ધ / Dha)',
+        'as3': 'A#3 (કોમળ નિ / Ni)',
+        'b3': 'B3 (શુદ્ધ નિ / Ni)'
+      }
+    },
+    hi: {
+      title: "लयबद्ध मेट्रोनोम",
+      lblBpmText: "BPM",
+      lblTimeSignature: "बीट्स (Time Signature)",
+      lblSubdivision: "उप-विभाजन (Subdivision)",
+      lblSoundProfile: "ध्वनि प्रकार (Sounds)",
+      lblRiyazTimer: "रियाज़ टाइमर (Timer)",
+      lblVolume: "आवाज़ (Volume)",
+      tapTempoBtn: "🥁 TAP TEMPO (ताल टैप करें)",
+      startBtn: "शुरू करें (Start)",
+      stopBtn: "रोकें (Stop)",
+      soundWood: "Woodblock (क्लासिक)",
+      soundDigi: "Digital Beep (सिंथ)",
+      soundRim: "Rim Shot (रिम शॉट)",
+      soundCow: "Cowbell (काउबेल)",
+      soundClap: "Clap (ताली)",
+      soundTabla: "Tabla (तबला बोल)",
+      soundDholak: "Dholak (ढोलक)",
+      soundPakhawaj: "Pakhawaj (पखावज)",
+      soundSnare: "Snare (ड्रम स्नेयर)",
+      timerOff: "बंद (Off)",
+      timerMin: "मिनट",
+      lblAdvancedTools: "एडवांस टूल्स",
+      lblMuteAccent: "पहली बीट म्यूट करें",
+      lblSpeedTrainer: "स्पीड ट्रेनर सक्रिय करें",
+      lblTrainerIncrement: "बढ़ाएं (BPM +)",
+      lblTrainerMeasures: "आवर्तन (Measures)",
+      lblTrainerStatus: "प्रगति (Progress):",
+      lblDroneTitle: "तानपुरा ट्यूनिंग ड्रोन (Drone)",
+      lblDroneVol: "ड्रोन वॉल्यूम",
+      trainerMeasureText: "आवर्तन",
+      trainerEveryMeasures: "हर",
+      droneStart: "▶ START",
+      droneStop: "⏹ STOP",
+      lblBarCounter: "आवर्तन बार (Bar):",
+      lblRhythmPattern: "ताल / लय पैटर्न (Rhythms)",
+      lblPresetsHeader: "सहेजे गए प्रीसेट",
+      lblSaveBtn: "सहेजें",
+      lblNoPresets: "कोई सहेजे गए प्रीसेट नहीं हैं",
+      presetPlaceholder: "प्रीसेट नाम (जैसे तीनताल रियाज़)",
+      lblDroneMode: "ड्रोन मोड",
+      lblSaPa: "सा + पा के साथ",
+      droneSimple: "Simple (साधारण)",
+      droneTanpura: "Tanpura (तानपुरा)",
+      droneHarmonium: "Harmonium (हारमोनियम)",
+      sgClassic: "── क्लासिक ──",
+      sgIndian: "── भारतीय ──",
+      sgDrum: "── ड्रम किट ──",
+      rgClassical: "── शास्त्रीय ताल (Classical) ──",
+      rgRare: "── दुर्लभ / एडवांस ताल (Rare / Advanced) ──",
+      rgLight: "── लोक / लाइट ताल (Folk / Light) ──",
+      rgWestern: "── पश्चिमी बीट्स (Western Beats) ──",
+      lblSaPaOption: "सा + पा (Sa + Pa)",
+      notes: {
+        'c3': 'C3 (सा / Sa)',
+        'cs3': 'C#3 (कोमल रे / Re)',
+        'd3': 'D3 (शुद्ध रे / Re)',
+        'ds3': 'D#3 (कोमल ग / Ga)',
+        'e3': 'E3 (शुद्ध ग / Ga)',
+        'f3': 'F3 (शुद्ध म / Ma)',
+        'fs3': 'F#3 (तीव्र म / Ma)',
+        'g3': 'G3 (पंचम / Pa)',
+        'gs3': 'G#3 (कोमल ध / Dha)',
+        'a3': 'A3 (शुद्ध ध / Dha)',
+        'as3': 'A#3 (कोमल नि / Ni)',
+        'b3': 'B3 (शुद्ध नि / Ni)'
+      }
+    },
+    en: {
+      title: "Rhythmic Metronome",
+      lblBpmText: "BPM",
+      lblTimeSignature: "Beats per Measure",
+      lblSubdivision: "Subdivision",
+      lblSoundProfile: "Sound Profile",
+      lblRiyazTimer: "Riyaz Timer",
+      lblVolume: "Volume",
+      tapTempoBtn: "🥁 TAP TEMPO",
+      startBtn: "Start",
+      stopBtn: "Stop",
+      soundWood: "Classic Woodblock",
+      soundDigi: "Synth Digital Beep",
+      soundRim: "Rim Shot",
+      soundCow: "Cowbell",
+      soundClap: "Clap",
+      soundTabla: "Indian Tabla",
+      soundDholak: "Dholak",
+      soundPakhawaj: "Pakhawaj",
+      soundSnare: "Acoustic Snare Click",
+      timerOff: "Off",
+      timerMin: "Min",
+      lblAdvancedTools: "Advanced Tools",
+      lblMuteAccent: "Mute Accented Beat",
+      lblSpeedTrainer: "Enable Speed Trainer",
+      lblTrainerIncrement: "Increment (BPM +)",
+      lblTrainerMeasures: "Every (Measures)",
+      lblTrainerStatus: "Progress:",
+      lblDroneTitle: "Tuning Drone Generator",
+      lblDroneVol: "Drone Volume",
+      trainerMeasureText: "Measures",
+      trainerEveryMeasures: "Every",
+      droneStart: "▶ START",
+      droneStop: "⏹ STOP",
+      lblBarCounter: "Measure Bar:",
+      lblRhythmPattern: "Rhythm Pattern / Taala",
+      lblPresetsHeader: "Saved Presets",
+      lblSaveBtn: "Save",
+      lblNoPresets: "No saved presets yet",
+      presetPlaceholder: "Preset name (e.g., TeenTaal Riyaz)",
+      lblDroneMode: "Drone Mode",
+      lblSaPa: "With Sa + Pa",
+      droneSimple: "Simple Tone",
+      droneTanpura: "Tanpura Drone",
+      droneHarmonium: "Harmonium Drone",
+      sgClassic: "── Classic ──",
+      sgIndian: "── Indian ──",
+      sgDrum: "── Drum Kit ──",
+      rgClassical: "── Classical Taals ──",
+      rgRare: "── Rare / Advanced Taals ──",
+      rgLight: "── Folk / Light Taals ──",
+      rgWestern: "── Western Beats ──",
+      lblSaPaOption: "Sa + Pa",
+      notes: {
+        'c3': 'C3 (Sa)',
+        'cs3': 'C#3 (Komal Re)',
+        'd3': 'D3 (Shuddha Re)',
+        'ds3': 'D#3 (Komal Ga)',
+        'e3': 'E3 (Shuddha Ga)',
+        'f3': 'F3 (Shuddha Ma)',
+        'fs3': 'F#3 (Teevra Ma)',
+        'g3': 'G3 (Pa)',
+        'gs3': 'G#3 (Komal Dha)',
+        'a3': 'A3 (Shuddha Dha)',
+        'as3': 'A#3 (Komal Ni)',
+        'b3': 'B3 (Shuddha Ni)'
+      }
+    },
+    en: {
+      title: "Rhythmic Metronome",
+      lblBpmText: "BPM",
+      lblTimeSignature: "Beats per Measure",
+      lblSubdivision: "Subdivision",
+      lblSoundProfile: "Sound Profile",
+      lblRiyazTimer: "Riyaz Timer",
+      lblVolume: "Volume",
+      tapTempoBtn: "🥁 TAP TEMPO",
+      startBtn: "Start",
+      stopBtn: "Stop",
+      soundWood: "Classic Woodblock",
+      soundDigi: "Synth Digital Beep",
+      soundRim: "Rim Shot",
+      soundCow: "Cowbell",
+      soundClap: "Clap",
+      soundTabla: "Indian Tabla",
+      soundDholak: "Dholak",
+      soundPakhawaj: "Pakhawaj",
+      soundSnare: "Acoustic Snare Click",
+      timerOff: "Off",
+      timerMin: "Min",
+      lblAdvancedTools: "Advanced Tools",
+      lblMuteAccent: "Mute Accented Beat",
+      lblSpeedTrainer: "Enable Speed Trainer",
+      lblTrainerIncrement: "Increment (BPM +)",
+      lblTrainerMeasures: "Every (Measures)",
+      lblTrainerStatus: "Progress:",
+      lblDroneTitle: "Tuning Drone Generator",
+      lblDroneVol: "Drone Volume",
+      trainerMeasureText: "Measures",
+      trainerEveryMeasures: "Every",
+      droneStart: "▶ START",
+      droneStop: "⏹ STOP",
+      lblBarCounter: "Measure Bar:",
+      lblRhythmPattern: "Rhythm Pattern / Taala",
+      lblPresetsHeader: "Saved Presets",
+      lblSaveBtn: "Save",
+      lblNoPresets: "No saved presets yet",
+      presetPlaceholder: "Preset name (e.g., TeenTaal Riyaz)",
+      lblDroneMode: "Drone Mode",
+      lblSaPa: "With Sa + Pa",
+      droneSimple: "Simple Tone",
+      droneTanpura: "Tanpura Drone",
+      droneHarmonium: "Harmonium Drone",
+      sgClassic: "── Classic ──",
+      sgIndian: "── Indian ──",
+      sgDrum: "── Drum Kit ──",
+      rgClassical: "── Classical Taals ──",
+      rgRare: "── Rare / Advanced Taals ──",
+      rgLight: "── Folk / Light Taals ──",
+      rgWestern: "── Western Beats ──"
+    }
+  };
+
+  const RHYTHM_TRANSLATIONS = {
+    gu: {
+      metronome: "સામાન્ય ક્લીક (Standard Metronome)",
+      teental: "તીનતાલ (Teental - 16 માત્રા)",
+      jhaptaal: "ઝપતાલ (Jhaptaal - 10 માત્રા)",
+      ektaal: "એકતાલ (Ektaal - 12 માત્રા)",
+      chautaal: "ચૌતાલ (Chautaal - 12 માત્રા)",
+      dhamar: "ધમાર (Dhamar - 14 માત્રા)",
+      tilwada: "તિલવાડા (Tilwada - 16 માત્રા)",
+      sooltaal: "સૂલતાલ (Sooltaal - 10 માત્રા)",
+      tevra: "તેવરા (Tevra - 7 માત્રા)",
+      jhumra: "ઝુમરા (Jhumra - 14 માત્રા)",
+      ada_chautaal: "આડા ચૌતાલ (Ada Chautaal - 14 માત્રા)",
+      chartal_ki_sawari: "ચારતાલ કી સવારી (Chartal ki Sawari - 11 માત્રા)",
+      farodast: "ફરોદસ્ત (Farodast - 14 માત્રા)",
+      matta: "મત્તા તાલ (Matta - 9 માત્રા)",
+      pancham_sawari: "પંચમ સવારી (Pancham Sawari - 15 માત્રા)",
+      shikar: "શિકાર (Shikar - 17 માત્રા)",
+      brahmtaal: "બ્રહ્મ તાલ (Brahmtaal - 28 માત્રા)",
+      ganesh: "ગણેશ તાલ (Ganesh - 21 માત્રા)",
+      keharwa: "કહરવા (Keharwa - 8 માત્રા)",
+      dadra: "દાદરા (Dadra - 6 માત્રા)",
+      rupak: "રૂપક (Rupak - 7 માત્રા)",
+      deepchandi: "દીપચંદી (Deepchandi - 14 માત્રા)",
+      punjabi: "પંજાબી ઠેકા (Punjabi - 8 માત્રા)",
+      slow_keharwa: "ધીમો કહરવા (Slow Keharwa - 8 માત્રા)",
+      bhajani: "ભજની ઠેકા (Bhajani - 8 માત્રા)",
+      pashto: "પશ્તો (Pashto - 7 માત્રા)"
+    },
+    hi: {
+      metronome: "सामान्य क्लिक (Standard Metronome)",
+      teental: "तीनताल (Teental - 16 मात्रा)",
+      jhaptaal: "झपताल (Jhaptaal - 10 मात्रा)",
+      ektaal: "एकताल (Ektaal - 12 मात्रा)",
+      chautaal: "चौताल (Chautaal - 12 मात्रा)",
+      dhamar: "धमार (Dhamar - 14 मात्रा)",
+      tilwada: "तिलवाड़ा (Tilwada - 16 मात्रा)",
+      sooltaal: "सूलताल (Sooltaal - 10 मात्रा)",
+      tevra: "तेवरा (Tevra - 7 मात्रा)",
+      jhumra: "झुमरा (Jhumra - 14 मात्रा)",
+      ada_chautaal: "आड़ा चौताल (Ada Chautaal - 14 मात्रा)",
+      chartal_ki_sawari: "चारताल की सवारी (Chartal ki Sawari - 11 मात्रा)",
+      farodast: "फ़रोदस्त (Farodast - 14 मात्रा)",
+      matta: "मत्ता ताल (Matta - 9 मात्रा)",
+      pancham_sawari: "पंचम सवारी (Pancham Sawari - 15 मात्रा)",
+      shikar: "शिकार (Shikar - 17 मात्रा)",
+      brahmtaal: "ब्रह्म ताल (Brahmtaal - 28 मात्रा)",
+      ganesh: "गणेश ताल (Ganesh - 21 मात्रा)",
+      keharwa: "कहरवा (Keharwa - 8 मात्रा)",
+      dadra: "दादरा (Dadra - 6 मात्रा)",
+      rupak: "रूपक (Rupak - 7 मात्रा)",
+      deepchandi: "दीपचंदी (Deepchandi - 14 मात्रा)",
+      punjabi: "पंजाबी ठेका (Punjabi - 8 मात्रा)",
+      slow_keharwa: "धीमा कहरवा (Slow Keharwa - 8 मात्रा)",
+      bhajani: "भजनी ठेका (Bhajani - 8 मात्रा)",
+      pashto: "पश्तो (Pashto - 7 मात्रा)"
+    },
+    en: {
+      metronome: "Standard Metronome Click",
+      teental: "Teental (16 Beats)",
+      jhaptaal: "Jhaptaal (10 Beats)",
+      ektaal: "Ektaal (12 Beats)",
+      chautaal: "Chautaal (12 Beats)",
+      dhamar: "Dhamar (14 Beats)",
+      tilwada: "Tilwada (16 Beats)",
+      sooltaal: "Sooltaal (10 Beats)",
+      tevra: "Tevra (7 Beats)",
+      jhumra: "Jhumra (14 Beats)",
+      ada_chautaal: "Ada Chautaal (14 Beats)",
+      chartal_ki_sawari: "Chartal ki Sawari (11 Beats)",
+      farodast: "Farodast (14 Beats)",
+      matta: "Matta Taal (9 Beats)",
+      pancham_sawari: "Pancham Sawari (15 Beats)",
+      shikar: "Shikar (17 Beats)",
+      brahmtaal: "Brahmtaal (28 Beats)",
+      ganesh: "Ganesh (21 Beats)",
+      keharwa: "Keharwa (8 Beats)",
+      dadra: "Dadra (6 Beats)",
+      rupak: "Rupak (7 Beats)",
+      deepchandi: "Deepchandi (14 Beats)",
+      punjabi: "Punjabi Theka (8 Beats)",
+      slow_keharwa: "Slow Keharwa (8 Beats)",
+      bhajani: "Bhajani Theka (8 Beats)",
+      pashto: "Pashto (7 Beats)"
+    }
+  };
+
+  const lang = (() => {
+    try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch (e) { return 'gu'; }
+  })();
+  const t = METRONOME_TEXT[lang] || METRONOME_TEXT.gu;
+
+  // Apply translations to UI
+  document.getElementById('lblBpmText').textContent = t.lblBpmText;
+  document.getElementById('lblTimeSignature').textContent = t.lblTimeSignature;
+  document.getElementById('lblSubdivision').textContent = t.lblSubdivision;
+  document.getElementById('lblSoundProfile').textContent = t.lblSoundProfile;
+  document.getElementById('lblRiyazTimer').textContent = t.lblRiyazTimer;
+  document.getElementById('lblVolume').textContent = t.lblVolume;
+  document.getElementById('tapTempoBtn').textContent = t.tapTempoBtn;
+  document.getElementById('lblPlayBtn').textContent = t.startBtn;
+
+  document.getElementById('lblAdvancedTools').textContent = t.lblAdvancedTools;
+  document.getElementById('lblMuteAccent').textContent = t.lblMuteAccent;
+  document.getElementById('lblSpeedTrainer').textContent = t.lblSpeedTrainer;
+  document.getElementById('lblTrainerIncrement').textContent = t.lblTrainerIncrement;
+  document.getElementById('lblTrainerMeasures').textContent = t.lblTrainerMeasures;
+  document.getElementById('lblTrainerStatus').textContent = t.lblTrainerStatus;
+  document.getElementById('lblDroneTitle').textContent = t.lblDroneTitle;
+  document.getElementById('lblDroneVol').textContent = t.lblDroneVol;
+  document.getElementById('lblBarCounter').textContent = t.lblBarCounter;
+  document.getElementById('lblRhythmPattern').textContent = t.lblRhythmPattern;
+  document.getElementById('lblPresetsHeader').textContent = t.lblPresetsHeader;
+  document.getElementById('lblSaveBtn').textContent = t.lblSaveBtn;
+  document.getElementById('presetNameInput').placeholder = t.presetPlaceholder;
+  
+  // Drone mode & labels
+  document.getElementById('lblDroneMode').textContent = t.lblDroneMode;
+  document.getElementById('lblSaPa').textContent = t.lblSaPa;
+  document.getElementById('lblSaPaCheckboxText').textContent = t.lblSaPaOption;
+
+  // Localize drone key notes select
+  const droneKeySelect = document.getElementById('droneKeySelect');
+  if (droneKeySelect) {
+    const noteKeys = ['c3', 'cs3', 'd3', 'ds3', 'e3', 'f3', 'fs3', 'g3', 'gs3', 'a3', 'as3', 'b3'];
+    for (let i = 0; i < droneKeySelect.options.length; i++) {
+      const key = noteKeys[i];
+      if (key && t.notes && t.notes[key]) {
+        droneKeySelect.options[i].text = t.notes[key];
+      }
+    }
+  }
+
+  // Localize sound select options & optgroups
+  const soundSelect = document.getElementById('soundSelect');
+  document.getElementById('sgClassic').label = t.sgClassic;
+  document.getElementById('sgIndian').label = t.sgIndian;
+  document.getElementById('sgDrum').label = t.sgDrum;
+
+  const optWood = soundSelect.querySelector('option[value="woodblock"]');
+  const optDigi = soundSelect.querySelector('option[value="digital"]');
+  const optRim = soundSelect.querySelector('option[value="rimshot"]');
+  const optCow = soundSelect.querySelector('option[value="cowbell"]');
+  const optClap = soundSelect.querySelector('option[value="clap"]');
+  const optTabla = soundSelect.querySelector('option[value="tabla"]');
+  const optDholak = soundSelect.querySelector('option[value="dholak"]');
+  const optPakh = soundSelect.querySelector('option[value="pakhawaj"]');
+  const optSnare = soundSelect.querySelector('option[value="snare"]');
+
+  if (optWood) optWood.text = t.soundWood;
+  if (optDigi) optDigi.text = t.soundDigi;
+  if (optRim) optRim.text = t.soundRim;
+  if (optCow) optCow.text = t.soundCow;
+  if (optClap) optClap.text = t.soundClap;
+  if (optTabla) optTabla.text = t.soundTabla;
+  if (optDholak) optDholak.text = t.soundDholak;
+  if (optPakh) optPakh.text = t.soundPakhawaj;
+  if (optSnare) optSnare.text = t.soundSnare;
+
+  // Localize timer select
+  const timerSelect = document.getElementById('timerSelect');
+  timerSelect.options[0].text = t.timerOff;
+  for (let i = 1; i < timerSelect.options.length; i++) {
+    const val = timerSelect.options[i].value;
+    timerSelect.options[i].text = `${val} ${t.timerMin}`;
+  }
+
+  // Localize rhythm select optgroups & options
+  const rhythmSelect = document.getElementById('rhythmSelect');
+  document.getElementById('rgClassical').label = t.rgClassical;
+  document.getElementById('rgRare').label = t.rgRare;
+  document.getElementById('rgLight').label = t.rgLight;
+  document.getElementById('rgWestern').label = t.rgWestern;
+
+  const rhythmMap = RHYTHM_TRANSLATIONS[lang] || RHYTHM_TRANSLATIONS.gu;
+  rhythmSelect.options[0].text = rhythmMap.metronome;
+  
+  // Translate Indian Taals
+  const indianTaals = [
+    'teental', 'jhaptaal', 'ektaal', 'chautaal', 'dhamar', 'tilwada',
+    'sooltaal', 'tevra', 'jhumra', 'ada_chautaal', 'chartal_ki_sawari', 'farodast',
+    'matta', 'pancham_sawari', 'shikar', 'brahmtaal', 'ganesh',
+    'keharwa', 'dadra', 'rupak', 'deepchandi', 'punjabi', 'slow_keharwa', 'bhajani', 'pashto'
+  ];
+  indianTaals.forEach(val => {
+    const opt = rhythmSelect.querySelector(`option[value="${val}"]`);
+    if (opt && rhythmMap[val]) opt.text = rhythmMap[val];
+  });
+
+  // Translate Western beats
+  const westernMap = {
+    gu: {
+      rock: "Rock (રોક)", pop: "Pop (પોપ)", waltz: "Waltz (વાલ્ટ્ઝ)", bossa_nova: "Bossa Nova (બોસા નોવા)",
+      reggae: "Reggae (રેગે)", shuffle: "Shuffle (શફલ)", jazz_swing: "Jazz Swing (જેઝ સ્વિંગ)",
+      samba: "Samba (સામ્બા)", cha_cha: "Cha-Cha (ચા-ચા)", tango: "Tango (ટેન્ગો)", polka: "Polka (પોલ્કા)",
+      blues: "Blues (બ્લૂઝ)", funk: "Funk (ફંક)", country: "Country (કંટ્રી)", hiphop: "Hip-Hop (હિપ હોપ)",
+      march: "March (માર્ચ)", six_eight: "6/8 Feel (૬/૮ ફીલ)", rumba: "Rumba (રુમ્બા)"
+    },
+    hi: {
+      rock: "Rock (रॉक)", pop: "Pop (पॉप)", waltz: "Waltz (वाल्ट्ज)", bossa_nova: "Bossa Nova (बोसा नोवा)",
+      reggae: "Reggae (रेगे)", shuffle: "Shuffle (शफल)", jazz_swing: "Jazz Swing (जैज़ स्विंग)",
+      samba: "Samba (साम्बा)", cha_cha: "Cha-Cha (चा-चा)", tango: "Tango (टैंगो)", polka: "Polka (पोल्का)",
+      blues: "Blues (ब्लूज़)", funk: "Funk (फंक)", country: "Country (कंट्री)", hiphop: "Hip-Hop (हिप हॉप)",
+      march: "March (मार्च)", six_eight: "6/8 Feel (सिक्स एइथ)", rumba: "Rumba (रुम्बा)"
+    },
+    en: {
+      rock: "Rock Beat (4/4)", pop: "Pop / Disco (4/4)", waltz: "Waltz Feel (3/4)", bossa_nova: "Bossa Nova (4/4)",
+      reggae: "Reggae / Ska (4/4)", shuffle: "Shuffle / Swing (4/4)", jazz_swing: "Jazz Swing (4/4)",
+      samba: "Samba (2/4)", cha_cha: "Cha-Cha (4/4)", tango: "Tango (4/4)", polka: "Polka (2/4)",
+      blues: "Blues Shuffle (4/4)", funk: "Funk Groove (4/4)", country: "Country (4/4)", hiphop: "Hip-Hop (4/4)",
+      march: "March (2/4)", six_eight: "6/8 Feel (6/8)", rumba: "Rumba (4/4)"
+    }
+  };
+  const wMap = westernMap[lang] || westernMap.gu;
+  Object.keys(wMap).forEach(val => {
+    const opt = rhythmSelect.querySelector(`option[value="${val}"]`);
+    if (opt) opt.text = wMap[val];
+  });
+
+  // Drone mode select translation
+  const droneModeSelect = document.getElementById('droneModeSelect');
+  droneModeSelect.options[0].text = t.droneSimple;
+  droneModeSelect.options[1].text = t.droneTanpura;
+  droneModeSelect.options[2].text = t.droneHarmonium;
+
+  // Web Audio Context setup
+  let audioCtx = null;
+  let tablaBuffers = {};
+  let isTablaSamplesLoaded = false;
+  let isTablaSamplesLoading = false;
+  let isPlaying = false;
+  let bpm = 120;
+  let timeSignature = 4;
+  let subdivision = 1;
+  let soundProfile = 'woodblock';
+  let currentRhythm = 'metronome';
+
+  let currentBeat = 0;
+  let currentSubdivision = 0;
+  let nextNoteTime = 0.0;
+  const lookahead = 25.0;
+  const scheduleAheadTime = 0.1;
+  let timerId = null;
+
+  // Riyaz countdown variables
+  let timerEndTime = null;
+  let timerIntervalId = null;
+
+  // Tap tempo variables
+  let tapTimes = [];
+
+  // Tuning Drone variables
+  let droneOsc = null;
+  let droneGain = null;
+  let isDronePlaying = false;
+
+  // Speed Trainer variables
+  let measureCount = 0;
+  let trainerEnabled = false;
+  let trainerInc = 5;
+  let trainerFreq = 8;
+
+  // DOM Elements
+  const bpmVal = document.getElementById('bpmVal');
+  const tempoSlider = document.getElementById('tempoSlider');
+  const playBtn = document.getElementById('playBtn');
+  const playIcon = document.getElementById('playIcon');
+  const lblPlayBtn = document.getElementById('lblPlayBtn');
+  const pendulumBar = document.getElementById('pendulumBar');
+  const volumeSlider = document.getElementById('volumeSlider');
+
+  // Load preferences from localStorage if saved
+  try {
+    const savedBpm = localStorage.getItem('harmonyMetronomeBpm');
+    if (savedBpm) {
+      bpm = Number(savedBpm);
+      bpmVal.textContent = bpm;
+      tempoSlider.value = bpm;
+    }
+    const savedSound = localStorage.getItem('harmonyMetronomeSound');
+    if (savedSound) {
+      soundProfile = savedSound;
+      soundSelect.value = savedSound;
+    }
+  } catch(e) {}
+
+  function rebuildLights() {
+    const container = document.getElementById('visualLightsContainer');
+    container.innerHTML = '';
+    for (let i = 0; i < timeSignature; i++) {
+      const light = document.createElement('div');
+      light.className = 'light-dot';
+      light.id = `light-dot-${i}`;
+      container.appendChild(light);
+    }
+  }
+
+  rebuildLights();
+
+  // Handle BPM changes
+  tempoSlider.addEventListener('input', (e) => {
+    bpm = Number(e.target.value);
+    bpmVal.textContent = bpm;
+    try { localStorage.setItem('harmonyMetronomeBpm', bpm); } catch(err) {}
+  });
+
+  function adjustBpm(amount) {
+    bpm = Math.max(30, Math.min(300, bpm + amount));
+    bpmVal.textContent = bpm;
+    tempoSlider.value = bpm;
+    try { localStorage.setItem('harmonyMetronomeBpm', bpm); } catch(err) {}
+  }
+
+  function setTimeSignature(val) {
+    timeSignature = val;
+    const btns = document.querySelectorAll('#beatsContainer .pill-btn');
+    btns.forEach((btn, idx) => {
+      const buttonVal = idx + 1;
+      btn.classList.toggle('active', buttonVal === val);
+    });
+    rebuildLights();
+    currentBeat = 0;
+    currentSubdivision = 0;
+  }
+
+  function setSubdivision(val) {
+    subdivision = val;
+    const btns = document.querySelectorAll('#subsContainer .pill-btn');
+    btns.forEach((btn, idx) => {
+      const buttonVal = idx + 1;
+      btn.classList.toggle('active', buttonVal === val);
+    });
+    currentBeat = 0;
+    currentSubdivision = 0;
+  }
+
+  soundSelect.addEventListener('change', (e) => {
+    soundProfile = e.target.value;
+    try { localStorage.setItem('harmonyMetronomeSound', soundProfile); } catch(err) {}
+  });
+
+  const TAAL_BEATS = {
+    metronome: 4,
+    // શાસ્ત્રીય તાલ (Classical)
+    teental: 16,
+    jhaptaal: 10,
+    ektaal: 12,
+    chautaal: 12,
+    dhamar: 14,
+    tilwada: 16,
+    sooltaal: 10,
+    tevra: 7,
+    jhumra: 14,
+    ada_chautaal: 14,
+    chartal_ki_sawari: 11,
+    farodast: 14,
+    // દુર્લભ / એડવાન્સ તાલ (Rare)
+    matta: 9,
+    pancham_sawari: 15,
+    shikar: 17,
+    brahmtaal: 28,
+    ganesh: 21,
+    // લોક / લાઈટ તાલ (Folk / Light)
+    keharwa: 8,
+    dadra: 6,
+    rupak: 7,
+    deepchandi: 14,
+    punjabi: 8,
+    slow_keharwa: 8,
+    bhajani: 8,
+    pashto: 7,
+    // Western Beats
+    rock: 4,
+    pop: 4,
+    waltz: 3,
+    bossa_nova: 4,
+    reggae: 4,
+    shuffle: 4,
+    jazz_swing: 4,
+    samba: 2,
+    cha_cha: 4,
+    tango: 4,
+    polka: 2,
+    blues: 4,
+    funk: 4,
+    country: 4,
+    hiphop: 4,
+    march: 2,
+    six_eight: 6,
+    rumba: 4
+  };
+
+  rhythmSelect.addEventListener('change', (e) => {
+    currentRhythm = e.target.value;
+    const beats = TAAL_BEATS[currentRhythm] || 4;
+    setTimeSignature(beats);
+    currentBeat = 0;
+    currentSubdivision = 0;
+  });
+
+  // Tap Tempo logic
+  document.getElementById('tapTempoBtn').addEventListener('click', () => {
+    const now = performance.now();
+    tapTimes.push(now);
+    if (tapTimes.length > 4) {
+      tapTimes.shift();
+    }
+    if (tapTimes.length > 1) {
+      let diffs = [];
+      for (let i = 1; i < tapTimes.length; i++) {
+        diffs.push(tapTimes[i] - tapTimes[i - 1]);
+      }
+      const avgDiff = diffs.reduce((sum, v) => sum + v, 0) / diffs.length;
+      const calcBpm = Math.round(60000 / avgDiff);
+      if (calcBpm >= 30 && calcBpm <= 300) {
+        bpm = calcBpm;
+        bpmVal.textContent = bpm;
+        tempoSlider.value = bpm;
+        try { localStorage.setItem('harmonyMetronomeBpm', bpm); } catch(err) {}
+      }
+    }
+  });
+
+  // Advanced Tools Event Listeners
+  const speedTrainerCheck = document.getElementById('speedTrainerCheck');
+  const speedTrainerSettings = document.getElementById('speedTrainerSettings');
+  const trainerBpmInc = document.getElementById('trainerBpmInc');
+  const trainerMeasures = document.getElementById('trainerMeasures');
+
+  speedTrainerCheck.addEventListener('change', (e) => {
+    trainerEnabled = e.target.checked;
+    speedTrainerSettings.style.display = trainerEnabled ? 'block' : 'none';
+    measureCount = 0;
+    updateTrainerProgressUI();
+  });
+
+  trainerBpmInc.addEventListener('change', (e) => {
+    trainerInc = Number(e.target.value);
+    measureCount = 0;
+    updateTrainerProgressUI();
+  });
+
+  trainerMeasures.addEventListener('change', (e) => {
+    trainerFreq = Number(e.target.value);
+    measureCount = 0;
+    updateTrainerProgressUI();
+  });
+
+  function updateTrainerProgressUI() {
+    document.getElementById('trainerProgressText').textContent = `${t.trainerMeasureText}: ${measureCount} / ${trainerFreq}`;
+  }
+
+  // Tuning Drone logic - Advanced Tanpura/Harmonium engine
+  let droneNodes = []; // Array to hold all drone oscillators/gains
+
+  document.getElementById('dronePlayBtn').addEventListener('click', () => {
+    if (isDronePlaying) {
+      stopDrone();
+    } else {
+      startDrone();
+    }
+  });
+
+  function startDrone() {
+    ensureAudioContext();
+    isDronePlaying = true;
+    droneNodes = [];
+    
+    const freq = parseFloat(document.getElementById('droneKeySelect').value);
+    const vol = parseFloat(document.getElementById('droneVolSlider').value) || 0.1;
+    const mode = document.getElementById('droneModeSelect').value;
+    const addPa = document.getElementById('droneSaPaCheck').checked;
+    const paFreq = freq * 1.5; // Pa = 3/2 ratio of Sa
+
+    // Create a master gain for the whole drone
+    droneGain = audioCtx.createGain();
+    droneGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+    droneGain.gain.exponentialRampToValueAtTime(vol, audioCtx.currentTime + 0.3);
+    droneGain.connect(audioCtx.destination);
+
+    if (mode === 'simple') {
+      // Simple single oscillator
+      const o = audioCtx.createOscillator();
+      o.type = 'triangle';
+      o.frequency.value = freq;
+      o.connect(droneGain);
+      o.start();
+      droneNodes.push(o);
+      if (addPa) {
+        const o2 = audioCtx.createOscillator();
+        o2.type = 'triangle';
+        o2.frequency.value = paFreq;
+        const g2 = audioCtx.createGain();
+        g2.gain.value = 0.7;
+        o2.connect(g2); g2.connect(droneGain);
+        o2.start();
+        droneNodes.push(o2);
+      }
+    } else if (mode === 'tanpura') {
+      // Tanpura: rich harmonics with slight detuning for warmth
+      const harmonics = [
+        { ratio: 1, type: 'sine', vol: 0.5 },       // fundamental Sa
+        { ratio: 2, type: 'sine', vol: 0.2 },       // octave
+        { ratio: 3, type: 'sine', vol: 0.08 },      // 5th harmonic
+        { ratio: 1.002, type: 'sine', vol: 0.15 },  // slight detune for "jivari" buzz
+        { ratio: 0.998, type: 'sine', vol: 0.12 },  // counter detune
+        { ratio: 0.5, type: 'triangle', vol: 0.1 }, // lower octave
+      ];
+      harmonics.forEach(h => {
+        const o = audioCtx.createOscillator();
+        o.type = h.type;
+        o.frequency.value = freq * h.ratio;
+        const g = audioCtx.createGain();
+        g.gain.value = h.vol;
+        o.connect(g); g.connect(droneGain);
+        o.start();
+        droneNodes.push(o);
+      });
+      if (addPa) {
+        [1, 1.003, 2].forEach((r, i) => {
+          const o = audioCtx.createOscillator();
+          o.type = 'sine';
+          o.frequency.value = paFreq * r;
+          const g = audioCtx.createGain();
+          g.gain.value = i === 0 ? 0.35 : 0.08;
+          o.connect(g); g.connect(droneGain);
+          o.start();
+          droneNodes.push(o);
+        });
+      }
+    } else if (mode === 'harmonium') {
+      // Harmonium: sawtooth with filter for bellows-like sound
+      const o = audioCtx.createOscillator();
+      o.type = 'sawtooth';
+      o.frequency.value = freq;
+      const lpf = audioCtx.createBiquadFilter();
+      lpf.type = 'lowpass';
+      lpf.frequency.value = freq * 4;
+      lpf.Q.value = 0.5;
+      o.connect(lpf); lpf.connect(droneGain);
+      o.start();
+      droneNodes.push(o);
+      // Add sub-octave for body
+      const o2 = audioCtx.createOscillator();
+      o2.type = 'triangle';
+      o2.frequency.value = freq * 0.5;
+      const g2 = audioCtx.createGain();
+      g2.gain.value = 0.15;
+      o2.connect(g2); g2.connect(droneGain);
+      o2.start();
+      droneNodes.push(o2);
+      if (addPa) {
+        const o3 = audioCtx.createOscillator();
+        o3.type = 'sawtooth';
+        o3.frequency.value = paFreq;
+        const lpf2 = audioCtx.createBiquadFilter();
+        lpf2.type = 'lowpass';
+        lpf2.frequency.value = paFreq * 4;
+        const g3 = audioCtx.createGain();
+        g3.gain.value = 0.65;
+        o3.connect(lpf2); lpf2.connect(g3); g3.connect(droneGain);
+        o3.start();
+        droneNodes.push(o3);
+      }
+    }
+    
+    const dPlayBtn = document.getElementById('dronePlayBtn');
+    dPlayBtn.textContent = t.droneStop;
+    dPlayBtn.style.borderColor = 'var(--accent)';
+  }
+
+  function stopDrone() {
+    isDronePlaying = false;
+    if (droneGain) {
+      droneGain.gain.setValueAtTime(droneGain.gain.value, audioCtx.currentTime);
+      droneGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+    }
+    const nodesToStop = [...droneNodes];
+    droneNodes = [];
+    setTimeout(() => {
+      nodesToStop.forEach(o => { try { o.stop(); } catch(e) {} });
+    }, 300);
+    
+    const dPlayBtn = document.getElementById('dronePlayBtn');
+    dPlayBtn.textContent = t.droneStart;
+    dPlayBtn.style.borderColor = 'var(--line)';
+  }
+
+  // Live drone updates
+  document.getElementById('droneKeySelect').addEventListener('change', () => {
+    if (isDronePlaying) { stopDrone(); setTimeout(startDrone, 100); }
+  });
+  document.getElementById('droneModeSelect').addEventListener('change', () => {
+    if (isDronePlaying) { stopDrone(); setTimeout(startDrone, 100); }
+  });
+  document.getElementById('droneSaPaCheck').addEventListener('change', () => {
+    if (isDronePlaying) { stopDrone(); setTimeout(startDrone, 100); }
+  });
+
+  document.getElementById('droneVolSlider').addEventListener('input', (e) => {
+    if (isDronePlaying && droneGain) {
+      const vol = parseFloat(e.target.value);
+      droneGain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    }
+  });
+
+  // Custom Presets Manager (Metronome Beats Pro feature)
+  function savePreset() {
+    const nameInput = document.getElementById('presetNameInput');
+    const name = nameInput.value.trim();
+    if (!name) return;
+    
+    const preset = {
+      name,
+      bpm,
+      timeSignature,
+      subdivision,
+      soundProfile,
+      currentRhythm,
+      trainerEnabled,
+      trainerInc,
+      trainerFreq
+    };
+    
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem('harmonyMetronomePresets') || '[]'); } catch(e) {}
+    list.push(preset);
+    localStorage.setItem('harmonyMetronomePresets', JSON.stringify(list));
+    
+    nameInput.value = '';
+    loadPresetsUI();
+  }
+
+  function deletePreset(index) {
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem('harmonyMetronomePresets') || '[]'); } catch(e) {}
+    list.splice(index, 1);
+    localStorage.setItem('harmonyMetronomePresets', JSON.stringify(list));
+    loadPresetsUI();
+  }
+
+  function applyPreset(preset) {
+    bpm = preset.bpm;
+    bpmVal.textContent = bpm;
+    tempoSlider.value = bpm;
+    
+    soundProfile = preset.soundProfile || 'woodblock';
+    soundSelect.value = soundProfile;
+    
+    currentRhythm = preset.currentRhythm || 'metronome';
+    rhythmSelect.value = currentRhythm;
+    
+    setTimeSignature(preset.timeSignature);
+    setSubdivision(preset.subdivision);
+    
+    trainerEnabled = !!preset.trainerEnabled;
+    speedTrainerCheck.checked = trainerEnabled;
+    speedTrainerSettings.style.display = trainerEnabled ? 'block' : 'none';
+    trainerInc = preset.trainerInc || 5;
+    trainerBpmInc.value = trainerInc;
+    trainerFreq = preset.trainerFreq || 8;
+    trainerMeasures.value = trainerFreq;
+    
+    measureCount = 0;
+    updateTrainerProgressUI();
+    
+    try {
+      localStorage.setItem('harmonyMetronomeBpm', bpm);
+      localStorage.setItem('harmonyMetronomeSound', soundProfile);
+    } catch(e) {}
+  }
+
+  function loadPresetsUI() {
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem('harmonyMetronomePresets') || '[]'); } catch(e) {}
+    
+    const container = document.getElementById('presetsListContainer');
+    container.innerHTML = '';
+    
+    if (list.length === 0) {
+      container.innerHTML = `<div style="font-size:12.5px; color:var(--subtitle); text-align:center; padding:10px;" id="lblNoPresets">${t.lblNoPresets}</div>`;
+      return;
+    }
+    
+    list.forEach((preset, index) => {
+      const item = document.createElement('div');
+      item.style = 'display:flex; justify-content:space-between; align-items:center; background:var(--bg); border:1.5px solid var(--line); border-radius:10px; padding:10px; margin-bottom:8px;';
+      
+      const info = document.createElement('div');
+      info.style = 'cursor:pointer; flex:1; text-align:left;';
+      const rhythmLabel = rhythmSelect.querySelector(`option[value="${preset.currentRhythm || 'metronome'}"]`).textContent;
+      info.innerHTML = `<strong style="font-size:14px; color:var(--text);">${preset.name}</strong><br><span style="font-size:11.5px; color:var(--subtitle);">${preset.bpm} BPM | ${preset.timeSignature}/4 | ${rhythmLabel}</span>`;
+      info.addEventListener('click', () => applyPreset(preset));
+      
+      const delBtn = document.createElement('button');
+      delBtn.style = 'background:none; border:none; color:var(--accent-red); font-weight:700; cursor:pointer; font-size:14px; padding:0 8px;';
+      delBtn.textContent = '❌';
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deletePreset(index);
+      });
+      
+      item.appendChild(info);
+      item.appendChild(delBtn);
+      container.appendChild(item);
+    });
+  }
+
+  loadPresetsUI();
+
+  // Web Audio Synthesizer percussion engines
+  function playKickSynth(time, gainNode, vol) {
+    const osc = audioCtx.createOscillator();
+    osc.connect(gainNode);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(130, time);
+    osc.frequency.exponentialRampToValueAtTime(50, time + 0.08);
+    gainNode.gain.setValueAtTime(vol, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+    osc.start(time);
+    osc.stop(time + 0.15);
+  }
+
+  function playSnareSynth(time, gainNode, vol) {
+    const osc = audioCtx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(180, time);
+    osc.connect(gainNode);
+    osc.start(time);
+    osc.stop(time + 0.08);
+    
+    const bufferSize = audioCtx.sampleRate * 0.08;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1200;
+    noise.connect(filter);
+    filter.connect(gainNode);
+    
+    gainNode.gain.setValueAtTime(vol, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+    noise.start(time);
+    noise.stop(time + 0.09);
+  }
+
+  // Rim Shot synth - sharp metallic click
+  function playRimShotSynth(time, gainNode, vol) {
+    const osc = audioCtx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(1800, time);
+    osc.frequency.exponentialRampToValueAtTime(600, time + 0.015);
+    osc.connect(gainNode);
+    gainNode.gain.setValueAtTime(vol, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.03);
+    osc.start(time);
+    osc.stop(time + 0.04);
+  }
+
+  // Cowbell synth - resonant metallic bell
+  function playCowbellSynth(time, gainNode, vol) {
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const g1 = audioCtx.createGain();
+    const g2 = audioCtx.createGain();
+    osc1.type = 'square'; osc1.frequency.value = 560;
+    osc2.type = 'square'; osc2.frequency.value = 845;
+    osc1.connect(g1); g1.connect(gainNode);
+    osc2.connect(g2); g2.connect(gainNode);
+    g1.gain.setValueAtTime(vol * 0.6, time);
+    g1.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+    g2.gain.setValueAtTime(vol * 0.4, time);
+    g2.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+    gainNode.gain.setValueAtTime(1, time);
+    osc1.start(time); osc1.stop(time + 0.1);
+    osc2.start(time); osc2.stop(time + 0.1);
+  }
+
+  // Clap synth - burst noise
+  function playClapSynth(time, gainNode, vol) {
+    const bufferSize = audioCtx.sampleRate * 0.04;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 2500;
+    filter.Q.value = 1.2;
+    noise.connect(filter);
+    filter.connect(gainNode);
+    gainNode.gain.setValueAtTime(vol, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+    noise.start(time);
+    noise.stop(time + 0.07);
+  }
+
+  // Dholak synth - deep open tone
+  function playDholakSynth(time, gainNode, vol, isAccent) {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    const baseF = isAccent ? 95 : 130;
+    osc.frequency.setValueAtTime(baseF, time);
+    osc.frequency.exponentialRampToValueAtTime(baseF * 0.6, time + 0.15);
+    g.gain.setValueAtTime(vol * 0.9, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.start(time); osc.stop(time + 0.25);
+  }
+
+  // Pakhawaj synth - deep bass with resonance
+  function playPakhawajSynth(time, gainNode, vol, isAccent) {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    const baseF = isAccent ? 80 : 110;
+    osc.frequency.setValueAtTime(baseF, time);
+    osc.frequency.exponentialRampToValueAtTime(baseF * 0.5, time + 0.2);
+    g.gain.setValueAtTime(vol, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.start(time); osc.stop(time + 0.35);
+    // Add overtone for body
+    const osc2 = audioCtx.createOscillator();
+    const g2 = audioCtx.createGain();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(baseF * 2.5, time);
+    g2.gain.setValueAtTime(vol * 0.3, time);
+    g2.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+    osc2.connect(g2); g2.connect(audioCtx.destination);
+    osc2.start(time); osc2.stop(time + 0.1);
+  }
+
+  function playHiHatSynth(time, gainNode, vol) {
+    const bufferSize = audioCtx.sampleRate * 0.02;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 7000;
+    noise.connect(filter);
+    filter.connect(gainNode);
+    
+    gainNode.gain.setValueAtTime(vol, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.02);
+    noise.start(time);
+    noise.stop(time + 0.03);
+  }
+
+  // Instrument-aware bol parameters: { freq, freqEnd, decay, type, vol, overtoneFreq, overtoneVol }
+  const BOL_INSTRUMENTS = {
+    tabla: {
+      dha:  { freq: 100, freqEnd: 70,  decay: 0.14, type: 'sine', vol: 0.8, overtone: { freq: 260, vol: 0.6, decay: 0.06 } },
+      dhin: { freq: 125, freqEnd: 100, decay: 0.18, type: 'sine', vol: 0.8 },
+      ta:   { freq: 280, freqEnd: 280, decay: 0.05, type: 'sine', vol: 0.8 },
+      ge:   { freq: 90,  freqEnd: 90,  decay: 0.04, type: 'triangle', vol: 0.5 },
+    },
+    dholak: {
+      dha:  { freq: 80,  freqEnd: 50,  decay: 0.22, type: 'sine', vol: 0.9, overtone: { freq: 200, vol: 0.4, decay: 0.1 } },
+      dhin: { freq: 95,  freqEnd: 65,  decay: 0.25, type: 'sine', vol: 0.85 },
+      ta:   { freq: 350, freqEnd: 320, decay: 0.06, type: 'triangle', vol: 0.9 },
+      ge:   { freq: 70,  freqEnd: 55,  decay: 0.06, type: 'sine', vol: 0.55 },
+    },
+    pakhawaj: {
+      dha:  { freq: 65,  freqEnd: 40,  decay: 0.3,  type: 'sine', vol: 1.0, overtone: { freq: 160, vol: 0.3, decay: 0.12 } },
+      dhin: { freq: 75,  freqEnd: 50,  decay: 0.32, type: 'sine', vol: 0.9 },
+      ta:   { freq: 220, freqEnd: 200, decay: 0.08, type: 'triangle', vol: 0.85 },
+      ge:   { freq: 55,  freqEnd: 40,  decay: 0.07, type: 'sine', vol: 0.5 },
+    },
+    // Non-percussion profiles: pitch-based clicks
+    woodblock: {
+      dha:  { freq: 900,  freqEnd: 900,  decay: 0.04, type: 'triangle', vol: 1.0 },
+      dhin: { freq: 750,  freqEnd: 750,  decay: 0.04, type: 'triangle', vol: 0.85 },
+      ta:   { freq: 1200, freqEnd: 1200, decay: 0.03, type: 'triangle', vol: 0.9 },
+      ge:   { freq: 600,  freqEnd: 600,  decay: 0.03, type: 'triangle', vol: 0.6 },
+    },
+    digital: {
+      dha:  { freq: 800,  freqEnd: 800,  decay: 0.06, type: 'sine', vol: 1.0 },
+      dhin: { freq: 650,  freqEnd: 650,  decay: 0.06, type: 'sine', vol: 0.85 },
+      ta:   { freq: 1100, freqEnd: 1100, decay: 0.04, type: 'sine', vol: 0.9 },
+      ge:   { freq: 500,  freqEnd: 500,  decay: 0.04, type: 'sine', vol: 0.6 },
+    },
+    rimshot: {
+      dha:  { freq: 1800, freqEnd: 600,  decay: 0.03, type: 'square', vol: 1.0 },
+      dhin: { freq: 1500, freqEnd: 500,  decay: 0.03, type: 'square', vol: 0.85 },
+      ta:   { freq: 2200, freqEnd: 800,  decay: 0.02, type: 'square', vol: 0.9 },
+      ge:   { freq: 1000, freqEnd: 400,  decay: 0.02, type: 'square', vol: 0.6 },
+    },
+    cowbell: {
+      dha:  { freq: 560,  freqEnd: 560,  decay: 0.08, type: 'square', vol: 0.7 },
+      dhin: { freq: 480,  freqEnd: 480,  decay: 0.08, type: 'square', vol: 0.6 },
+      ta:   { freq: 845,  freqEnd: 845,  decay: 0.06, type: 'square', vol: 0.7 },
+      ge:   { freq: 400,  freqEnd: 400,  decay: 0.05, type: 'square', vol: 0.5 },
+    },
+  };
+
+  function playBolSynth(stroke, time, vol) {
+    if (stroke === '-') return; // rest
+    
+    // ── Real Audio Sample Playback Engine (Online/Buffered) ──
+    if (soundProfile === 'tabla' && isTablaSamplesLoaded) {
+      const playBuffer = (buffer, t, v) => {
+        if (!buffer) return;
+        const source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(v * 1.1, t);
+        source.connect(gainNode).connect(audioCtx.destination);
+        source.start(t);
+      };
+
+      if (stroke === 'dha') {
+        playBuffer(tablaBuffers["Ab1"], time, vol); // Ta
+        playBuffer(tablaBuffers["C#1"], time, vol * 0.95); // Ga
+      } else if (stroke === 'dhin' || stroke === 'dhi') {
+        playBuffer(tablaBuffers["F2"], time, vol * 0.9);   // Tin
+        playBuffer(tablaBuffers["C#1"], time, vol * 0.95); // Ga
+      } else if (stroke === 'tin' || stroke === 'ta' || stroke === 'na') {
+        playBuffer(tablaBuffers["Ab1"], time, vol);        // Ta
+      } else if (stroke === 'ge' || stroke === 'ga') {
+        playBuffer(tablaBuffers["D1"], time, vol);         // Ge
+      } else {
+        playBuffer(tablaBuffers["F#1"], time, vol);        // Ke
+      }
+      return;
+    }
+
+    // ── High-Fidelity Indian Percussion Physical Modeling Engine ──
+    if (['tabla', 'dholak', 'pakhawaj'].includes(soundProfile)) {
+      let inst = soundProfile;
+      
+      // Determine tuning base frequencies and decay profiles
+      let baseTreble = 293.66; // D4 (Standard tuning for Tabla)
+      let baseBass = 85;       // Low Ghe for Tabla
+      let bassBendEnd = 118;   // Upward meend slide frequency
+      let decayTreble = 0.24;
+      let decayBass = 0.22;
+
+      if (inst === 'dholak') {
+        baseTreble = 220.00;   // A3 for Dholak
+        baseBass = 75;
+        bassBendEnd = 95;
+        decayTreble = 0.16;
+        decayBass = 0.18;
+      } else if (inst === 'pakhawaj') {
+        baseTreble = 174.61;   // F3 for Pakhawaj
+        baseBass = 60;
+        bassBendEnd = 80;
+        decayTreble = 0.28;
+        decayBass = 0.32;
+      }
+
+      // Helper function to synthesize Ghe (Bayan bass open with upward pitch bend)
+      const triggerGhe = (t, v) => {
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const g1 = audioCtx.createGain();
+        const g2 = audioCtx.createGain();
+        
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(baseBass, t);
+        osc1.frequency.exponentialRampToValueAtTime(bassBendEnd, t + decayBass * 0.8);
+        
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(baseBass * 2, t);
+        osc2.frequency.exponentialRampToValueAtTime(bassBendEnd * 2, t + decayBass * 0.8);
+        
+        g1.gain.setValueAtTime(v * 0.85, t);
+        g1.gain.exponentialRampToValueAtTime(0.001, t + decayBass);
+        
+        g2.gain.setValueAtTime(v * 0.35, t);
+        g2.gain.exponentialRampToValueAtTime(0.001, t + decayBass * 0.6);
+        
+        osc1.connect(g1).connect(audioCtx.destination);
+        osc2.connect(g2).connect(audioCtx.destination);
+        
+        osc1.start(t); osc1.stop(t + decayBass + 0.05);
+        osc2.start(t); osc2.stop(t + decayBass + 0.05);
+      };
+
+      // Helper function to synthesize Ta/Na/Tin (Dayan treble open with clear harmonics)
+      const triggerTa = (t, v, isMuted = false) => {
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(baseTreble * 6, t);
+        filter.Q.value = 1.0;
+        filter.connect(audioCtx.destination);
+
+        const harmonics = [
+          { ratio: 1.0, amp: 0.8, decay: decayTreble },
+          { ratio: 2.0, amp: 0.45, decay: decayTreble * 0.65 },
+          { ratio: 3.0, amp: 0.2, decay: decayTreble * 0.4 },
+          { ratio: 4.0, amp: 0.08, decay: decayTreble * 0.2 },
+        ];
+
+        harmonics.forEach(h => {
+          const osc = audioCtx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(baseTreble * h.ratio, t);
+          
+          const g = audioCtx.createGain();
+          g.gain.setValueAtTime(isMuted ? v * h.amp * 0.35 : v * h.amp, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + (isMuted ? h.decay * 0.25 : h.decay));
+          
+          osc.connect(g).connect(filter);
+          osc.start(t); osc.stop(t + h.decay + 0.05);
+        });
+
+        // Sharp metallic strike click transient
+        const transientOsc = audioCtx.createOscillator();
+        const transientGain = audioCtx.createGain();
+        transientOsc.type = 'sine';
+        transientOsc.frequency.setValueAtTime(2500, t);
+        transientGain.gain.setValueAtTime(v * 0.25, t);
+        transientGain.gain.exponentialRampToValueAtTime(0.001, t + 0.015);
+        transientOsc.connect(transientGain).connect(audioCtx.destination);
+        transientOsc.start(t); transientOsc.stop(t + 0.03);
+      };
+
+      // Helper for muted consonants (ke, ka, ti, ki)
+      const triggerMuteConsonant = (t, v) => {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(260, t);
+        osc.frequency.exponentialRampToValueAtTime(140, t + 0.04);
+        g.gain.setValueAtTime(v * 0.75, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+        osc.connect(g).connect(audioCtx.destination);
+        osc.start(t); osc.stop(t + 0.07);
+
+        // Add high transient
+        const transientOsc = audioCtx.createOscillator();
+        const transientGain = audioCtx.createGain();
+        transientOsc.type = 'triangle';
+        transientOsc.frequency.setValueAtTime(1200, t);
+        transientGain.gain.setValueAtTime(v * 0.15, t);
+        transientGain.gain.exponentialRampToValueAtTime(0.001, t + 0.01);
+        transientOsc.connect(transientGain).connect(audioCtx.destination);
+        transientOsc.start(t); transientOsc.stop(t + 0.02);
+      };
+
+      // Stroke dispatch logic
+      if (stroke === 'dha') {
+        // Dha = Ghe (Bayan) + Ta (Dayan)
+        triggerGhe(time, vol);
+        triggerTa(time, vol);
+      } else if (stroke === 'dhin' || stroke === 'dhi') {
+        // Dhin = Ghe (Bayan) + Tin (Dayan soft)
+        triggerGhe(time, vol * 0.95);
+        triggerTa(time, vol * 0.85, true);
+      } else if (stroke === 'tin' || stroke === 'ta' || stroke === 'na') {
+        // Treble open stroke
+        triggerTa(time, vol);
+      } else if (stroke === 'ge' || stroke === 'ga') {
+        // Bass open stroke
+        triggerGhe(time, vol);
+      } else {
+        // Muted consonants (ke, ka, ti, ki, di)
+        triggerMuteConsonant(time, vol);
+      }
+      return;
+    }
+
+    // ── Standard Metronome & Non-percussion click dispatcher ──
+    let bolKey = 'dha';
+    if (stroke === 'dha') bolKey = 'dha';
+    else if (stroke === 'dhin' || stroke === 'dhi') bolKey = 'dhin';
+    else if (stroke === 'tin' || stroke === 'ta' || stroke === 'na') bolKey = 'ta';
+    else if (stroke === 'ge' || stroke === 'ke' || stroke === 'ti' || stroke === 'ga' || stroke === 'di' || stroke === 'ka') bolKey = 'ge';
+
+    const instKey = BOL_INSTRUMENTS[soundProfile] ? soundProfile : 'tabla';
+    const params = BOL_INSTRUMENTS[instKey][bolKey];
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = params.type;
+    osc.frequency.setValueAtTime(params.freq, time);
+    if (params.freqEnd !== params.freq) {
+      osc.frequency.exponentialRampToValueAtTime(params.freqEnd, time + params.decay);
+    }
+    gain.gain.setValueAtTime(vol * params.vol, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + params.decay + 0.02);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(time);
+    osc.stop(time + params.decay + 0.04);
+
+    if (params.overtone) {
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(params.overtone.freq, time);
+      gain2.gain.setValueAtTime(vol * params.overtone.vol, time);
+      gain2.gain.exponentialRampToValueAtTime(0.001, time + params.overtone.decay);
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+      osc2.start(time);
+      osc2.stop(time + params.overtone.decay + 0.02);
+    }
+
+    if (soundProfile === 'snare') {
+      const gainN = audioCtx.createGain();
+      gainN.connect(audioCtx.destination);
+      playSnareSynth(time, gainN, vol * params.vol);
+      return;
+    }
+    if (soundProfile === 'clap') {
+      const gainN = audioCtx.createGain();
+      gainN.connect(audioCtx.destination);
+      playClapSynth(time, gainN, vol * params.vol);
+      return;
+    }
+  }
+
+  function base64ToArrayBuffer(base64) {
+    const base64String = base64.split(',')[1] || base64;
+    const binaryString = window.atob(base64String);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
+
+  function loadRealTablaSamples() {
+    if (isTablaSamplesLoaded || isTablaSamplesLoading) return;
+    isTablaSamplesLoading = true;
+    console.log("Loading real Tabla audio samples...");
+    
+    fetch('https://raw.githubusercontent.com/trivedigaurav/tabla-js/master/js/tabla-mp3.js')
+      .then(response => response.text())
+      .then(text => {
+        const jsonStart = text.indexOf('{');
+        const jsonEnd = text.lastIndexOf('}');
+        if (jsonStart === -1 || jsonEnd === -1) {
+          isTablaSamplesLoading = false;
+          return;
+        }
+        
+        const jsonStr = text.substring(jsonStart, jsonEnd + 1);
+        const soundfont = JSON.parse(jsonStr);
+        
+        const notesToLoad = ["Bb0", "C#1", "D1", "F#1", "G1", "Ab1", "F2"];
+        let loadedCount = 0;
+        
+        notesToLoad.forEach(note => {
+          if (soundfont[note]) {
+            const arrayBuffer = base64ToArrayBuffer(soundfont[note]);
+            audioCtx.decodeAudioData(arrayBuffer, (buffer) => {
+              tablaBuffers[note] = buffer;
+              loadedCount++;
+              if (loadedCount === notesToLoad.length) {
+                isTablaSamplesLoaded = true;
+                isTablaSamplesLoading = false;
+                console.log("Real Tabla samples successfully loaded & decoded!");
+              }
+            }, (err) => {
+              console.error("Error decoding note " + note, err);
+              isTablaSamplesLoading = false;
+            });
+          } else {
+            isTablaSamplesLoading = false;
+          }
+        });
+      })
+      .catch(err => {
+        isTablaSamplesLoading = false;
+        console.warn("Could not load real Tabla samples, falling back to physical modeling synthesis:", err);
+      });
+  }
+
+  function ensureAudioContext() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    if (!isTablaSamplesLoaded && !isTablaSamplesLoading) {
+      loadRealTablaSamples();
+    }
+  }
+
+  // Precise Web Audio Scheduling
+  function nextNote() {
+    const secondsPerBeat = 60.0 / bpm;
+    const secondsPerSubdivision = secondsPerBeat / subdivision;
+    nextNoteTime += secondsPerSubdivision;
+
+    currentSubdivision++;
+    if (currentSubdivision >= subdivision) {
+      currentSubdivision = 0;
+      currentBeat++;
+      if (currentBeat >= timeSignature) {
+        currentBeat = 0;
+      }
+    }
+  }
+
+  function scheduleNote(beatNumber, subNumber, time) {
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    let vol = parseFloat(volumeSlider.value);
+    let freq = 800;
+
+    const muteAccent = document.getElementById('muteAccentCheck').checked;
+
+    if (currentRhythm === 'metronome') {
+      if (beatNumber === 0 && subNumber === 0) {
+        if (muteAccent) {
+          vol = 0;
+        } else {
+          freq = 1200;
+          vol *= 1.25;
+        }
+      } else if (subNumber > 0) {
+        freq = 550;
+        vol *= 0.55;
+      } else {
+        freq = 780;
+      }
+
+      gainNode.gain.setValueAtTime(vol, time);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+
+      if (vol > 0) {
+        if (soundProfile === 'digital') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, time);
+          osc.start(time);
+          osc.stop(time + 0.09);
+        } else if (soundProfile === 'woodblock') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq * 1.6, time);
+          osc.start(time);
+          osc.stop(time + 0.04);
+        } else if (soundProfile === 'snare') {
+          playSnareSynth(time, gainNode, vol);
+        } else if (soundProfile === 'rimshot') {
+          playRimShotSynth(time, gainNode, vol);
+        } else if (soundProfile === 'cowbell') {
+          playCowbellSynth(time, gainNode, vol);
+        } else if (soundProfile === 'clap') {
+          playClapSynth(time, gainNode, vol);
+        } else if (soundProfile === 'dholak') {
+          playDholakSynth(time, gainNode, vol, beatNumber === 0 && subNumber === 0);
+        } else if (soundProfile === 'pakhawaj') {
+          playPakhawajSynth(time, gainNode, vol, beatNumber === 0 && subNumber === 0);
+        } else if (soundProfile === 'tabla') {
+          osc.type = 'sine';
+          const baseFreq = (beatNumber === 0 && subNumber === 0) ? 220 : 170;
+          osc.frequency.setValueAtTime(baseFreq, time);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.75, time + 0.09);
+          osc.start(time);
+          osc.stop(time + 0.12);
+        }
+      }
+    } else if (['rock','pop','waltz','bossa_nova','reggae','shuffle','jazz_swing','samba','cha_cha','tango','polka','blues','funk','country','hiphop','march','six_eight','rumba'].includes(currentRhythm)) {
+      // Western drum pattern engine
+      const WESTERN_PATTERNS = {
+        // [K=kick, S=snare, H=hihat, -=rest]
+        rock:       ['K','S','K','S'],
+        pop:        ['K','H','S','H'],
+        waltz:      ['K','H','H'],
+        bossa_nova: ['K','H','S','H'],
+        reggae:     ['H','S','H','K'],
+        shuffle:    ['K','H','S','H'],
+        jazz_swing: ['K','H','S','H'],
+        samba:      ['K','S'],
+        cha_cha:    ['K','H','S','H'],
+        tango:      ['K','K','S','-'],
+        polka:      ['K','S'],
+        blues:      ['K','H','S','H'],
+        funk:       ['K','S','K','S'],
+        country:    ['K','H','S','H'],
+        hiphop:     ['K','-','S','-'],
+        march:      ['K','S'],
+        six_eight:  ['K','H','H','K','H','H'],
+        rumba:      ['K','H','S','H']
+      };
+      const wp = WESTERN_PATTERNS[currentRhythm] || ['K','S','K','S'];
+      if (subNumber > 0) {
+        playHiHatSynth(time, gainNode, vol * 0.4);
+      } else {
+        const hit = wp[beatNumber % wp.length];
+        if (hit === 'K') playKickSynth(time, gainNode, vol * 1.2);
+        else if (hit === 'S') playSnareSynth(time, gainNode, vol * 1.0);
+        else if (hit === 'H') playHiHatSynth(time, gainNode, vol * 0.5);
+        // '-' = rest
+      }
+    } else {
+      if (subNumber > 0) {
+        playHiHatSynth(time, gainNode, vol * 0.3);
+      } else {
+        let stroke = 'dha';
+        const TAAL_STROKES = {
+          // ── શાસ્ત્રીય તાલ ──
+          teental:      ['dha','dhin','dhin','dha','dha','dhin','dhin','dha','dha','tin','tin','ta','ta','dhin','dhin','dha'],
+          jhaptaal:     ['dhin','na','dhin','dhin','na','tin','na','dhin','dhin','na'],
+          ektaal:       ['dhin','dhin','dha','ge','tin','na','ke','na','dha','ge','tin','na'],
+          chautaal:     ['dha','dha','dhin','ta','ke','ta','ga','di','ge','na','dha','ge'],
+          dhamar:       ['ka','dhi','ta','dhi','ta','dha','-','ge','ti','ta','ti','ta','ta','-'],
+          tilwada:      ['dha','tin','tin','ta','ta','dhin','dhin','dha','dha','tin','tin','ta','ta','dhin','dhin','dha'],
+          sooltaal:     ['dha','dha','dhin','ta','ke','ta','ga','di','ge','na'],
+          tevra:        ['dha','dhin','ta','ti','ta','dha','ge'],
+          jhumra:       ['dhin','-','dha','dhin','dhin','dha','ge','tin','-','ta','tin','tin','ta','ge'],
+          ada_chautaal: ['dhin','ta','dha','dha','dhin','dhin','ta','ta','ke','ta','ga','di','ge','na'],
+          chartal_ki_sawari: ['dha','dhin','ta','dha','dhin','ta','dhin','ta','dha','tin','ta'],
+          farodast:     ['dha','dhin','na','dha','dha','tin','na','ta','tin','na','dha','dha','dhin','na'],
+          // ── દુર્લભ / એડવાન્સ તાલ ──
+          matta:        ['dha','dhin','ta','ta','dha','dhin','dha','tin','ta'],
+          pancham_sawari: ['dhin','na','dhin','dhin','na','dhin','na','dhin','dhin','na','tin','na','dhin','dhin','na'],
+          shikar:       ['dha','tin','ta','dha','dhin','dha','dhin','dha','tin','ta','dha','dhin','dha','tin','dha','dhin','na'],
+          brahmtaal:    ['dha','dhin','dhin','dha','dha','dhin','dhin','dha','dha','tin','tin','ta','ta','dhin','dha','dhin','dhin','dha','dha','dhin','dhin','dha','dha','tin','tin','ta','ta','dhin'],
+          ganesh:       ['dha','dhin','dhin','dha','dha','dhin','dhin','dha','dha','tin','tin','ta','ta','dhin','dhin','dha','dha','dhin','dhin','dha','dha'],
+          // ── લોક / લાઈટ તાલ ──
+          keharwa:      ['dha','ge','na','ti','na','ke','dhin','na'],
+          dadra:        ['dha','dhin','na','dha','tin','na'],
+          rupak:        ['tin','tin','na','dhin','na','dhin','na'],
+          deepchandi:   ['dha','dhin','-','dha','dha','tin','-','ta','tin','-','dha','dha','dhin','-'],
+          punjabi:      ['dha','ge','na','ge','na','ge','dhin','ge'],
+          slow_keharwa: ['dha','ge','na','ti','na','ke','dhin','na'],
+          bhajani:      ['dha','dhin','na','dha','tin','na','dhin','na'],
+          pashto:       ['dhin','na','dhin','dhin','na','dhin','na']
+        };
+        const pattern = TAAL_STROKES[currentRhythm];
+        if (pattern) {
+          stroke = pattern[beatNumber % pattern.length];
+        }
+        
+        playBolSynth(stroke, time, vol);
+      }
+    }
+
+    const timeDelta = (time - audioCtx.currentTime) * 1000;
+    setTimeout(() => {
+      if (isPlaying) {
+        flashVisuals(beatNumber, subNumber);
+      }
+    }, Math.max(0, timeDelta));
+  }
+
+  function scheduler() {
+    while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
+      scheduleNote(currentBeat, currentSubdivision, nextNoteTime);
+      nextNote();
+    }
+    timerId = setTimeout(scheduler, lookahead);
+  }
+
+  // Vibhag (section) division patterns for known taals
+  const VIBHAG_MAP = {
+    teental: [4,8,12],       // 4+4+4+4
+    jhaptaal: [2,5,7],       // 2+3+2+3
+    ektaal: [2,4,6,8,10],    // 2+2+2+2+2+2
+    chautaal: [2,4,6,8,10],  // 2+2+2+2+2+2
+    dhamar: [5,7,10],        // 5+2+3+4
+    tilwada: [4,8,12],       // 4+4+4+4
+    sooltaal: [2,4,6,8],     // 2+2+2+2+2
+    tevra: [3,5],            // 3+2+2
+    jhumra: [3,7,10],        // 3+4+3+4
+    ada_chautaal: [2,4,6,8,10,12], // 2+2+2+2+2+2+2
+    chartal_ki_sawari: [4,7], // 4+3+4
+    farodast: [4,8,11],      // 4+4+3+3
+    keharwa: [4],            // 4+4
+    dadra: [3],              // 3+3
+    rupak: [3,5],            // 3+2+2
+    deepchandi: [3,7,10],    // 3+4+3+4
+    punjabi: [4],            // 4+4
+    slow_keharwa: [4],       // 4+4
+    bhajani: [4],            // 4+4
+    pashto: [3,5],           // 3+2+2
+    matta: [4,6],            // 4+2+3
+    pancham_sawari: [4,7,11], // 4+3+4+4
+    shikar: [6,12,14],       // 6+6+2+3
+  };
+
+  function buildBolStrip() {
+    const strip = document.getElementById('bolDisplayStrip');
+    const ALL_STROKES = {
+      teental:['ધા','ધિન','ધિન','ધા','ધા','ધિન','ધિન','ધા','ધા','તિન','તિન','તા','તા','ધિન','ધિન','ધા'],
+      jhaptaal:['ધિન','ના','ધિન','ધિન','ના','તિન','ના','ધિન','ધિન','ના'],
+      ektaal:['ધિન','ધિન','ધા','ગે','તિન','ના','કે','ના','ધા','ગે','તિન','ના'],
+      chautaal:['ધા','ધા','ધિન','તા','કે','તા','ગા','દિ','ગે','ના','ધા','ગે'],
+      dhamar:['કા','ધિ','તા','ધિ','તા','ધા','—','ગે','તિ','તા','તિ','તા','તા','—'],
+      tilwada:['ધા','તિન','તિન','તા','તા','ધિન','ધિન','ધા','ધા','તિન','તિન','તા','તા','ધિન','ધિન','ધા'],
+      sooltaal:['ધા','ધા','ધિન','તા','કે','તા','ગા','દિ','ગે','ના'],
+      tevra:['ધા','ધિન','તા','તિ','તા','ધા','ગે'],
+      jhumra:['ધિન','—','ધા','ધિન','ધિન','ધા','ગે','તિન','—','તા','તિન','તિન','તા','ગે'],
+      ada_chautaal:['ધિન','તા','ધા','ધા','ધિન','ધિન','તા','તા','કે','તા','ગા','દિ','ગે','ના'],
+      chartal_ki_sawari:['ધા','ધિન','તા','ધા','ધિન','તા','ધિન','તા','ધા','તિન','તા'],
+      farodast:['ધા','ધિન','ના','ધા','ધા','તિન','ના','તા','તિન','ના','ધા','ધા','ધિન','ના'],
+      matta:['ધા','ધિન','તા','તા','ધા','ધિન','ધા','તિન','તા'],
+      pancham_sawari:['ધિન','ના','ધિન','ધિન','ના','ધિન','ના','ધિન','ધિન','ના','તિન','ના','ધિન','ધિન','ના'],
+      shikar:['ધા','તિન','તા','ધા','ધિન','ધા','ધિન','ધા','તિન','તા','ધા','ધિન','ધા','તિન','ધા','ધિન','ના'],
+      brahmtaal:['ધા','ધિન','ધિન','ધા','ધા','ધિન','ધિન','ધા','ધા','તિન','તિન','તા','તા','ધિન','ધા','ધિન','ધિન','ધા','ધા','ધિન','ધિન','ધા','ધા','તિન','તિન','તા','તા','ધિન'],
+      ganesh:['ધા','ધિન','ધિન','ધા','ધા','ધિન','ધિન','ધા','ધા','તિન','તિન','તા','તા','ધિન','ધિન','ધા','ધા','ધિન','ધિન','ધા','ધા'],
+      keharwa:['ધા','ગે','ના','તિ','ના','કે','ધિન','ના'],
+      dadra:['ધા','ધિન','ના','ધા','તિન','ના'],
+      rupak:['તિન','તિન','ના','ધિન','ના','ધિન','ના'],
+      deepchandi:['ધા','ધિન','—','ધા','ધા','તિન','—','તા','તિન','—','ધા','ધા','ધિન','—'],
+      punjabi:['ધા','ગે','ના','ગે','ના','ગે','ધિન','ગે'],
+      slow_keharwa:['ધા','ગે','ના','તિ','ના','કે','ધિન','ના'],
+      bhajani:['ધા','ધિન','ના','ધા','તિન','ના','ધિન','ના'],
+      pashto:['ધિન','ના','ધિન','ધિન','ના','ધિન','ના'],
+      rock:['Kick','Snare','Kick','Snare'],
+      pop:['Kick','HH','Snare','HH'],
+      waltz:['Kick','HH','HH'],
+      bossa_nova:['Kick','HH','Snare','HH'],
+      reggae:['HH','Snare','HH','Kick'],
+      shuffle:['Kick','HH','Snare','HH'],
+      jazz_swing:['Kick','HH','Snare','HH'],
+      samba:['Kick','Snare'],
+      cha_cha:['Kick','HH','Snare','HH'],
+      tango:['Kick','Kick','Snare','—'],
+      polka:['Kick','Snare'],
+      blues:['Kick','HH','Snare','HH'],
+      funk:['Kick','Snare','Kick','Snare'],
+      country:['Kick','HH','Snare','HH'],
+      hiphop:['Kick','—','Snare','—'],
+      march:['Kick','Snare'],
+      six_eight:['Kick','HH','HH','Kick','HH','HH'],
+      rumba:['Kick','HH','Snare','HH']
+    };
+    const BOL_TRANSLATIONS = {
+      gu: {
+        'ધા': 'ધા', 'ધિન': 'ધિન', 'તિન': 'તિન', 'તા': 'તા', 'ના': 'ના', 'ગે': 'ગે',
+        'કે': 'કે', 'ગા': 'ગા', 'દિ': 'દિ', 'કા': 'કા', 'ધિ': 'ધિ', 'તિ': 'તિ', '—': '—'
+      },
+      hi: {
+        'ધા': 'धा', 'ધિન': 'धिन', 'તિન': 'तिन', 'તા': 'ता', 'ના': 'ना', 'ગે': 'गे',
+        'કે': 'के', 'ગા': 'गा', 'દિ': 'दि', 'કા': 'का', 'ધિ': 'धि', 'તિ': 'ति', '—': '—'
+      },
+      en: {
+        'ધા': 'Dha', 'ધિન': 'Dhin', 'તિન': 'Tin', 'તા': 'Ta', 'ના': 'Na', 'ગે': 'Ge',
+        'કે': 'Ke', 'ગા': 'Ga', 'દિ': 'Di', 'કા': 'Ka', 'ધિ': 'Dhi', 'તિ': 'Ti', '—': '—'
+      }
+    };
+    const bols = ALL_STROKES[currentRhythm];
+    if (!bols || currentRhythm === 'metronome') {
+      strip.style.display = 'none';
+      return;
+    }
+    strip.style.display = 'flex';
+    strip.innerHTML = '';
+    // Size class based on beat count
+    strip.classList.remove('compact-sm', 'compact-md', 'compact-lg');
+    if (bols.length <= 10) strip.classList.add('compact-sm');
+    else if (bols.length <= 16) strip.classList.add('compact-md');
+    else strip.classList.add('compact-lg');
+
+    const vibhags = VIBHAG_MAP[currentRhythm] || [];
+    const langBols = BOL_TRANSLATIONS[lang] || BOL_TRANSLATIONS.gu;
+    bols.forEach((bol, idx) => {
+      // Insert vibhag divider before this beat if it's a division point
+      if (idx > 0 && vibhags.includes(idx)) {
+        const divider = document.createElement('span');
+        divider.className = 'bol-divider';
+        strip.appendChild(divider);
+      }
+      const el = document.createElement('span');
+      el.className = 'bol-item';
+      el.id = 'bol-' + idx;
+      // Bol text
+      const bolText = document.createElement('span');
+      bolText.textContent = langBols[bol] || bol;
+      el.appendChild(bolText);
+      // Beat number
+      const numText = document.createElement('span');
+      numText.className = 'bol-num';
+      numText.textContent = idx + 1;
+      el.appendChild(numText);
+      strip.appendChild(el);
+    });
+  }
+
+  buildBolStrip();
+  rhythmSelect.addEventListener('change', () => { setTimeout(buildBolStrip, 50); });
+
+  function flashVisuals(beatNumber, subNumber) {
+    if (subNumber === 0) {
+      const dots = document.querySelectorAll('.light-dot');
+      dots.forEach((dot, idx) => {
+        if (idx === beatNumber) {
+          dot.classList.add(beatNumber === 0 ? 'accent' : 'active');
+        } else {
+          dot.classList.remove('accent', 'active');
+        }
+      });
+
+      // Highlight current bol in strip
+      const bolItems = document.querySelectorAll('.bol-item');
+      bolItems.forEach((el, idx) => {
+        el.classList.remove('current', 'sam');
+        if (idx === beatNumber) {
+          el.classList.add(beatNumber === 0 ? 'sam' : 'current');
+        }
+      });
+
+      const angle = (beatNumber % 2 === 0) ? -24 : 24;
+      pendulumBar.style.transform = `rotate(${angle}deg)`;
+
+      if (beatNumber === 0) {
+        measureCount++;
+        document.getElementById('barCounterVal').textContent = measureCount;
+        
+        if (trainerEnabled && isPlaying) {
+          updateTrainerProgressUI();
+          if (measureCount > 0 && measureCount % trainerFreq === 0) {
+            bpm = Math.min(300, bpm + trainerInc);
+            bpmVal.textContent = bpm;
+            tempoSlider.value = bpm;
+            try { localStorage.setItem('harmonyMetronomeBpm', bpm); } catch(err) {}
+          }
+        }
+      }
+    }
+  }
+
+  function startMetronome() {
+    ensureAudioContext();
+    isPlaying = true;
+    currentBeat = 0;
+    currentSubdivision = 0;
+    measureCount = 0;
+    document.getElementById('barCounterVal').textContent = '0';
+    updateTrainerProgressUI();
+    nextNoteTime = audioCtx.currentTime + 0.05;
+    
+    scheduler();
+    
+    playBtn.classList.add('playing');
+    playIcon.textContent = '⏹';
+    lblPlayBtn.textContent = t.stopBtn;
+
+    const timerMins = Number(timerSelect.value);
+    if (timerMins > 0) {
+      timerEndTime = Date.now() + timerMins * 60 * 1000;
+      timerIntervalId = setInterval(() => {
+        if (Date.now() >= timerEndTime) {
+          stopMetronome();
+        }
+      }, 500);
+    }
+  }
+
+  function stopMetronome() {
+    isPlaying = false;
+    clearTimeout(timerId);
+    if (timerIntervalId) {
+      clearInterval(timerIntervalId);
+      timerIntervalId = null;
+    }
+    playBtn.classList.remove('playing');
+    playIcon.textContent = '▶';
+    lblPlayBtn.textContent = t.startBtn;
+    pendulumBar.style.transform = 'rotate(0deg)';
+    
+    const dots = document.querySelectorAll('.light-dot');
+    dots.forEach(dot => dot.classList.remove('accent', 'active'));
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (isPlaying) {
+      stopMetronome();
+    } else {
+      startMetronome();
+    }
+  });
+
+  initAppShell({ title: t.title });
+</script>
+</body>
+</html>
