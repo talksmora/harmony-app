@@ -224,14 +224,87 @@
   document.getElementById('thStatus').textContent = t.thStatus;
   document.getElementById('thAction').textContent = t.thAction;
 
-  const payments = [
+  // Read dynamic status
+  let feeStatus = localStorage.getItem('harmony_fee_status');
+  let dueDateStr = localStorage.getItem('harmony_fee_due_date') || '2026-08-10';
+
+  const valDueDate = document.getElementById('valDueDate');
+  const valStatus = document.getElementById('valStatus');
+
+  valDueDate.textContent = dueDateStr;
+
+  if (feeStatus === 'Paid') {
+    valStatus.textContent = t.paid;
+    valStatus.className = 'status-badge';
+    valStatus.style.cursor = 'default';
+  } else {
+    // Show active Pay Now button badge!
+    valStatus.textContent = lang === 'en' ? '💳 Pay Now (₹2,000)' : lang === 'hi' ? '💳 भुगतान करें (₹2,000)' : '💳 ચૂકવણી કરો (₹2,000)';
+    valStatus.className = 'status-badge pending';
+    valStatus.style.cursor = 'pointer';
+
+    valStatus.onclick = () => {
+      // Trigger Razorpay
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = startRazorpay;
+        document.head.appendChild(script);
+      } else {
+        startRazorpay();
+      }
+    };
+  }
+
+  function startRazorpay() {
+    const options = {
+      key: 'rzp_test_HarmonyMusicKey123',
+      amount: 200000,
+      currency: 'INR',
+      name: 'Harmony Music Class',
+      description: 'Monthly Tuition Fees',
+      handler: function(response) {
+        localStorage.setItem('harmony_fee_status', 'Paid');
+        
+        // Push a new payment to list
+        const todayStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        const newPayment = {
+          date: todayStr,
+          amount: '₹2,000',
+          method: 'UPI (Razorpay)',
+          status: 'Paid',
+          receiptNo: '#HM-' + Math.floor(1000 + Math.random() * 9000)
+        };
+        const localPay = JSON.parse(localStorage.getItem('harmony_payments_list') || '[]');
+        localPay.unshift(newPayment);
+        localStorage.setItem('harmony_payments_list', JSON.stringify(localPay));
+
+        // Advance due date
+        const dDate = new Date(dueDateStr);
+        dDate.setMonth(dDate.getMonth() + 1);
+        localStorage.setItem('harmony_fee_due_date', dDate.toISOString().split('T')[0]);
+
+        alert(lang === 'en' ? 'Payment Successful! App Unlocked.' : lang === 'hi' ? 'भुगतान सफल! ऐप अनलॉक हो गया।' : 'ચુકવણી સફળ! એપ અનલોક થઈ ગઈ છે.');
+        window.location.reload();
+      },
+      theme: { color: '#e74c3c' }
+    };
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  }
+
+  // Payments History List
+  const defaultPayments = [
     { date: '10 Aug 2026', amount: '₹2,000', method: 'UPI (GPay)', status: 'Paid', receiptNo: '#HM-9844' },
     { date: '10 Jul 2026', amount: '₹2,000', method: 'UPI (PhonePe)', status: 'Paid', receiptNo: '#HM-8421' },
     { date: '10 Jun 2026', amount: '₹2,000', method: 'Cash', status: 'Paid', receiptNo: '#HM-7512' }
   ];
 
+  const localPay = JSON.parse(localStorage.getItem('harmony_payments_list') || '[]');
+  const allPayments = [...localPay, ...defaultPayments];
+
   const body = document.getElementById('paymentHistoryBody');
-  payments.forEach(p => {
+  allPayments.forEach(p => {
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${p.date}</td>

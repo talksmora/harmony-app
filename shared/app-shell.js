@@ -289,4 +289,140 @@ async function initAppShell(options) {
       window.addEventListener('load', registerSW);
     }
   }
+
+  // ---- Global Fee Lock Check ----
+  (function checkGlobalFeeLock() {
+    if (!isLoggedIn || currentPage === 'login' || currentPage === 'index') return;
+
+    let feeStatus = localStorage.getItem('harmony_fee_status');
+    let dueDateStr = localStorage.getItem('harmony_fee_due_date');
+
+    if (!dueDateStr) {
+      dueDateStr = '2026-08-10';
+      localStorage.setItem('harmony_fee_due_date', dueDateStr);
+    }
+
+    const today = new Date();
+    const dueDate = new Date(dueDateStr);
+
+    if (today > dueDate && feeStatus !== 'Paid') {
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        document.head.appendChild(script);
+      }
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .global-lock-overlay {
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(10, 15, 20, 0.96);
+          backdrop-filter: blur(14px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 999999;
+          color: #f7e6d5;
+          text-align: center;
+          padding: 24px;
+        }
+        .global-lock-card {
+          max-width: 440px;
+          background: #111;
+          border: 3px solid #e74c3c;
+          border-radius: 24px;
+          padding: 32px;
+          box-shadow: 0 15px 40px rgba(231,76,60,0.3);
+        }
+        .lock-btn {
+          background: linear-gradient(135deg, #e74c3c, #c0392b);
+          border: none;
+          color: white;
+          padding: 16px 32px;
+          font-size: 1.1rem;
+          font-weight: 700;
+          border-radius: 50px;
+          cursor: pointer;
+          margin-top: 20px;
+          box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
+          transition: all 0.2s;
+        }
+        .lock-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 25px rgba(231, 76, 60, 0.6);
+        }
+      `;
+      document.head.appendChild(style);
+
+      const overlay = document.createElement('div');
+      overlay.className = 'global-lock-overlay';
+
+      const tObj = {
+        gu: {
+          title: '🔒 એપ લોક કરેલ છે',
+          msg: 'આ મહિનાની સંગીત ક્લાસની ફી બાકી હોવાથી સબ્સ્ક્રિપ્શન અસ્થાયી રૂપે બંધ કરવામાં આવ્યું છે. કૃપા કરીને અનલોક કરવા માટે Razorpay દ્વારા ફી ભરો.',
+          pay: '💳 ફી ભરો (₹2,000)'
+        },
+        hi: {
+          title: '🔒 ऐप लॉक है',
+          msg: 'इस महीने की संगीत क्लास की फीस बकाया होने के कारण आपकी सदस्यता अस्थायी रूप से बंद कर दी गई है। कृपया अनलॉक करने के लिए Razorpay द्वारा फीस का भुगतान करें।',
+          pay: '💳 फीस भरें (₹2,000)'
+        },
+        en: {
+          title: '🔒 App Locked',
+          msg: 'Tuition fees for this month are overdue. The application has been temporarily locked. Please pay ₹2,000 via Razorpay to unlock it.',
+          pay: '💳 Pay Fees Now (₹2,000)'
+        }
+      };
+      const lockT = tObj[SHELL_LANG] || tObj.en;
+
+      overlay.innerHTML = `
+        <div class="global-lock-card">
+          <div style="font-size: 3.5rem; margin-bottom: 16px;">🔒</div>
+          <h2 style="margin: 0 0 12px; color: #e74c3c;">${lockT.title}</h2>
+          <p style="font-size: 0.95rem; color: #a6b9c7; line-height: 1.6; margin: 0 0 20px;">${lockT.msg}</p>
+          <button class="lock-btn" id="globalLockPayBtn">${lockT.pay}</button>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = 'hidden';
+
+      document.getElementById('globalLockPayBtn').onclick = () => {
+        if (!window.Razorpay) {
+          alert('Razorpay is loading, please try again in a second...');
+          return;
+        }
+
+        const options = {
+          key: 'rzp_test_HarmonyMusicKey123',
+          amount: 200000,
+          currency: 'INR',
+          name: 'Harmony Music Class',
+          description: 'Monthly Tuition Fees',
+          handler: function(response) {
+            localStorage.setItem('harmony_fee_status', 'Paid');
+            
+            const nextDueDate = new Date(dueDate);
+            nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+            localStorage.setItem('harmony_fee_due_date', nextDueDate.toISOString().split('T')[0]);
+
+            alert(SHELL_LANG === 'en' ? 'Payment Successful! App Unlocked.' : SHELL_LANG === 'hi' ? 'भुगतान सफल! ऐप अनलॉक हो गया।' : 'ચુકવણી સફળ! એપ અનલોક થઈ ગઈ છે.');
+            window.location.reload();
+          },
+          prefill: {
+            name: session ? session.name : 'Learner',
+            email: session ? session.email : 'learner@example.com'
+          },
+          theme: {
+            color: '#e74c3c'
+          }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      };
+    }
+  })();
 }
