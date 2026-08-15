@@ -423,140 +423,156 @@
 
   // 1. Dayan Strike: Ta/Na (Sharp metallic rim stroke)
   function playTa(time = 0) {
-    if (!audioCtx) return;
-    const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
-    const osc = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    
-    // High metallic frequency sweep
-    const targetFreq = getScaleFreq(440);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(targetFreq, now);
-    // Slight pitch drop for realism
-    osc.frequency.exponentialRampToValueAtTime(targetFreq * 0.9, now + 0.15);
+    try {
+      if (!audioCtx) return;
+      const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      // High metallic frequency sweep
+      const targetFreq = getScaleFreq(440);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(targetFreq, now);
+      // Slight pitch drop for realism
+      osc.frequency.linearRampToValueAtTime(targetFreq * 0.9, now + 0.15);
 
-    gainNode.gain.setValueAtTime(1.0, now);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      gainNode.gain.setValueAtTime(1.0, now);
+      gainNode.gain.linearRampToValueAtTime(0.01, now + 0.2);
 
-    // Add snap/noise component for metal rim strike
-    const bufferSize = Math.floor(audioCtx.sampleRate * 0.02); // very short click
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
+      // Add snap/noise component for metal rim strike
+      const bufferSize = Math.floor(audioCtx.sampleRate * 0.02); // very short click
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+      
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = 'highpass';
+      noiseFilter.frequency.value = 1500;
+
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0.3, now);
+      noiseGain.gain.linearRampToValueAtTime(0.01, now + 0.015);
+
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(masterGain);
+
+      osc.connect(gainNode);
+      gainNode.connect(masterGain);
+
+      osc.start(now);
+      osc.stop(now + 0.35);
+      noise.start(now);
+      noise.stop(now + 0.1);
+    } catch(e) {
+      console.error("Error playing Ta:", e);
     }
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = buffer;
-    
-    const noiseFilter = audioCtx.createBiquadFilter();
-    noiseFilter.type = 'highpass';
-    noiseFilter.frequency.value = 1500;
-
-    const noiseGain = audioCtx.createGain();
-    noiseGain.gain.setValueAtTime(0.3, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.015);
-
-    noise.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(masterGain);
-
-    osc.connect(gainNode);
-    gainNode.connect(masterGain);
-
-    osc.start(now);
-    osc.stop(now + 0.35);
-    noise.start(now);
-    noise.stop(now + 0.1);
   }
 
   // 2. Dayan Open: Tin (Resonant middle ring stroke)
   function playTin(time = 0) {
-    if (!audioCtx) return;
-    const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
-    const osc = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    
-    // Pure resonant sine
-    const targetFreq = getScaleFreq(290);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(targetFreq, now);
-    osc.frequency.exponentialRampToValueAtTime(targetFreq * 0.95, now + 0.3);
+    try {
+      if (!audioCtx) return;
+      const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      // Pure resonant sine
+      const targetFreq = getScaleFreq(290);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(targetFreq, now);
+      osc.frequency.linearRampToValueAtTime(targetFreq * 0.95, now + 0.3);
 
-    gainNode.gain.setValueAtTime(0.9, now);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.45); // longer resonance
+      gainNode.gain.setValueAtTime(0.9, now);
+      gainNode.gain.linearRampToValueAtTime(0.01, now + 0.45); // longer resonance
 
-    osc.connect(gainNode);
-    gainNode.connect(masterGain);
+      osc.connect(gainNode);
+      gainNode.connect(masterGain);
 
-    osc.start(now);
-    osc.stop(now + 0.5);
+      osc.start(now);
+      osc.stop(now + 0.5);
+    } catch(e) {
+      console.error("Error playing Tin:", e);
+    }
   }
 
   // 3. Bayan Bass: Ghe (Resonant bass with frequency slide)
   function playGhe(time = 0) {
-    if (!audioCtx) return;
-    const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
-    const osc = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    
-    // Low frequency slide up (classic Ghe glide)
-    const baseFreq = 95;
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(baseFreq, now);
-    osc.frequency.quadraticRampToValueAtTime(baseFreq * 1.35, now + 0.22);
+    try {
+      if (!audioCtx) return;
+      const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      // Low frequency slide up (classic Ghe glide)
+      const baseFreq = 95;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(baseFreq, now);
+      osc.frequency.linearRampToValueAtTime(baseFreq * 1.35, now + 0.22);
 
-    gainNode.gain.setValueAtTime(1.0, now);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      gainNode.gain.setValueAtTime(1.0, now);
+      gainNode.gain.linearRampToValueAtTime(0.01, now + 0.5);
 
-    // Low rumble noise component
-    const bufferSize = Math.floor(audioCtx.sampleRate * 0.05);
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
+      // Low rumble noise component
+      const bufferSize = Math.floor(audioCtx.sampleRate * 0.05);
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+      
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = 'lowpass';
+      noiseFilter.frequency.value = 180;
+
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0.2, now);
+      noiseGain.gain.linearRampToValueAtTime(0.01, now + 0.04);
+
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(masterGain);
+
+      osc.connect(gainNode);
+      gainNode.connect(masterGain);
+
+      osc.start(now);
+      osc.stop(now + 0.6);
+      noise.start(now);
+      noise.stop(now + 0.1);
+    } catch(e) {
+      console.error("Error playing Ghe:", e);
     }
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = buffer;
-    
-    const noiseFilter = audioCtx.createBiquadFilter();
-    noiseFilter.type = 'lowpass';
-    noiseFilter.frequency.value = 180;
-
-    const noiseGain = audioCtx.createGain();
-    noiseGain.gain.setValueAtTime(0.2, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-
-    noise.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(masterGain);
-
-    osc.connect(gainNode);
-    gainNode.connect(masterGain);
-
-    osc.start(now);
-    osc.stop(now + 0.6);
-    noise.start(now);
-    noise.stop(now + 0.1);
   }
 
   // 4. Bayan Slap: Ka/Ke (Flat, completely damp strike)
   function playKa(time = 0) {
-    if (!audioCtx) return;
-    const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
-    const osc = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(80, now);
+    try {
+      if (!audioCtx) return;
+      const now = Math.max(time || audioCtx.currentTime, audioCtx.currentTime);
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(80, now);
 
-    gainNode.gain.setValueAtTime(0.7, now);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.06); // very short decay
+      gainNode.gain.setValueAtTime(0.7, now);
+      gainNode.gain.linearRampToValueAtTime(0.01, now + 0.06); // very short decay
 
-    osc.connect(gainNode);
-    gainNode.connect(masterGain);
+      osc.connect(gainNode);
+      gainNode.connect(masterGain);
 
-    osc.start(now);
-    osc.stop(now + 0.1);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    } catch(e) {
+      console.error("Error playing Ka:", e);
+    }
   }
 
   // Combined Bols
