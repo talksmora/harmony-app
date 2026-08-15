@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Tabla - Harmony Music</title>
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<link rel="stylesheet" href="shared/components.css">
+<style>
+  .tabla-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .drums-layout {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+  }
+  .drum-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .drum-body {
+    position: relative;
+    border-radius: 50%;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .drum-body:active {
+    transform: scale(0.97);
+  }
+  /* Dayan (Treble Drum) */
+  .dayan-drum {
+    width: 140px;
+    height: 140px;
+    background: radial-gradient(circle, #e0d0b0 40%, #8b5a2b 45%, #5c3818 90%);
+    border: 8px solid #3d2510;
+  }
+  /* Syahi (Black patch) */
+  .syahi-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px; height: 50px;
+    background: #111;
+    border-radius: 50%;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.2);
+  }
+  /* Bayan (Bass Drum) */
+  .bayan-drum {
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, #f0e2cf 35%, #999 40%, #666 70%, #333 95%);
+    border: 10px solid #222;
+  }
+  .syahi-offcenter {
+    position: absolute;
+    top: 45%; left: 40%;
+    transform: translate(-50%, -50%);
+    width: 70px; height: 70px;
+    background: #151515;
+    border-radius: 50%;
+    box-shadow: inset 0 0 12px rgba(255,255,255,0.25);
+  }
+  .drum-label {
+    margin-top: 12px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text);
+  }
+  .control-panel {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    text-align: left;
+  }
+  .panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .panel-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--subtitle);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .selector-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .bpm-display {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 100px;
+    text-align: center;
+  }
+  .scale-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+  }
+  .scale-btn {
+    padding: 8px 4px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .scale-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .play-btn {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto 10px;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+    transition: transform 0.1s, background-color 0.2s;
+  }
+  .play-btn:active {
+    transform: scale(0.95);
+  }
+  .play-btn.playing {
+    background: var(--accent-green, #2ecc71);
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+  }
+  /* Visual Beat counter */
+  .beat-indicator-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .beat-grid {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    max-width: 600px;
+  }
+  .beat-dot {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--subtitle);
+    transition: all 0.1s ease;
+  }
+  .beat-dot.active {
+    background: var(--accent);
+    color: #fff;
+    transform: scale(1.15);
+    box-shadow: 0 0 10px var(--accent);
+  }
+  .beat-dot.sam {
+    border: 1.5px solid var(--accent);
+  }
+  .current-bol {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+    min-height: 45px;
+    margin-top: 10px;
+    text-shadow: 0 0 15px rgba(231, 76, 60, 0.2);
+  }
+  .info-box {
+    margin-top: 30px;
+    padding: 15px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-align: left;
+  }
+</style>
+</head>
+<body data-page="tabla">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    
+    <div class="tabla-container">
+      <h2 id="pageTitle" style="margin-top:0;">🥁 વર્ચ્યુઅલ તબલા અને તાનપુરા (Virtual Tabla & Tanpura)</h2>
+      <p id="pageSub" style="color:var(--subtitle); font-size:0.9rem;">રિયાઝ માટે રિયલ-ટાઇમ કન્સ્ટ્રક્ટિવ તબલા સાથ અને કી ચેન્જર</p>
+
+      <!-- Visual Drums Layout -->
+      <div class="drums-layout">
+        <!-- Bayan (Bass) -->
+        <div class="drum-wrapper" id="bayanWrapper">
+          <div class="drum-body bayan-drum">
+            <div class="syahi-offcenter"></div>
+          </div>
+          <span class="drum-label" id="lblBayan">બાયાન (Dagga / Bass)</span>
+          <span style="font-size: 0.75rem; color:var(--subtitle);" id="lblBayanBol"> બોલ: Ghe, Ka</span>
+        </div>
+
+        <!-- Dayan (Treble) -->
+        <div class="drum-wrapper" id="dayanWrapper">
+          <div class="drum-body dayan-drum">
+            <div class="syahi-center"></div>
+          </div>
+          <span class="drum-label" id="lblDayan">દાયાન (Tabla / Treble)</span>
+          <span style="font-size: 0.75rem; color:var(--subtitle);" id="lblDayanBol">બોલ: Ta, Tin, Na</span>
+        </div>
+      </div>
+
+      <!-- Play Button and Bol Counter -->
+      <button class="play-btn" id="playTaalBtn">▶</button>
+      <div class="current-bol" id="currentBolDisplay">-</div>
+
+      <!-- Visual Beat Dots -->
+      <div class="beat-indicator-container">
+        <div class="beat-grid" id="beatGrid"></div>
+      </div>
+
+      <!-- Settings and Controls -->
+      <div class="control-panel">
+        <!-- Taal Selector -->
+        <div class="panel-section">
+          <span class="panel-label" id="lblSelectTaal">તાલ પસંદ કરો (Taal)</span>
+          <select id="taalSelect" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); color:var(--text); font-weight:600;">
+            <option value="teen_taal" selected>Teentaal (૧૬ માત્રા)</option>
+            <option value="dadra">Dadra (૬ માત્રા)</option>
+            <option value="kehrwa">Keherwa (૮ માત્રા)</option>
+            <option value="roopak">Rupak (૭ માત્રા)</option>
+            <option value="jhaptaal">Jhaptal (૧૦ માત્રા)</option>
+            <option value="ektaal">Ektal (૧૨ માત્રા)</option>
+            <option value="bhajani">Bhajani (૮ માત્રા)</option>
+          </select>
+        </div>
+
+        <!-- Tempo (BPM) -->
+        <div class="panel-section">
+          <span class="panel-label" id="lblTempo">લય (Tempo)</span>
+          <div class="selector-row">
+            <button class="pill-btn" id="btnBpmMinus" style="padding:6px 12px; font-weight:700;">-</button>
+            <span class="bpm-display" id="bpmValue">120 BPM</span>
+            <button class="pill-btn" id="btnBpmPlus" style="padding:6px 12px; font-weight:700;">+</button>
+          </div>
+          <input type="range" id="bpmRange" min="50" max="220" value="120" style="width:100%; margin-top:8px; accent-color:var(--accent);">
+        </div>
+
+        <!-- Key/Scale Selection -->
+        <div class="panel-section">
+          <span class="panel-label" id="lblScale">સ્વર / કી (Scale / Pitch)</span>
+          <div class="scale-grid" id="scaleGrid">
+            <!-- Scale buttons generated by JS -->
+          </div>
+        </div>
+
+        <!-- Tanpura Drone Option -->
+        <div class="panel-section" style="justify-content: center;">
+          <span class="panel-label" id="lblTanpura">તાનપુરા સાથ (Tanpura Background)</span>
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-top:8px; font-weight:600;">
+            <input type="checkbox" id="tanpuraCheckbox" style="width:20px; height:20px; accent-color:var(--accent);">
+            <span id="lblEnableTanpura">તાનપુરા ડ્રોન ચાલુ કરો</span>
+          </label>
+          <select id="tanpuraTuneSelect" style="width:100%; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); color:var(--text); margin-top:8px; font-size:0.85rem;">
+            <option value="Pa" selected>Pa - Sa - Sa - Sa (પંચમ)</option>
+            <option value="Ma">Ma - Sa - Sa - Sa (મધ્યમ)</option>
+            <option value="Ni">Ni - Sa - Sa - Sa (નિષાદ)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Info/Description Section -->
+      <div class="info-box">
+        <h4 id="lblAboutTitle" style="margin-top:0;">📖 તબલા રિયાઝ માર્ગદર્શિકા</h4>
+        <p id="lblAboutDesc" style="color:var(--subtitle); font-size:0.88rem; line-height:1.6; margin-bottom:0;">
+          તબલા એ ભારતીય સંગીતનું હૃદય છે. આ વર્ચ્યુઅલ સાધનની મદદથી તમે કોઈપણ સંગીત શૈલી અથવા ગાયન પ્રેક્ટિસ માટે સાથ મેળવી શકો છો. પીચ ટ્રાન્સપોઝરથી તમારા ગળાની કી (Scale) મુજબ પિચ સેટ કરો અને મેટ્રોનોમની ચોકસાઈથી રિયાઝ કરો.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+  const TABLA_TEXT = {
+    gu: {
+      title: '🥁 વર્ચ્યુઅલ તબલા અને તાનપુરા',
+      sub: 'રિયાઝ માટે રિયલ-ટાઇમ કન્સ્ટ્રક્ટિવ તબલા સાથ અને કી ચેન્જર',
+      bayan: 'બાયાન (Dagga / Bass)',
+      dayan: 'દાયાન (Tabla / Treble)',
+      selectTaal: 'તાલ પસંદ કરો (Select Taal)',
+      tempo: 'લય (Tempo)',
+      scale: 'સ્વર / કી (Scale / Pitch)',
+      tanpura: 'તાનપુરા સાથ (Tanpura Background)',
+      enableTanpura: 'તાનપુરા ડ્રોન ચાલુ કરો',
+      aboutTitle: '📖 તબલા રિયાઝ માર્ગદર્શિકા',
+      aboutDesc: 'તબલા એ ભારતીય સંગીતનું હૃદય છે. આ વર્ચ્યુઅલ સાધનની મદદથી તમે કોઈપણ સંગીત શૈલી અથવા ગાયન પ્રેક્ટિસ માટે સાથ મેળવી શકો છો. પીચ ટ્રાન્સપોઝરથી તમારા ગળાની કી (Scale) મુજબ પિચ સેટ કરો અને મેટ્રોનોમની ચોકસાઈથી રિયાઝ કરો.'
+    },
+    hi: {
+      title: '🥁 वर्चुअल तबला और तानपुरा',
+      sub: 'अभ्यास के लिए रीयल-टाइम तबला संगत और पिच ट्रांसपोजर',
+      bayan: 'बायाँ (Dagga / Bass)',
+      dayan: 'दायाँ (Tabla / Treble)',
+      selectTaal: 'ताल चुनें (Select Taal)',
+      tempo: 'लय / गति (Tempo)',
+      scale: 'स्वर / पिच (Scale / Pitch)',
+      tanpura: 'तानपुरा संगत (Tanpura Background)',
+      enableTanpura: 'तानपुरा ड्रोन चालू करें',
+      aboutTitle: '📖 तबला रियाज़ गाइड',
+      aboutDesc: 'तबला भारतीय शास्त्रीय संगीत का आधार है। इस वर्चुअल टूल की मदद से आप अपनी गायकी या वादन के लिए सटीक लय और पिच (Scale) चुनकर रियाज़ कर सकते हैं। अपनी जरूरत अनुसार स्केल बदलें।'
+    },
+    en: {
+      title: '🥁 Virtual Tabla & Tanpura',
+      sub: 'Real-time tabla accompaniment and scale transposer for riyaz',
+      bayan: 'Bayan (Dagga / Bass)',
+      dayan: 'Dayan (Tabla / Treble)',
+      selectTaal: 'Select Taal',
+      tempo: 'Tempo / Rhythm',
+      scale: 'Scale / Pitch Tuning',
+      tanpura: 'Tanpura Accompaniment',
+      enableTanpura: 'Enable Tanpura Drone',
+      aboutTitle: '📖 Tabla Riyaz Guide',
+      aboutDesc: 'Tabla is the rhythmic heart of Indian Classical Music. Adjust the tempo, select the taal that matches your composition, and transpose the pitch scale to match your vocal scale for high-fidelity accompaniment.'
+    }
+  };
+
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+  const t = TABLA_TEXT[lang] || TABLA_TEXT.gu;
+
+  // Render Page text
+  document.getElementById('pageTitle').textContent = t.title;
+  document.getElementById('pageSub').textContent = t.sub;
+  document.getElementById('lblBayan').textContent = t.bayan;
+  document.getElementById('lblDayan').textContent = t.dayan;
+  document.getElementById('lblSelectTaal').textContent = t.selectTaal;
+  document.getElementById('lblTempo').textContent = t.tempo;
+  document.getElementById('lblScale').textContent = t.scale;
+  document.getElementById('lblTanpura').textContent = t.tanpura;
+  document.getElementById('lblEnableTanpura').textContent = t.enableTanpura;
+  document.getElementById('lblAboutTitle').textContent = t.aboutTitle;
+  document.getElementById('lblAboutDesc').textContent = t.aboutDesc;
+
+  initAppShell({ title: t.title.split(' ')[1] || 'Tabla' });
+
+  // Web Audio Context setup
+  let audioCtx = null;
+  let masterGain = null;
+  let isPlaying = false;
+
+  // Scale settings
+  const SCALES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  let currentScaleIndex = 0; // C default
+
+  // Setup Scale Buttons Grid
+  const scaleGrid = document.getElementById('scaleGrid');
+  SCALES.forEach((sc, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'scale-btn' + (idx === currentScaleIndex ? ' active' : '');
+    btn.textContent = sc;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentScaleIndex = idx;
+      if (audioCtx) restartTanpuraIfRunning();
+    });
+    scaleGrid.appendChild(btn);
+  });
+
+  // Sound Synthesizers using Web Audio API (mathematical models for Tabla bols)
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.8;
+      masterGain.connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Helper to transpose base frequencies based on selected scale
+  function getScaleFreq(baseFreq) {
+    // Relative to C scale
+    return baseFreq * Math.pow(2, currentScaleIndex / 12);
+  }
+
+  // 1. Dayan Strike: Ta/Na (Sharp metallic rim stroke)
+  function playTa(time = 0) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    // High metallic frequency sweep
+    const targetFreq = getScaleFreq(440);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(targetFreq, time);
+    // Slight pitch drop for realism
+    osc.frequency.exponentialRampToValueAtTime(targetFreq * 0.9, time + 0.15);
+
+    gainNode.gain.setValueAtTime(1.0, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+
+    // Add snap/noise component for metal rim strike
+    const bufferSize = audioCtx.sampleRate * 0.02; // very short click
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    
+    const noiseFilter = audioCtx.createBiquadFilter();
+    noiseFilter.type = 'highpass';
+    noiseFilter.frequency.value = 1500;
+
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0.3, time);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.015);
+
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(masterGain);
+
+    osc.connect(gainNode);
+    gainNode.connect(masterGain);
+
+    osc.start(time);
+    osc.stop(time + 0.35);
+    noise.start(time);
+    noise.stop(time + 0.1);
+  }
+
+  // 2. Dayan Open: Tin (Resonant middle ring stroke)
+  function playTin(time = 0) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    // Pure resonant sine
+    const targetFreq = getScaleFreq(290);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(targetFreq, time);
+    osc.frequency.exponentialRampToValueAtTime(targetFreq * 0.95, time + 0.3);
+
+    gainNode.gain.setValueAtTime(0.9, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.45); // longer resonance
+
+    osc.connect(gainNode);
+    gainNode.connect(masterGain);
+
+    osc.start(time);
+    osc.stop(time + 0.5);
+  }
+
+  // 3. Bayan Bass: Ghe (Resonant bass with frequency slide)
+  function playGhe(time = 0) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    // Low frequency slide up (classic Ghe glide)
+    const baseFreq = 95;
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(baseFreq, time);
+    osc.frequency.quadraticRampToValueAtTime(baseFreq * 1.35, time + 0.22);
+
+    gainNode.gain.setValueAtTime(1.0, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.5);
+
+    // Low rumble noise component
+    const bufferSize = audioCtx.sampleRate * 0.05;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    
+    const noiseFilter = audioCtx.createBiquadFilter();
+    noiseFilter.type = 'lowpass';
+    noiseFilter.frequency.value = 180;
+
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0.2, time);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
+
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(masterGain);
+
+    osc.connect(gainNode);
+    gainNode.connect(masterGain);
+
+    osc.start(time);
+    osc.stop(time + 0.6);
+    noise.start(time);
+    noise.stop(time + 0.1);
+  }
+
+  // 4. Bayan Slap: Ka/Ke (Flat, completely damp strike)
+  function playKa(time = 0) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(80, time);
+
+    gainNode.gain.setValueAtTime(0.7, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.06); // very short decay
+
+    osc.connect(gainNode);
+    gainNode.connect(masterGain);
+
+    osc.start(time);
+    osc.stop(time + 0.1);
+  }
+
+  // Combined Bols
+  function playDha(time = 0) {
+    playTa(time);
+    playGhe(time);
+  }
+
+  // Combined Dhin
+  function playDhin(time = 0) {
+    playTin(time);
+    playGhe(time);
+  }
+
+  // Interactive UI clicks
+  document.getElementById('bayanWrapper').addEventListener('click', () => {
+    initAudio();
+    // Alternates between Ghe and Ka on user click
+    if (Math.random() > 0.3) {
+      playGhe();
+      flashDrum('bayanWrapper', '#f0e2cf');
+    } else {
+      playKa();
+      flashDrum('bayanWrapper', '#999');
+    }
+  });
+
+  document.getElementById('dayanWrapper').addEventListener('click', () => {
+    initAudio();
+    // Alternates between Ta, Tin on click
+    if (Math.random() > 0.4) {
+      playTa();
+      flashDrum('dayanWrapper', '#e0d0b0');
+    } else {
+      playTin();
+      flashDrum('dayanWrapper', '#8b5a2b');
+    }
+  });
+
+  function flashDrum(id, color) {
+    const el = document.getElementById(id).querySelector('.drum-body');
+    el.style.boxShadow = `0 0 25px ${color}`;
+    el.style.transform = 'scale(0.96)';
+    setTimeout(() => {
+      el.style.boxShadow = '';
+      el.style.transform = '';
+    }, 100);
+  }
+
+  // Rhythmic Loop engine (Scheduler)
+  const TAAL_SEQUENCES = {
+    teen_taal: {
+      length: 16,
+      bols: ['Dha', 'Dhin', 'Dhin', 'Dha', 'Dha', 'Dhin', 'Dhin', 'Dha', 'Dha', 'Tin', 'Tin', 'Ta', 'Ta', 'Dhin', 'Dhin', 'Dha'],
+      accents: [1, 5, 13], // Tali beats (1-based index: 1, 5, 13)
+      khali: [9] // Khali (beat 9)
+    },
+    dadra: {
+      length: 6,
+      bols: ['Dha', 'Dhin', 'Na', 'Dha', 'Tin', 'Na'],
+      accents: [1],
+      khali: [4]
+    },
+    kehrwa: {
+      length: 8,
+      bols: ['Dha', 'Ghe', 'Na', 'Ti', 'Na', 'Ke', 'Dhi', 'Na'],
+      accents: [1, 5],
+      khali: [5]
+    },
+    roopak: {
+      length: 7,
+      bols: ['Tin', 'Tin', 'Na', 'Dhin', 'Na', 'Dhin', 'Na'],
+      accents: [4, 6],
+      khali: [1] // Rupak starts with khali (Sam is Khali)
+    },
+    jhaptaal: {
+      length: 10,
+      bols: ['Dhin', 'Na', 'Dhin', 'Dhin', 'Na', 'Tin', 'Na', 'Dhin', 'Dhin', 'Na'],
+      accents: [1, 3, 8],
+      khali: [6]
+    },
+    ektaal: {
+      length: 12,
+      bols: ['Dhin', 'Dhin', 'Dha', 'Ge', 'Tu', 'Na', 'Kat', 'Ta', 'Dha', 'Ge', 'Dhi', 'Na'],
+      accents: [1, 5, 9, 11],
+      khali: [3, 7]
+    },
+    bhajani: {
+      length: 8,
+      bols: ['Dha', 'Ghe', 'Na', 'Tin', 'Ta', 'Ke', 'Na', 'Dhin'],
+      accents: [1, 5],
+      khali: [5]
+    }
+  };
+
+  let bpm = 120;
+  let currentBeat = 0;
+  let nextNoteTime = 0.0;
+  let scheduleAheadTime = 0.1; // 100ms lookahead
+  let timerID = null;
+  let currentSequence = TAAL_SEQUENCES.teen_taal;
+
+  function getStepDuration() {
+    return 60.0 / bpm; // Beat duration in seconds
+  }
+
+  function scheduleNote(beatNumber, time) {
+    const bol = currentSequence.bols[beatNumber];
+    
+    // Play sound based on Bol
+    switch(bol) {
+      case 'Dha': playDha(time); break;
+      case 'Dhin': playDhin(time); break;
+      case 'Ta': case 'Na': playTa(time); break;
+      case 'Tin': case 'Ti': case 'Tu': playTin(time); break;
+      case 'Ghe': case 'Ge': case 'Dhi': playGhe(time); break;
+      case 'Ke': case 'Ka': case 'Kat': playKa(time); break;
+      default: playDha(time);
+    }
+
+    // Schedule UI updates
+    const delay = (time - audioCtx.currentTime) * 1000;
+    setTimeout(() => {
+      if (!isPlaying) return;
+      
+      // Update display text
+      document.getElementById('currentBolDisplay').textContent = bol;
+      
+      // Update active beat indicator dot
+      document.querySelectorAll('.beat-dot').forEach(dot => dot.classList.remove('active'));
+      const activeDot = document.getElementById('dot-' + beatNumber);
+      if (activeDot) activeDot.classList.add('active');
+
+      // Trigger slight glow animation on correct drums
+      if (['Dha', 'Dhin', 'Ghe', 'Ge', 'Dhi', 'Ka', 'Ke', 'Kat'].includes(bol)) {
+        flashDrum('bayanWrapper', '#f0e2cf');
+      }
+      if (['Dha', 'Dhin', 'Ta', 'Na', 'Tin', 'Ti', 'Tu'].includes(bol)) {
+        flashDrum('dayanWrapper', '#e0d0b0');
+      }
+    }, Math.max(0, delay));
+  }
+
+  function scheduler() {
+    while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
+      scheduleNote(currentBeat, nextNoteTime);
+      nextNoteTime += getStepDuration();
+      currentBeat = (currentBeat + 1) % currentSequence.length;
+    }
+    timerID = setTimeout(scheduler, 25);
+  }
+
+  // Draw visual dots based on selected Taal
+  function updateBeatGrid() {
+    const grid = document.getElementById('beatGrid');
+    grid.innerHTML = '';
+    
+    for (let i = 0; i < currentSequence.length; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'beat-dot';
+      dot.id = 'dot-' + i;
+      
+      // Label indicator
+      let label = (i + 1).toString();
+      const oneBasedIdx = i + 1;
+      
+      if (oneBasedIdx === 1) {
+        dot.classList.add('sam');
+        label = '❌'; // Sam sign
+      } else if (currentSequence.accents.includes(oneBasedIdx)) {
+        label = '👏'; // Tali (clap)
+      } else if (currentSequence.khali.includes(oneBasedIdx)) {
+        label = '0';  // Khali
+      }
+
+      dot.textContent = label;
+      grid.appendChild(dot);
+    }
+  }
+
+  updateBeatGrid();
+
+  // Tanpura Drone Synth (Continuous background drone)
+  let tanpuraNode1 = null;
+  let tanpuraNode2 = null;
+  let tanpuraGain = null;
+
+  function startTanpura() {
+    if (!audioCtx || !document.getElementById('tanpuraCheckbox').checked) return;
+    
+    // Stop previous if running
+    stopTanpura();
+
+    tanpuraGain = audioCtx.createGain();
+    tanpuraGain.gain.setValueAtTime(0.08, audioCtx.currentTime); // Low background drone volume
+    tanpuraGain.connect(masterGain);
+
+    const tuneType = document.getElementById('tanpuraTuneSelect').value;
+    
+    // Base Sa frequency (around C3 = 130.81Hz)
+    const saFreq = getScaleFreq(130.81);
+    
+    let supportFreq = saFreq * 1.5; // Pa (Fifth, 3:2 ratio)
+    if (tuneType === 'Ma') supportFreq = saFreq * (4/3); // Ma (Fourth, 4:3 ratio)
+    if (tuneType === 'Ni') supportFreq = saFreq * 1.875; // Ni (Seventh, 15:8 ratio)
+
+    // Oscillator 1: Sa
+    tanpuraNode1 = audioCtx.createOscillator();
+    tanpuraNode1.type = 'sawtooth';
+    tanpuraNode1.frequency.value = saFreq;
+    
+    // Filter to make the sawtooth sound warm and like a string string
+    const filter1 = audioCtx.createBiquadFilter();
+    filter1.type = 'lowpass';
+    filter1.frequency.value = 500;
+    
+    tanpuraNode1.connect(filter1);
+    filter1.connect(tanpuraGain);
+
+    // Oscillator 2: Tuning note (Pa/Ma/Ni)
+    tanpuraNode2 = audioCtx.createOscillator();
+    tanpuraNode2.type = 'sawtooth';
+    tanpuraNode2.frequency.value = supportFreq;
+
+    const filter2 = audioCtx.createBiquadFilter();
+    filter2.type = 'lowpass';
+    filter2.frequency.value = 600;
+
+    tanpuraNode2.connect(filter2);
+    filter2.connect(tanpuraGain);
+
+    // Dynamic wave/chorus effect using slight LFO detune
+    const lfo = audioCtx.createOscillator();
+    lfo.frequency.value = 0.5; // 0.5 Hz slow wave
+    const lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 5; // Detuning range in cents
+    
+    lfo.connect(lfoGain);
+    lfoGain.connect(tanpuraNode1.detune);
+    lfoGain.connect(tanpuraNode2.detune);
+
+    lfo.start();
+    tanpuraNode1.start();
+    tanpuraNode2.start();
+  }
+
+  function stopTanpura() {
+    if (tanpuraNode1) {
+      try { tanpuraNode1.stop(); } catch(e) {}
+      tanpuraNode1 = null;
+    }
+    if (tanpuraNode2) {
+      try { tanpuraNode2.stop(); } catch(e) {}
+      tanpuraNode2 = null;
+    }
+    if (tanpuraGain) {
+      tanpuraGain.disconnect();
+      tanpuraGain = null;
+    }
+  }
+
+  function restartTanpuraIfRunning() {
+    if (document.getElementById('tanpuraCheckbox').checked && isPlaying) {
+      startTanpura();
+    }
+  }
+
+  // Control Listeners
+  document.getElementById('taalSelect').addEventListener('change', (e) => {
+    currentSequence = TAAL_SEQUENCES[e.target.value] || TAAL_SEQUENCES.teen_taal;
+    currentBeat = 0;
+    updateBeatGrid();
+  });
+
+  const bpmRange = document.getElementById('bpmRange');
+  const bpmValue = document.getElementById('bpmValue');
+  
+  function updateBpm(val) {
+    bpm = Math.max(50, Math.min(220, val));
+    bpmRange.value = bpm;
+    bpmValue.textContent = bpm + ' BPM';
+  }
+
+  bpmRange.addEventListener('input', (e) => {
+    updateBpm(Number(e.target.value));
+  });
+
+  document.getElementById('btnBpmMinus').addEventListener('click', () => {
+    updateBpm(bpm - 5);
+  });
+
+  document.getElementById('btnBpmPlus').addEventListener('click', () => {
+    updateBpm(bpm + 5);
+  });
+
+  document.getElementById('tanpuraCheckbox').addEventListener('change', () => {
+    if (isPlaying) {
+      startTanpura();
+    }
+  });
+
+  document.getElementById('tanpuraTuneSelect').addEventListener('change', () => {
+    if (isPlaying) {
+      startTanpura();
+    }
+  });
+
+  // Play / Stop Listener
+  const playBtn = document.getElementById('playTaalBtn');
+  playBtn.addEventListener('click', () => {
+    initAudio();
+    if (isPlaying) {
+      // Stop Playback
+      isPlaying = false;
+      playBtn.classList.remove('playing');
+      playBtn.textContent = '▶';
+      clearTimeout(timerID);
+      stopTanpura();
+      document.getElementById('currentBolDisplay').textContent = '-';
+      document.querySelectorAll('.beat-dot').forEach(dot => dot.classList.remove('active'));
+    } else {
+      // Start Playback
+      isPlaying = true;
+      playBtn.classList.add('playing');
+      playBtn.textContent = '⏸';
+      currentBeat = 0;
+      nextNoteTime = audioCtx.currentTime + 0.05;
+      scheduler();
+      startTanpura();
+    }
+  });
+</script>
+</body>
+</html>
