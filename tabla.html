@@ -175,26 +175,45 @@
     max-width: 600px;
   }
   .beat-dot {
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: var(--border);
+    width: 65px;
+    height: 75px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    gap: 4px;
+    padding: 6px;
+    font-size: 0.85rem;
     font-weight: 700;
     color: var(--subtitle);
-    transition: all 0.1s ease;
+    transition: all 0.15s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  .beat-dot .beat-symbol {
+    font-size: 0.95rem;
+    color: var(--subtitle);
+  }
+  .beat-dot .beat-bol {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--accent);
   }
   .beat-dot.active {
     background: var(--accent);
+    border-color: var(--accent);
     color: #fff;
-    transform: scale(1.15);
-    box-shadow: 0 0 10px var(--accent);
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+  }
+  .beat-dot.active .beat-symbol,
+  .beat-dot.active .beat-bol {
+    color: #fff;
   }
   .beat-dot.sam {
-    border: 1.5px solid var(--accent);
+    border: 2px solid var(--accent);
   }
   .current-bol {
     font-size: 2rem;
@@ -762,47 +781,264 @@
 
   // Rhythmic Loop engine (Scheduler)
   const TAAL_SEQUENCES = {
-    teen_taal: {
+    teentaal: {
       length: 16,
-      bols: ['Dha', 'Dhin', 'Dhin', 'Dha', 'Dha', 'Dhin', 'Dhin', 'Dha', 'Dha', 'Tin', 'Tin', 'Ta', 'Ta', 'Dhin', 'Dhin', 'Dha'],
-      accents: [1, 5, 13], // Tali beats (1-based index: 1, 5, 13)
-      khali: [9] // Khali (beat 9)
-    },
-    dadra: {
-      length: 6,
-      bols: ['Dha', 'Dhin', 'Na', 'Dha', 'Tin', 'Na'],
-      accents: [1],
-      khali: [4]
-    },
-    kehrwa: {
-      length: 8,
-      bols: ['Dha', 'Ghe', 'Na', 'Ti', 'Na', 'Ke', 'Dhi', 'Na'],
-      accents: [1, 5],
-      khali: [5]
-    },
-    roopak: {
-      length: 7,
-      bols: ['Tin', 'Tin', 'Na', 'Dhin', 'Na', 'Dhin', 'Na'],
-      accents: [4, 6],
-      khali: [1] // Rupak starts with khali (Sam is Khali)
-    },
-    jhaptaal: {
-      length: 10,
-      bols: ['Dhin', 'Na', 'Dhin', 'Dhin', 'Na', 'Tin', 'Na', 'Dhin', 'Dhin', 'Na'],
-      accents: [1, 3, 8],
-      khali: [6]
+      bols: ["Dha", "Dhin", "Dhin", "Dha", "Dha", "Dhin", "Dhin", "Dha", "Dha", "Tin", "Tin", "Ta", "Ta", "Dhin", "Dhin", "Dha"],
+      accents: [1, 5, 13],
+      khali: [9],
+      name: "Teentaal (तीनताल / 16)"
     },
     ektaal: {
       length: 12,
-      bols: ['Dhin', 'Dhin', 'Dha', 'Ge', 'Tu', 'Na', 'Kat', 'Ta', 'Dha', 'Ge', 'Dhi', 'Na'],
+      bols: ["Dhin", "Dhin", "Dhage", "Tirakita", "Tu", "Na", "Kat", "Ta", "Dhage", "Tirakita", "Dhin", "Na"],
       accents: [1, 5, 9, 11],
-      khali: [3, 7]
+      khali: [3, 7],
+      name: "Ektaal (एकताल / 12)"
+    },
+    jhaptaal: {
+      length: 10,
+      bols: ["Dhi", "Na", "Dhi", "Dhi", "Na", "Ti", "Na", "Dhi", "Dhi", "Na"],
+      accents: [1, 3, 8],
+      khali: [6],
+      name: "Jhaptaal (झपताल / 10)"
+    },
+    rupak: {
+      length: 7,
+      bols: ["Tin", "Tin", "Na", "Dhin", "Na", "Dhin", "Na"],
+      accents: [4, 6],
+      khali: [1],
+      name: "Rupak (रूपक / 7)"
+    },
+    dadra: {
+      length: 6,
+      bols: ["Dha", "Dhin", "Na", "Dha", "Tin", "Na"],
+      accents: [1],
+      khali: [4],
+      name: "Dadra (दादरा / 6)"
+    },
+    keherwa: {
+      length: 4,
+      bols: ["DhaGe", "NaTi", "NaKe", "DhiNa"],
+      accents: [1],
+      khali: [3],
+      name: "Keherwa (कहरवा / 4)"
+    },
+    jhoomra: {
+      length: 14,
+      bols: ["Dhi", "-", "Dha", "Dha", "Dhi", "-", "Dha", "Tin", "-", "Ta", "Ta", "Dhi", "-", "Dha"],
+      accents: [1, 8],
+      khali: [4, 11],
+      name: "Jhoomra (झूमરા / 14)"
+    },
+    dhamar: {
+      length: 14,
+      bols: ["Ka", "Dhi", "Ta", "Dhi", "Ta", "Dha", "-", "Ga", "Ti", "Ta", "Ti", "Ta", "Ta", "-"],
+      accents: [1, 8, 11],
+      khali: [6],
+      name: "Dhamar (धमार / 14)"
+    },
+    chautaal: {
+      length: 12,
+      bols: ["Dha", "Dha", "Dhin", "Ta", "Kita", "Dha", "Dhin", "Ta", "Tita", "Kata", "Gadi", "Gana"],
+      accents: [1, 3, 7, 9],
+      khali: [5, 11],
+      name: "Chautaal (चौताल / 12)"
+    },
+    sultaal: {
+      length: 10,
+      bols: ["Dha", "Dha", "Dhin", "Ta", "Kita", "Dhage", "Tina", "Kita", "Dha", "Ga"],
+      accents: [1, 3, 7, 9],
+      khali: [5],
+      name: "Sultaal (सूलताल / 10)"
+    },
+    tilwada: {
+      length: 16,
+      bols: ["Dha", "Tira", "Kita", "Dhin", "Dha", "Dha", "Tin", "Tin", "Ta", "Tira", "Kita", "Dhin", "Dha", "Dha", "Dhin", "Dhin"],
+      accents: [1, 5, 13],
+      khali: [9],
+      name: "Tilwada (तिलवाड़ा / 16)"
+    },
+    deepchandi: {
+      length: 14,
+      bols: ["Dha", "Dhin", "-", "Dha", "Dha", "Tin", "-", "Ta", "Tin", "-", "Dha", "Dha", "Dhin", "-"],
+      accents: [1, 8],
+      khali: [4, 11],
+      name: "Deepchandi (दीपचंदी / 14)"
+    },
+    addha: {
+      length: 8,
+      bols: ["Dhin", "Ta", "Dhin", "Dhin", "Ta", "Dhin", "Ta", "Dhin"],
+      accents: [1],
+      khali: [5],
+      name: "Addha (अड्ढा / 8)"
+    },
+    sitarkhani: {
+      length: 16,
+      bols: ["Dha", "-", "Dhin", "-", "Dha", "-", "Dhin", "-", "Ta", "-", "Tin", "-", "Dha", "-", "Dhin", "-"],
+      accents: [1, 5, 13],
+      khali: [9],
+      name: "Sitarkhani (सितારખાની / 16)"
+    },
+    adhachautaal: {
+      length: 14,
+      bols: ["Dhi", "Traka", "Dhi", "Dhi", "Ta", "Traka", "Dhi", "Ti", "Traka", "Dhi", "Dhi", "Ta", "Traka", "Dhi"],
+      accents: [1, 3, 5, 7, 11],
+      khali: [9, 13],
+      name: "Ada Chautaal (आड़ा चौताल / 14)"
+    },
+    tevra: {
+      length: 7,
+      bols: ["Dha", "Dhin", "Ta", "Tita", "Kata", "Gadi", "Gana"],
+      accents: [1, 6],
+      khali: [4],
+      name: "Tevra (तेवરા / 7)"
+    },
+    mattataal: {
+      length: 9,
+      bols: ["Dhin", "Na", "Dhi", "Dhi", "Na", "Ti", "Na", "Dhi", "Na"],
+      accents: [1, 7],
+      khali: [5],
+      name: "Matta Taal (मट्ट ताल / 9)"
+    },
+    brahmtaal: {
+      length: 14,
+      bols: ["Dha", "Ka", "Dhin", "Na", "Ti", "Na", "Ka", "Tita", "Dhin", "Na", "Ti", "Na", "Ka", "Ta"],
+      accents: [1, 3, 5, 7, 11, 13],
+      khali: [9],
+      name: "Brahm Taal (ब्रह्म ताल / 14)"
+    },
+    rudrataal: {
+      length: 11,
+      bols: ["Dha", "Dhin", "Dha", "Dha", "Tin", "Tin", "Ta", "Ta", "Dha", "Dhin", "Dha"],
+      accents: [1, 9],
+      khali: [5],
+      name: "Rudra Taal (रुद्र ताल / 11)"
+    },
+    lakshmitaal: {
+      length: 18,
+      bols: ["Dha", "Dhin", "Dhin", "Dha", "Dha", "Dhin", "Dhin", "Dha", "Dha", "Tin", "Tin", "Ta", "Ta", "Dhin", "Dhin", "Dha", "Tin", "Na"],
+      accents: [1, 5, 13],
+      khali: [9, 17],
+      name: "Lakshmi Taal (लक्ष्मी ताल / 18)"
+    },
+    farodast: {
+      length: 14,
+      bols: ["Dhi", "Dha", "Dha", "Dhi", "Dhi", "Dha", "Dha", "Ti", "Ta", "Ta", "Dhi", "Dhi", "Dha", "Dha"],
+      accents: [1, 4, 11],
+      khali: [8],
+      name: "Farodast (फरोदस्त / 14)"
+    },
+    pancham: {
+      length: 15,
+      bols: ["Dha", "Dhi", "Ta", "Dha", "Dhi", "Ta", "Dha", "Dhi", "Ta", "Ti", "Ta", "Dha", "Dhi", "Ta", "Dha"],
+      accents: [1, 4, 7, 13],
+      khali: [10],
+      name: "Pancham Sawari (पंचम सवारी / 15)"
+    },
+    gajjhampa: {
+      length: 15,
+      bols: ["Dhin", "Dhin", "Dha", "Dha", "Ge", "Tin", "Tin", "Ta", "Ta", "Ke", "Dhin", "Dhin", "Dha", "Dha", "Ge"],
+      accents: [1, 11],
+      khali: [6],
+      name: "Gaj Jhampa (गज झम्पा / 15)"
+    },
+    sawari: {
+      length: 15,
+      bols: ["Dha", "Dhi", "Dhi", "Dha", "Dha", "Dhi", "Dhi", "Dha", "Dha", "Tin", "Tin", "Ta", "Dhin", "Dhin", "Dha"],
+      accents: [1, 5, 13],
+      khali: [9],
+      name: "Sawari (સવારી / 15)"
+    },
+    punjabi: {
+      length: 8,
+      bols: ["Dha", "Dha", "Ge", "Na", "Dha", "Dha", "Tin", "Na"],
+      accents: [1],
+      khali: [5],
+      name: "Punjabi (पंजाबी / 8)"
+    },
+    pashto: {
+      length: 7,
+      bols: ["Dhin", "Ta", "Ta", "Dhin", "Dhin", "Ta", "Ta"],
+      accents: [1],
+      khali: [4],
+      name: "Pashto (पश्तो / 7)"
     },
     bhajani: {
+      length: 6,
+      bols: ["Dha", "Gi", "Na", "Ti", "Na", "Ka"],
+      accents: [1],
+      khali: [4],
+      name: "Bhajani (भजनी / 6)"
+    },
+    khemta: {
+      length: 6,
+      bols: ["Dha", "Ka", "Ta", "Dha", "Ka", "Ta"],
+      accents: [1],
+      khali: [4],
+      name: "Khemta (खेમટા / 6)"
+    },
+    jat: {
+      length: 6,
+      bols: ["Dha", "Dha", "Tin", "Na", "Ka", "Ta"],
+      accents: [1, 3],
+      khali: [5],
+      name: "Jat (जट / 6)"
+    },
+    pahari: {
+      length: 6,
+      bols: ["Dha", "Ti", "Na", "Ta", "Ti", "Na"],
+      accents: [1],
+      khali: [4],
+      name: "Pahari (पहाड़ी / 6)"
+    },
+    rajasthani: {
       length: 8,
-      bols: ['Dha', 'Ghe', 'Na', 'Tin', 'Ta', 'Ke', 'Na', 'Dhin'],
-      accents: [1, 5],
-      khali: [5]
+      bols: ["Dha", "Ge", "Tin", "Na", "Dha", "Ge", "Dhin", "Na"],
+      accents: [1],
+      khali: [5],
+      name: "Rajasthani (राजस्थानी / 8)"
+    },
+    lavani: {
+      length: 8,
+      bols: ["Dha", "Tin", "Dhin", "Na", "Ta", "Tin", "Dhin", "Na"],
+      accents: [1],
+      khali: [5],
+      name: "Lavani (लावणी / 8)"
+    },
+    garba: {
+      length: 8,
+      bols: ["Dha", "Dhin", "Ta", "Na", "Dha", "Dhin", "Ta", "Na"],
+      accents: [1],
+      khali: [5],
+      name: "Garba (ગરબા / 8)"
+    },
+    vishnutaal: {
+      length: 20,
+      bols: ["Dha", "Dhin", "Dhin", "Dha", "Dha", "Dhin", "Dhin", "Dha", "Dha", "Tin", "Tin", "Ta", "Ta", "Dhin", "Dhin", "Dha", "Dha", "Tin", "Tin", "Ta"],
+      accents: [1, 5, 13],
+      khali: [9, 17],
+      name: "Vishnu Taal (विष्णु ताल / 20)"
+    },
+    ganeshtaal: {
+      length: 18,
+      bols: ["Dha", "Dhin", "Dhin", "Dha", "Dha", "Dhin", "Dhin", "Dha", "Dha", "Tin", "Tin", "Ta", "Ta", "Dhin", "Dha", "Dhin", "Dhin", "Dha"],
+      accents: [1, 5, 13, 16],
+      khali: [9],
+      name: "Ganesh Taal (गणेश ताल / 18)"
+    },
+    shikhartaal: {
+      length: 17,
+      bols: ["Dha", "Dhin", "Dhin", "Dha", "Dha", "Dhin", "Dhin", "Dha", "Dha", "Tin", "Tin", "Ta", "Ta", "Dhin", "Dhin", "Dha", "Dhin"],
+      accents: [1, 5, 13],
+      khali: [9],
+      name: "Shikhar Taal (शिखर ताल / 17)"
+    },
+    chartaalki: {
+      length: 11,
+      bols: ["Dha", "Dha", "Dhin", "Ta", "Kita", "Dha", "Dhin", "Ta", "Tita", "Kata", "Gadi"],
+      accents: [1, 9],
+      khali: [5],
+      name: "Char Taal ki Sawari (चार ताल की सवारी / 11)"
     }
   };
 
@@ -811,7 +1047,7 @@
   let nextNoteTime = 0.0;
   let scheduleAheadTime = 0.1; // 100ms lookahead
   let timerID = null;
-  let currentSequence = TAAL_SEQUENCES.teen_taal;
+  let currentSequence = TAAL_SEQUENCES.teentaal;
 
   function getStepDuration() {
     return 60.0 / bpm; // Beat duration in seconds
@@ -819,9 +1055,10 @@
 
   function scheduleNote(beatNumber, time) {
     const bol = currentSequence.bols[beatNumber];
+    const duration = getStepDuration();
     
     // Play sound based on Bol
-    playSpecificBol(bol, time);
+    playSpecificBol(bol, time, duration);
 
     // Schedule UI updates
     const delay = (time - audioCtx.currentTime) * 1000;
@@ -837,10 +1074,11 @@
       if (activeDot) activeDot.classList.add('active');
 
       // Trigger slight glow animation on correct drums
-      if (['Dha', 'Dhin', 'Ghe', 'Ge', 'Dhi', 'Ka', 'Ke', 'Kat'].includes(bol)) {
+      const capitalized = capitalizeFirstLetter(bol);
+      if (['Dha', 'Dhin', 'Ghe', 'Ge', 'Dhi', 'Ka', 'Ke', 'Kat', 'DhaGe', 'DhiNa'].some(b => capitalized.startsWith(b))) {
         flashDrum('bayanWrapper', '#f0e2cf');
       }
-      if (['Dha', 'Dhin', 'Ta', 'Na', 'Tin', 'Ti', 'Tu'].includes(bol)) {
+      if (['Dha', 'Dhin', 'Ta', 'Na', 'Tin', 'Ti', 'Tu', 'NaTi', 'NaKe'].some(b => capitalized.startsWith(b))) {
         flashDrum('dayanWrapper', '#e0d0b0');
       }
     }, Math.max(0, delay));
@@ -870,20 +1108,28 @@
       dot.className = 'beat-dot';
       dot.id = 'dot-' + i;
       
-      // Label indicator
-      let label = (i + 1).toString();
       const oneBasedIdx = i + 1;
+      let symbol = oneBasedIdx.toString();
       
       if (oneBasedIdx === 1) {
         dot.classList.add('sam');
-        label = '❌'; // Sam sign
+        symbol = '❌'; // Sam sign
       } else if (currentSequence.accents.includes(oneBasedIdx)) {
-        label = '👏'; // Tali (clap)
+        symbol = '👏'; // Tali (clap)
       } else if (currentSequence.khali.includes(oneBasedIdx)) {
-        label = '0';  // Khali
+        symbol = '0';  // Khali
       }
-
-      dot.textContent = label;
+      
+      const symbolEl = document.createElement('span');
+      symbolEl.className = 'beat-symbol';
+      symbolEl.textContent = symbol;
+      
+      const bolEl = document.createElement('span');
+      bolEl.className = 'beat-bol';
+      bolEl.textContent = currentSequence.bols[i] || '-';
+      
+      dot.appendChild(symbolEl);
+      dot.appendChild(bolEl);
       grid.appendChild(dot);
     }
   }
@@ -997,9 +1243,23 @@
     }
   }
 
+  // Populate Taal Select dropdown
+  const taalSelect = document.getElementById('taalSelect');
+  taalSelect.innerHTML = '';
+  for (let key in TAAL_SEQUENCES) {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = TAAL_SEQUENCES[key].name;
+    taalSelect.appendChild(opt);
+  }
+
+  // Set default sequence and draw grid
+  currentSequence = TAAL_SEQUENCES.teentaal;
+  updateBeatGrid();
+
   // Control Listeners
-  document.getElementById('taalSelect').addEventListener('change', (e) => {
-    currentSequence = TAAL_SEQUENCES[e.target.value] || TAAL_SEQUENCES.teen_taal;
+  taalSelect.addEventListener('change', (e) => {
+    currentSequence = TAAL_SEQUENCES[e.target.value] || TAAL_SEQUENCES.teentaal;
     currentBeat = 0;
     updateBeatGrid();
   });
