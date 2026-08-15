@@ -17,10 +17,10 @@ const NAV_ITEMS = [
   { page: 'metronome', icon: '⏱️', label: { gu: 'લયબદ્ધ મેટ્રોનોમ', hi: 'लयबद्ध मेट्रोनोम', en: 'Rhythmic Metronome' }, href: 'metronome.html' },
   { page: 'tabla', icon: '🥁', label: { gu: 'વર્ચ્યુઅલ તબલા', hi: 'वर्चुअल तबला', en: 'Virtual Tabla' }, href: 'tabla.html' },
   { page: 'instruments', icon: '🎵', label: { gu: 'બધા વાદ્ય સાધનો', hi: 'सभी वाद्य यंत्र', en: 'All Instruments' }, href: 'instruments.html' },
-  { page: 'attendance', icon: '🗓️', label: { gu: 'હાજરી', hi: 'उपस्थिति', en: 'Attendance' }, href: '#', soon: true },
-  { page: 'fees', icon: '💳', label: { gu: 'ફી મેનેજમેન્ટ', hi: 'फीस प्रबंधन', en: 'Fee Management' }, href: '#', soon: true },
-  { page: 'schedule', icon: '📅', label: { gu: 'ક્લાસ શેડ્યૂલ', hi: 'क्लास शेड्यूल', en: 'Class Schedule' }, href: '#', soon: true },
-  { page: 'students', icon: '🧑‍🎓', label: { gu: 'વિદ્યાર્થી યાદી', hi: 'छात्र सूची', en: 'Student List' }, href: '#', soon: true },
+  { page: 'attendance', icon: '🗓️', label: { gu: 'હાજરી', hi: 'उपस्थिति', en: 'Attendance' }, href: 'attendance.html' },
+  { page: 'fees', icon: '💳', label: { gu: 'ફી મેનેજમેન્ટ', hi: 'फीस प्रबंधन', en: 'Fee Management' }, href: 'fee-management.html' },
+  { page: 'schedule', icon: '📅', label: { gu: 'ક્લાસ શેડ્યૂલ', hi: 'क्लास शेड्यूल', en: 'Class Schedule' }, href: 'class-schedule.html' },
+  { page: 'students', icon: '🧑‍🎓', label: { gu: 'વિદ્યાર્થી યાદી', hi: 'छात्र सूची', en: 'Student List' }, href: 'student-list.html' },
   { section: { gu: 'મેનેજમેન્ટ', hi: 'प्रबंधन', en: 'Management' } },
   { page: 'owner-console', icon: '🛡️', label: { gu: 'ઓનર કન્સોલ', hi: 'ओनर कंसोल', en: 'Owner Console' }, href: 'owner-console.html', ownerOnly: true }
 ];

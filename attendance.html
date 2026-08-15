@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .attendance-container {
+    background: linear-gradient(135deg, #1e272c 0%, #0f1315 100%);
+    border: 8px solid #07090a;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+  }
+  .checkin-card {
+    background: rgba(255,255,255,0.03);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .checkin-btn {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    border: none;
+    color: white;
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
+    transition: all 0.2s ease;
+    margin-top: 12px;
+  }
+  .checkin-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(46, 204, 113, 0.6);
+  }
+  .checkin-btn:disabled {
+    background: #34495e;
+    color: #7f8c8d;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-val {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .stat-lbl {
+    font-size: 0.75rem;
+    color: var(--subtitle);
+  }
+  .calendar-wrap {
+    background: rgba(0,0,0,0.2);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--border);
+  }
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .calendar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    text-align: center;
+  }
+  .day-name {
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: var(--subtitle);
+    padding-bottom: 8px;
+  }
+  .day-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 50%;
+    position: relative;
+  }
+  .day-cell.present {
+    background: rgba(46, 204, 113, 0.2);
+    border: 1.5px solid #2ecc71;
+    color: #2ecc71;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+  }
+  .day-cell.today {
+    border: 1.5px solid var(--accent);
+  }
+  .day-cell.empty {
+    opacity: 0.2;
+  }
+  
+  @media(max-width: 600px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body data-page="attendance">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">🗓️ Attendance</h2>
+      <a href="dashboard.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← Back</a>
+    </div>
+
+    <div class="attendance-container">
+      <div class="checkin-card">
+        <h3 id="lblCheckinTitle">Today's Check-in</h3>
+        <p id="lblCheckinDesc" style="font-size:0.85rem; color:var(--subtitle); margin: 6px 0 16px;">Mark your daily attendance at the class</p>
+        <button class="checkin-btn" id="btnCheckin">Mark Attendance</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="valPresent">0</div>
+          <div class="stat-lbl" id="lblPresentDays">Days Present</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="valRatio">0%</div>
+          <div class="stat-lbl" id="lblAttendanceRate">Attendance Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="valStreak">0</div>
+          <div class="stat-lbl" id="lblActiveStreak">Current Streak</div>
+        </div>
+      </div>
+
+      <div class="calendar-wrap">
+        <div class="calendar-header">
+          <div class="calendar-title" id="valMonthYear">August 2026</div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '🗓️ દૈનિક હાજરી',
+      back: '← પાછા જાઓ',
+      checkinTitle: 'આજની હાજરી',
+      checkinDesc: 'સંગીત ક્લાસમાં તમારી દૈનિક હાજરી જાતે પૂરો',
+      markBtn: 'હાજરી પૂરો',
+      alreadyMarked: '✓ હાજરી પુરાઈ ગઈ છે',
+      presentDays: 'હાજર દિવસો',
+      rate: 'હાજરી ગુણોત્તર',
+      streak: 'ચાલુ ક્રમ (Streak)',
+      days: ['રવિ', 'સોમ', 'મંગળ', 'બુધ', 'ગુરુ', 'શુક્ર', 'શનિ'],
+      months: ['જાન્યુઆરી', 'ફેબ્રુઆરી', 'માર્ચ', 'એપ્રિલ', 'મે', 'જૂન', 'જુલાઈ', 'ઑગસ્ટ', 'સપ્ટેમ્બર', 'ઑક્ટોબર', 'નવેમ્બર', 'ડિસેમ્બર']
+    },
+    hi: {
+      title: '🗓️ दैनिक उपस्थिति',
+      back: '← वापस जाएं',
+      checkinTitle: 'आज की उपस्थिति',
+      checkinDesc: 'संगीत क्लास में अपनी दैनिक उपस्थिति दर्ज करें',
+      markBtn: 'उपस्थिति दर्ज करें',
+      alreadyMarked: '✓ उपस्थिति दर्ज हो चुकी है',
+      presentDays: 'उपस्थित दिन',
+      rate: 'उपस्थिति दर',
+      streak: 'सक्रिय सिलसिला (Streak)',
+      days: ['रवि', 'सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि'],
+      months: ['जनवरी', 'फ़रवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर']
+    },
+    en: {
+      title: '🗓️ Daily Attendance',
+      back: '← Go Back',
+      checkinTitle: "Today's Attendance",
+      checkinDesc: 'Mark your daily attendance at the class',
+      markBtn: 'Mark Attendance',
+      alreadyMarked: '✓ Attendance Marked',
+      presentDays: 'Days Present',
+      rate: 'Attendance Rate',
+      streak: 'Current Streak',
+      days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    }
+  };
+
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('lblCheckinTitle').textContent = t.checkinTitle;
+  document.getElementById('lblCheckinDesc').textContent = t.checkinDesc;
+  document.getElementById('lblPresentDays').textContent = t.presentDays;
+  document.getElementById('lblAttendanceRate').textContent = t.rate;
+  document.getElementById('lblActiveStreak').textContent = t.streak;
+
+  // Local storage state keys
+  const STORAGE_KEY = 'harmony_student_attendance';
+  let attendanceDates = [];
+  try {
+    attendanceDates = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch(e) {
+    attendanceDates = [];
+  }
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const checkinBtn = document.getElementById('btnCheckin');
+
+  if (attendanceDates.includes(todayStr)) {
+    checkinBtn.textContent = t.alreadyMarked;
+    checkinBtn.disabled = true;
+  }
+
+  checkinBtn.onclick = () => {
+    if (!attendanceDates.includes(todayStr)) {
+      attendanceDates.push(todayStr);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(attendanceDates));
+      checkinBtn.textContent = t.alreadyMarked;
+      checkinBtn.disabled = true;
+      renderAll();
+    }
+  };
+
+  function renderAll() {
+    const now = new Date();
+    const curYear = now.getFullYear();
+    const curMonth = now.getMonth();
+
+    // Month Title
+    document.getElementById('valMonthYear').textContent = `${t.months[curMonth]} ${curYear}`;
+
+    // Stats calculations
+    const presentCount = attendanceDates.length;
+    document.getElementById('valPresent').textContent = presentCount;
+
+    // Attendance percentage (assume 24 active classes/month scale)
+    const rate = Math.min(100, Math.round((presentCount / 24) * 100));
+    document.getElementById('valRatio').textContent = `${rate}%`;
+
+    // Streak calculation (consecutive days)
+    let streak = 0;
+    let tempDate = new Date();
+    while (true) {
+      const checkStr = tempDate.toISOString().split('T')[0];
+      if (attendanceDates.includes(checkStr)) {
+        streak++;
+        tempDate.setDate(tempDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    document.getElementById('valStreak').textContent = streak;
+
+    // Render Calendar
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+
+    // Day headers
+    t.days.forEach(d => {
+      const header = document.createElement('div');
+      header.className = 'day-name';
+      header.textContent = d;
+      grid.appendChild(header);
+    });
+
+    const firstDayIndex = new Date(curYear, curMonth, 1).getDay();
+    const totalDays = new Date(curYear, curMonth + 1, 0).getDate();
+
+    // Padding empty cells
+    for (let i = 0; i < firstDayIndex; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'day-cell empty';
+      grid.appendChild(empty);
+    }
+
+    // Days cells
+    for (let d = 1; d <= totalDays; d++) {
+      const cell = document.createElement('div');
+      cell.className = 'day-cell';
+      cell.textContent = d;
+
+      const dateObj = new Date(curYear, curMonth, d);
+      const dateStr = dateObj.toISOString().split('T')[0];
+
+      if (attendanceDates.includes(dateStr)) {
+        cell.classList.add('present');
+      }
+      if (dateStr === todayStr) {
+        cell.classList.add('today');
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+
+  renderAll();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>

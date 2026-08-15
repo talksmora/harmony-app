@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fee Management - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .fee-container {
+    background: linear-gradient(135deg, #1e272c 0%, #0f1315 100%);
+    border: 8px solid #07090a;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+  }
+  .summary-card {
+    background: rgba(255,255,255,0.03);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .status-badge {
+    background: rgba(46, 204, 113, 0.2);
+    border: 1px solid #2ecc71;
+    color: #2ecc71;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+  .status-badge.pending {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid #e74c3c;
+    color: #e74c3c;
+  }
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+  .history-table th {
+    text-align: left;
+    font-size: 0.8rem;
+    color: var(--subtitle);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .history-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .view-receipt-btn {
+    background: var(--border);
+    border: none;
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  .view-receipt-btn:hover {
+    background: var(--accent);
+    color: white;
+  }
+
+  /* Receipt Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  .receipt-modal {
+    background: #111;
+    border: 3px solid var(--border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    color: #fff;
+    position: relative;
+  }
+  .close-modal {
+    position: absolute;
+    top: 16px; right: 16px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--subtitle);
+  }
+</style>
+</head>
+<body data-page="attendance">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">💳 Fee Management</h2>
+      <a href="dashboard.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← Back</a>
+    </div>
+
+    <div class="fee-container">
+      <div class="summary-card">
+        <div>
+          <h3 id="valPlanName" style="margin:0 0 6px;">Monthly Music Course</h3>
+          <p style="margin:0; font-size:0.8rem; color:var(--subtitle);"><span id="lblDueDate">Next Due:</span> <strong id="valDueDate">10 Sept 2026</strong></p>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:1.4rem; font-weight:900; color:var(--accent); margin-bottom:4px;">₹2,000 / month</div>
+          <span class="status-badge" id="valStatus">Paid</span>
+        </div>
+      </div>
+
+      <h3 id="lblPaymentHistory">Payment History</h3>
+      <div style="overflow-x:auto;">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th id="thDate">Date</th>
+              <th id="thAmount">Amount</th>
+              <th id="thMethod">Method</th>
+              <th id="thStatus">Status</th>
+              <th id="thAction">Receipt</th>
+            </tr>
+          </thead>
+          <tbody id="paymentHistoryBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Receipt Modal -->
+  <div class="modal-overlay" id="receiptModalOverlay">
+    <div class="receipt-modal">
+      <span class="close-modal" id="btnCloseModal">&times;</span>
+      <h3 style="margin-top:0; border-bottom:1px dashed var(--border); padding-bottom:10px; text-align:center;">HARMONY MUSIC RECEIPT</h3>
+      <div style="margin:16px 0; font-size:0.9rem; line-height:1.6;">
+        <p><strong>Receipt No:</strong> <span id="recNo">#HM-2608</span></p>
+        <p><strong>Date:</strong> <span id="recDate">10 Aug 2026</span></p>
+        <p><strong>Student:</strong> <span id="recName">Harmony Learner</span></p>
+        <p><strong>Course:</strong> <span id="recCourse">Instrument & Riyaz training</span></p>
+        <p><strong>Amount:</strong> <strong id="recAmount">₹2,000.00</strong></p>
+        <p><strong>Method:</strong> <span id="recMethod">UPI (GPay)</span></p>
+        <p><strong>Status:</strong> <span style="color:#2ecc71; font-weight:bold;">PAID</span></p>
+      </div>
+      <div style="border-top:1px dashed var(--border); padding-top:12px; text-align:center; font-size:0.75rem; color:var(--subtitle);">
+        Thank you for playing with us! 🎵
+      </div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '💳 ફી વ્યવસ્થાપન',
+      back: '← પાછા જાઓ',
+      plan: 'માસિક સંગીત કોર્સ',
+      dueDate: 'આગામી તારીખ:',
+      history: 'ચુકવણીનો ઇતિહાસ',
+      thDate: 'તારીખ', thAmount: 'રકમ', thMethod: 'પદ્ધતિ', thStatus: 'સ્થિતિ', thAction: 'રસીદ',
+      paid: 'ચૂકવેલ', pending: 'બાકી',
+      view: 'જુઓ',
+      courses: 'ઇન્સ્ટ્રુમેન્ટ અને રિયાઝ તાલીમ'
+    },
+    hi: {
+      title: '💳 फीस प्रबंधन',
+      back: '← वापस जाएं',
+      plan: 'मासिक संगीत कोर्स',
+      dueDate: 'अगली देय तिथि:',
+      history: 'भुगतान इतिहास',
+      thDate: 'तारीख', thAmount: 'राशि', thMethod: 'तरीका', thStatus: 'स्थिति', thAction: 'रसीद',
+      paid: 'भुगतान किया', pending: 'लंबित',
+      view: 'देखें',
+      courses: 'इंस्ट्रूमेंट और रियाज़ प्रशिक्षण'
+    },
+    en: {
+      title: '💳 Fee Management',
+      back: '← Go Back',
+      plan: 'Monthly Music Course',
+      dueDate: 'Next Due:',
+      history: 'Payment History',
+      thDate: 'Date', thAmount: 'Amount', thMethod: 'Method', thStatus: 'Status', thAction: 'Receipt',
+      paid: 'Paid', pending: 'Pending',
+      view: 'View',
+      courses: 'Instrument & Riyaz training'
+    }
+  };
+
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('valPlanName').textContent = t.plan;
+  document.getElementById('lblDueDate').textContent = t.dueDate;
+  document.getElementById('lblPaymentHistory').textContent = t.history;
+  document.getElementById('thDate').textContent = t.thDate;
+  document.getElementById('thAmount').textContent = t.thAmount;
+  document.getElementById('thMethod').textContent = t.thMethod;
+  document.getElementById('thStatus').textContent = t.thStatus;
+  document.getElementById('thAction').textContent = t.thAction;
+
+  const payments = [
+    { date: '10 Aug 2026', amount: '₹2,000', method: 'UPI (GPay)', status: 'Paid', receiptNo: '#HM-9844' },
+    { date: '10 Jul 2026', amount: '₹2,000', method: 'UPI (PhonePe)', status: 'Paid', receiptNo: '#HM-8421' },
+    { date: '10 Jun 2026', amount: '₹2,000', method: 'Cash', status: 'Paid', receiptNo: '#HM-7512' }
+  ];
+
+  const body = document.getElementById('paymentHistoryBody');
+  payments.forEach(p => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${p.date}</td>
+      <td style="font-weight:700;">${p.amount}</td>
+      <td>${p.method}</td>
+      <td><span class="status-badge">${t.paid}</span></td>
+      <td><button class="view-receipt-btn">${t.view}</button></td>
+    `;
+
+    row.querySelector('.view-receipt-btn').onclick = () => {
+      document.getElementById('recNo').textContent = p.receiptNo;
+      document.getElementById('recDate').textContent = p.date;
+      document.getElementById('recAmount').textContent = p.amount;
+      document.getElementById('recMethod').textContent = p.method;
+      document.getElementById('recCourse').textContent = t.courses;
+      document.getElementById('receiptModalOverlay').style.display = 'flex';
+    };
+
+    body.appendChild(row);
+  });
+
+  // Modal actions
+  document.getElementById('btnCloseModal').onclick = () => {
+    document.getElementById('receiptModalOverlay').style.display = 'none';
+  };
+  document.getElementById('receiptModalOverlay').onclick = (e) => {
+    if (e.target === document.getElementById('receiptModalOverlay')) {
+      document.getElementById('receiptModalOverlay').style.display = 'none';
+    }
+  };
+
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>

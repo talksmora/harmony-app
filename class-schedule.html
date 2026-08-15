@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Schedule - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<link rel="stylesheet" href="shared/app-shell.css">
+<style>
+  .schedule-container {
+    background: linear-gradient(135deg, #1e272c 0%, #0f1315 100%);
+    border: 8px solid #07090a;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    color: #f7e6d5;
+  }
+  .week-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .week-tab {
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--subtitle);
+    transition: all 0.2s;
+  }
+  .week-tab.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .class-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .class-card {
+    background: rgba(255,255,255,0.03);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    transition: transform 0.2s;
+  }
+  .class-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+  }
+  .class-time {
+    font-weight: 800;
+    color: var(--accent);
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+  .class-batch {
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 0 0 4px;
+  }
+  .class-instructor {
+    font-size: 0.8rem;
+    color: var(--subtitle);
+  }
+  .join-btn {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .join-btn:hover {
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    transform: translateY(-1px);
+  }
+  .no-classes {
+    text-align: center;
+    padding: 40px;
+    color: var(--subtitle);
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+</style>
+</head>
+<body data-page="attendance">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+      <h2 id="lblTitle" style="margin:0;">📅 Class Schedule</h2>
+      <a href="dashboard.html" id="btnBack" class="ctrl-btn" style="text-decoration:none; padding:8px 16px; font-size:0.8rem; font-weight:600; border-radius:12px; background:var(--border);">← Back</a>
+    </div>
+
+    <div class="schedule-container">
+      <div class="week-tabs" id="weekTabs"></div>
+      <div class="class-list" id="classList"></div>
+    </div>
+  </div>
+
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+
+  const TEXT = {
+    gu: {
+      title: '📅 સમયપત્રક',
+      back: '← પાછા જાઓ',
+      join: 'ક્લાસમાં જોડાઓ',
+      instructor: 'શિક્ષક:',
+      noClasses: 'આ દિવસે કોઈ ક્લાસ સુનિશ્ચિત નથી',
+      days: ['સોમ', 'મંગળ', 'બુધ', 'ગુરુ', 'શુક્ર', 'શનિ', 'રવિ'],
+      dayFull: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    },
+    hi: {
+      title: '📅 कक्षा कार्यक्रम',
+      back: '← वापस जाएं',
+      join: 'क्लास में शामिल हों',
+      instructor: 'शिक्षक:',
+      noClasses: 'इस दिन कोई क्लास निर्धारित नहीं है',
+      days: ['सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि', 'रवि'],
+      dayFull: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    },
+    en: {
+      title: '📅 Class Schedule',
+      back: '← Go Back',
+      join: 'Join Class',
+      instructor: 'Teacher:',
+      noClasses: 'No classes scheduled for this day',
+      days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      dayFull: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    }
+  };
+
+  const t = TEXT[lang] || TEXT.gu;
+
+  document.getElementById('lblTitle').textContent = t.title;
+  document.getElementById('btnBack').textContent = t.back;
+
+  // Timetable schedule database
+  const SCHEDULE = {
+    'Monday': [
+      { time: '09:00 AM - 10:30 AM', batch: 'Harmonium Basics Batch', teacher: 'Guru Shastri Ji', link: '#' },
+      { time: '04:00 PM - 05:30 PM', batch: 'Classical Vocal Riyaz', teacher: 'Amit Mehta', link: '#' }
+    ],
+    'Tuesday': [
+      { time: '10:00 AM - 11:30 AM', batch: 'Tabla Beat & Taal Study', teacher: 'Pt. Rahul Vyas', link: '#' },
+      { time: '05:00 PM - 06:30 PM', batch: 'Vocal Advanced Training', teacher: 'Pt. Rahul Vyas', link: '#' }
+    ],
+    'Wednesday': [
+      { time: '09:00 AM - 10:30 AM', batch: 'Harmonium Basics Batch', teacher: 'Guru Shastri Ji', link: '#' }
+    ],
+    'Thursday': [
+      { time: '10:00 AM - 11:30 AM', batch: 'Tabla Beat & Taal Study', teacher: 'Pt. Rahul Vyas', link: '#' },
+      { time: '06:00 PM - 07:30 PM', batch: 'Guitar & String Chords', teacher: 'Vikram Sen', link: '#' }
+    ],
+    'Friday': [
+      { time: '11:00 AM - 12:30 PM', batch: 'Keyboard Melodies', teacher: 'Amit Mehta', link: '#' },
+      { time: '04:00 PM - 05:30 PM', batch: 'Classical Vocal Riyaz', teacher: 'Pt. Rahul Vyas', link: '#' }
+    ],
+    'Saturday': [
+      { time: '10:00 AM - 12:00 PM', batch: 'Weekend Riyaz Masterclass', teacher: 'Pt. Rahul Vyas', link: '#' }
+    ],
+    'Sunday': [] // Holiday
+  };
+
+  let activeDayIndex = (new Date().getDay() + 6) % 7; // Convert 0-6 (Sun-Sat) to 0-6 (Mon-Sun)
+
+  function renderTabs() {
+    const tabs = document.getElementById('weekTabs');
+    tabs.innerHTML = '';
+
+    t.days.forEach((day, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'week-tab' + (idx === activeDayIndex ? ' active' : '');
+      btn.textContent = day;
+      btn.onclick = () => {
+        activeDayIndex = idx;
+        renderTabs();
+        renderClasses();
+      };
+      tabs.appendChild(btn);
+    });
+  }
+
+  function renderClasses() {
+    const list = document.getElementById('classList');
+    list.innerHTML = '';
+
+    const dayName = t.dayFull[activeDayIndex];
+    const classes = SCHEDULE[dayName] || [];
+
+    if (classes.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'no-classes';
+      empty.textContent = t.noClasses;
+      list.appendChild(empty);
+      return;
+    }
+
+    classes.forEach(c => {
+      const card = document.createElement('div');
+      card.className = 'class-card';
+      card.innerHTML = `
+        <div>
+          <div class="class-time">🕒 ${c.time}</div>
+          <h4 class="class-batch">${c.batch}</h4>
+          <div class="class-instructor">${t.instructor} <strong>${c.teacher}</strong></div>
+        </div>
+        <div>
+          <a href="${c.link}" class="join-btn">${t.join}</a>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  renderTabs();
+  renderClasses();
+  initAppShell({ title: t.title });
+})();
+</script>
+</body>
+</html>
