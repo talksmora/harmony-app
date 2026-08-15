@@ -4,3 +4,5 @@ node_modules/
 *.mp4
 *.zip
 *.log
+
+.vercel
