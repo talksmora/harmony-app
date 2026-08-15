@@ -817,6 +817,37 @@
     }
   };
 
+  function DevanagariToGujarati(text) {
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+      const code = text.charCodeAt(i);
+      if (code >= 2304 && code <= 2431) {
+        result += String.fromCharCode(code + 384);
+      } else {
+        result += text[i];
+      }
+    }
+    return result;
+  }
+
+  function getLocalizedTaalName(nameStr, lang) {
+    const match = nameStr.match(/^([^(]+)\(([^/]+)\/\s*(\d+)\)/);
+    if (!match) return nameStr;
+    
+    const englishName = match[1].trim();
+    const nativeName = match[2].trim();
+    const beats = match[3].trim();
+    
+    if (lang === 'en') {
+      return `${englishName} (${beats} beats)`;
+    } else if (lang === 'hi') {
+      return `${nativeName} (${beats} मात्रा)`;
+    } else { // 'gu'
+      const guName = DevanagariToGujarati(nativeName);
+      return `${guName} (${beats} માત્રા)`;
+    }
+  }
+
   const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
   const t = TABLA_TEXT[lang] || TABLA_TEXT.gu;
 
@@ -840,47 +871,7 @@
   document.getElementById('btnSeqPlay').textContent = t.btnSeqPlay;
   document.getElementById('btnSeqClear').textContent = t.btnSeqClear;
 
-  // Reconstruct Taal Selector options dynamically in the selected language
   const taalSelect = document.getElementById('taalSelect');
-  const taalOptions = {
-    gu: [
-      { value: 'teen_taal', text: 'તીનતાલ (૧૬ માત્રા)' },
-      { value: 'dadra', text: 'દાદરા (૬ માત્રા)' },
-      { value: 'kehrwa', text: 'કહરવા (૮ માત્રા)' },
-      { value: 'roopak', text: 'રૂપક (૭ માત્રા)' },
-      { value: 'jhaptaal', text: 'ઝપતાલ (૧૦ માત્રા)' },
-      { value: 'ektaal', text: 'એકતાલ (૧૨ માત્રા)' },
-      { value: 'bhajani', text: 'ભજની (૮ માત્રા)' }
-    ],
-    hi: [
-      { value: 'teen_taal', text: 'तीनताल (16 मात्रा)' },
-      { value: 'dadra', text: 'दादरा (6 मात्रा)' },
-      { value: 'kehrwa', text: 'कहरवा (8 मात्रा)' },
-      { value: 'roopak', text: 'रूपक (7 मात्रा)' },
-      { value: 'jhaptaal', text: 'झपताल (10 मात्रा)' },
-      { value: 'ektaal', text: 'एकताल (12 मात्रा)' },
-      { value: 'bhajani', text: 'भजनी (8 मात्रा)' }
-    ],
-    en: [
-      { value: 'teen_taal', text: 'Teentaal (16 beats)' },
-      { value: 'dadra', text: 'Dadra (6 beats)' },
-      { value: 'kehrwa', text: 'Keherwa (8 beats)' },
-      { value: 'roopak', text: 'Rupak (7 beats)' },
-      { value: 'jhaptaal', text: 'Jhaptal (10 beats)' },
-      { value: 'ektaal', text: 'Ektal (12 beats)' },
-      { value: 'bhajani', text: 'Bhajani (8 beats)' }
-    ]
-  };
-
-  const selectedTaalVal = taalSelect.value;
-  taalSelect.innerHTML = '';
-  (taalOptions[lang] || taalOptions.gu).forEach(opt => {
-    const el = document.createElement('option');
-    el.value = opt.value;
-    el.textContent = opt.text;
-    if (opt.value === selectedTaalVal) el.selected = true;
-    taalSelect.appendChild(el);
-  });
 
   // Reconstruct Tanpura Tone Selector options dynamically in the selected language
   const tanpuraTuneSelect = document.getElementById('tanpuraTuneSelect');
@@ -1801,22 +1792,26 @@
     }
   }
 
-  // Populate Taal Select dropdown
+  // Populate dynamically translated Taal Select dropdown
+  const savedVal = localStorage.getItem('harmonySelectedTaal') || 'teentaal';
   taalSelect.innerHTML = '';
   for (let key in TAAL_SEQUENCES) {
     const opt = document.createElement('option');
     opt.value = key;
-    opt.textContent = TAAL_SEQUENCES[key].name;
+    opt.textContent = getLocalizedTaalName(TAAL_SEQUENCES[key].name, lang);
+    if (key === savedVal) opt.selected = true;
     taalSelect.appendChild(opt);
   }
 
   // Set default sequence and draw grid
-  currentSequence = TAAL_SEQUENCES.teentaal;
+  currentSequence = TAAL_SEQUENCES[savedVal] || TAAL_SEQUENCES.teentaal;
   updateBeatGrid();
 
   // Control Listeners
   taalSelect.addEventListener('change', (e) => {
-    currentSequence = TAAL_SEQUENCES[e.target.value] || TAAL_SEQUENCES.teentaal;
+    const val = e.target.value;
+    try { localStorage.setItem('harmonySelectedTaal', val); } catch(err) {}
+    currentSequence = TAAL_SEQUENCES[val] || TAAL_SEQUENCES.teentaal;
     currentBeat = 0;
     updateBeatGrid();
   });
