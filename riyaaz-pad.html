@@ -14,7 +14,7 @@
     user-select: none;
     -webkit-user-select: none;
     touch-action: none;
-    background: #05070a;
+    background: #040609;
     overflow: hidden;
     margin: 0;
     padding: 0;
@@ -48,19 +48,19 @@
     gap: 6px;
     padding: 6px;
     box-sizing: border-box;
-    background: #080b0f;
+    background: #080b10;
   }
-  /* Top Control Bar styling matching premium GeoShred console */
+  /* Top Bar Console matching premium GeoShred dashboard */
   .controls-panel {
-    background: linear-gradient(180deg, #161c24 0%, #0e1218 100%);
-    border: 1px solid rgba(184, 134, 11, 0.25);
-    border-radius: 10px;
-    padding: 8px 16px;
+    background: linear-gradient(180deg, #18202c 0%, #0d121a 100%);
+    border: 1.5px solid rgba(184, 134, 11, 0.3);
+    border-radius: 12px;
+    padding: 10px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
   }
   .left-controls {
     display: flex;
@@ -68,45 +68,46 @@
     gap: 8px;
   }
   .raga-selector select {
-    background: #11151d;
+    background: #101520;
     color: #f3e6d0;
-    border: 1.5px solid rgba(184,134,11,0.4);
-    padding: 6px 12px;
+    border: 1.5px solid rgba(184,134,11,0.5);
+    padding: 6px 14px;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 700;
     outline: none;
     cursor: pointer;
   }
   /* Central Premium Preset Display */
   .preset-display {
-    background: radial-gradient(circle, #220f00 0%, #0e0500 100%);
-    border: 2px solid #b8860b;
+    background: radial-gradient(circle, #2a1400 0%, #0c0400 100%);
+    border: 2px solid #d4af37;
     border-radius: 8px;
-    padding: 6px 20px;
-    min-width: 160px;
+    padding: 8px 24px;
+    min-width: 180px;
     text-align: center;
-    box-shadow: 0 0 10px rgba(184,134,11,0.3);
+    box-shadow: 0 0 12px rgba(212,175,55,0.3);
     cursor: pointer;
     transition: all 0.2s ease;
   }
   .preset-display:hover {
-    box-shadow: 0 0 15px rgba(184,134,11,0.5);
-    border-color: #f4c542;
+    box-shadow: 0 0 18px rgba(212,175,55,0.6);
+    border-color: #fdd835;
   }
   .preset-name {
-    color: #f4c542;
-    font-size: 0.95rem;
+    color: #fdd835;
+    font-size: 1rem;
     font-weight: 800;
-    letter-spacing: 0.5px;
-    text-shadow: 0 0 5px rgba(244,197,66,0.5);
+    letter-spacing: 0.8px;
+    text-shadow: 0 0 6px rgba(253,216,53,0.5);
   }
   .preset-category {
-    color: rgba(243,230,208,0.5);
+    color: rgba(243,230,208,0.6);
     font-size: 0.65rem;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     margin-top: 1px;
+    letter-spacing: 0.5px;
   }
   .right-sliders {
     display: flex;
@@ -149,11 +150,12 @@
   .canvas-wrap {
     flex: 1;
     position: relative;
-    border: 1.5px solid rgba(184,134,11,0.2);
+    border: 1.5px solid rgba(184,134,11,0.25);
     border-radius: 12px;
     overflow: hidden;
     background: #020305;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.7) inset;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.8) inset;
+    width: 100% !important;
   }
   #surface {
     display: block;
@@ -206,20 +208,19 @@
   .pedal.active .pedal-led {
     box-shadow: 0 0 8px currentColor;
   }
-  /* Color theme styles for vintage stompboxes */
-  .distortion-pedal { background: #b22222; } /* Red Stompbox */
+  
+  .distortion-pedal { background: #b22222; }
   .distortion-pedal.active .pedal-led { background: #ff3333; color: #ff3333; }
   
-  .chorus-pedal { background: #1f4e79; } /* Blue Stompbox */
+  .chorus-pedal { background: #1f4e79; }
   .chorus-pedal.active .pedal-led { background: #3399ff; color: #3399ff; }
   
-  .delay-pedal { background: #2e7d32; } /* Green Stompbox */
+  .delay-pedal { background: #2e7d32; }
   .delay-pedal.active .pedal-led { background: #33ff33; color: #33ff33; }
   
-  .reverb-pedal { background: #e65100; } /* Yellow/Orange Stompbox */
+  .reverb-pedal { background: #e65100; }
   .reverb-pedal.active .pedal-led { background: #ffaa00; color: #ffaa00; }
 
-  /* Vintage mechanical stomp switch */
   .stomp-switch {
     width: 24px;
     height: 24px;
@@ -485,7 +486,6 @@
     }
   };
 
-  // Detailed physical presets properties mapping
   const INSTRUMENT_PRESETS = {
     sitar: { damping: 0.14, feedback: 0.99, filterType: 'bandpass', filterMult: 3.5, filterMaxFreq: 6000, filterQ: 4.5, attack: 0.005, peakGain: 0.28, release: 1.2 },
     sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.3, release: 0.85 },
@@ -534,6 +534,7 @@
   const NUM_STRINGS = 4;
   const BASE_SA = 130.81; // C3
   const ROW_SEMITONE_OFFSETS = [15, 10, 5, 0];
+  const NUM_FRETS = 16; // Chromatic fretboard layout exactly matching GeoShred!
 
   // Web Audio Context & Effects Chain
   let audioCtx = null;
@@ -548,7 +549,6 @@
   let reverbNode = null;
   let resonanceFilters = [];
 
-  // Dry/Wet Bypass nodes for stompboxes
   const dryWetNodes = {
     overdrive: { dry: null, wet: null },
     chorus: { dry: null, wet: null },
@@ -556,7 +556,6 @@
     reverb: { dry: null, wet: null }
   };
 
-  // Pedalboard States
   const pedalStates = {
     overdrive: true,
     chorus: false,
@@ -578,7 +577,6 @@
     return curve;
   }
 
-  // Load AudioWorklet and setup physical model chain
   async function ensureCtx() {
     if (audioCtx) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -678,7 +676,6 @@
     buildSympatheticResonators();
   }
 
-  // Create full physical pedal routing chain
   function buildEffectsChain() {
     masterGain = audioCtx.createGain();
     masterGain.gain.value = 0.75;
@@ -699,9 +696,9 @@
     chorusDelayNode = audioCtx.createDelay();
     chorusDelayNode.delayTime.value = 0.025;
     chorusLfoNode = audioCtx.createOscillator();
-    chorusLfoNode.frequency.value = 1.5; // slow modulation
+    chorusLfoNode.frequency.value = 1.5; 
     const chorusLfoGain = audioCtx.createGain();
-    chorusLfoGain.gain.value = 0.005; // 5ms wobble
+    chorusLfoGain.gain.value = 0.005; 
     chorusLfoNode.connect(chorusLfoGain).connect(chorusDelayNode.delayTime);
     chorusLfoNode.start();
     const chorusDry = audioCtx.createGain();
@@ -717,7 +714,7 @@
     echoDelayNode.delayTime.value = 0.35;
     echoFeedbackNode = audioCtx.createGain();
     echoFeedbackNode.gain.value = 0.45;
-    echoDelayNode.connect(echoFeedbackNode).connect(echoDelayNode); // feedback loop
+    echoDelayNode.connect(echoFeedbackNode).connect(echoDelayNode); 
     const delayDry = audioCtx.createGain();
     const delayWet = audioCtx.createGain();
     const delayOut = audioCtx.createGain();
@@ -747,7 +744,6 @@
 
     reverbOut.connect(audioCtx.destination);
 
-    // Apply initial bypass configs
     updatePedalBypass('overdrive');
     updatePedalBypass('chorus');
     updatePedalBypass('delay');
@@ -762,11 +758,9 @@
     if (!dry || !wet) return;
 
     if (pedalStates[effectKey]) {
-      // Stomp pedal ON (wet active, dry bypassed)
       dry.gain.setTargetAtTime(0, now, 0.015);
       wet.gain.setTargetAtTime(1, now, 0.015);
     } else {
-      // Stomp pedal OFF (dry active, wet bypassed)
       dry.gain.setTargetAtTime(1, now, 0.015);
       wet.gain.setTargetAtTime(0, now, 0.015);
     }
@@ -807,7 +801,6 @@
     });
   }
 
-  // Waveguide physical string SynthVoice
   class SynthVoice {
     constructor(freq) {
       const now = audioCtx.currentTime;
@@ -896,42 +889,48 @@
     return baseSwar;
   }
 
+  // Chromatic tuning math for GeoShred isomorphic fretboard grid
   function xyToFreq(x, y, isSnap) {
     const rh = H / NUM_STRINGS;
     let stringIndex = Math.floor((H - y) / rh);
     stringIndex = Math.max(0, Math.min(NUM_STRINGS - 1, stringIndex));
 
-    const scaleKey = scaleSelect.value;
-    const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
-
     const stringSemitones = ROW_SEMITONE_OFFSETS[stringIndex];
-    const stringBaseFreq = BASE_SA * Math.pow(2, stringSemitones / 12);
-
-    const noteWidth = W / scale.swars.length;
-    const rawCol = x / noteWidth;
+    const fretWidth = W / NUM_FRETS;
+    const rawFret = x / fretWidth;
 
     if (isSnap) {
-      const nearestCol = Math.max(0, Math.min(scale.swars.length - 1, Math.round(rawCol)));
-      const interval = scale.intervals[nearestCol];
-      return stringBaseFreq * Math.pow(2, interval / 12);
+      const scaleKey = scaleSelect.value;
+      const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
+      
+      const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.round(rawFret)));
+      const currentSemitones = stringSemitones + nearestFret;
+      
+      // Snaps to the nearest scale interval
+      const relSemitones = ((currentSemitones % 12) + 12) % 12;
+      let closestInterval = scale.intervals[0];
+      let minDiff = 999;
+      
+      scale.intervals.forEach(interval => {
+        const diff = Math.abs(interval - relSemitones);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestInterval = interval;
+        }
+      });
+      
+      const octave = Math.floor(currentSemitones / 12);
+      const snappedSemitones = octave * 12 + closestInterval;
+      return BASE_SA * Math.pow(2, snappedSemitones / 12);
     }
 
-    const colIdx = Math.floor(rawCol);
-    const fraction = rawCol - colIdx;
+    const continuousSemitones = stringSemitones + rawFret;
+    return BASE_SA * Math.pow(2, continuousSemitones / 12);
+  }
 
-    if (colIdx < 0) return stringBaseFreq;
-    if (colIdx >= scale.swars.length - 1) {
-      const lastInterval = scale.intervals[scale.swars.length - 1];
-      return stringBaseFreq * Math.pow(2, lastInterval / 12);
-    }
-
-    const intervalA = scale.intervals[colIdx];
-    const intervalB = scale.intervals[colIdx + 1];
-
-    const freqA = stringBaseFreq * Math.pow(2, intervalA / 12);
-    const freqB = stringBaseFreq * Math.pow(2, intervalB / 12);
-
-    return freqA * Math.pow(freqB / freqA, fraction);
+  // Check if a specific relative semitone offset belongs to the scale
+  function isSemitoneInScale(relSemitones, scale) {
+    return scale.intervals.includes(relSemitones);
   }
 
   function drawInterface() {
@@ -939,42 +938,59 @@
     const rh = H / NUM_STRINGS;
     const scaleKey = scaleSelect.value;
     const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
-    const noteWidth = W / scale.swars.length;
+    const fretWidth = W / NUM_FRETS;
 
     for (let s = 0; s < NUM_STRINGS; s++) {
       const y = H - (s + 1) * rh;
-      ctx.fillStyle = s % 2 === 0 ? '#0b0d12' : '#07090d';
-      ctx.fillRect(0, y, W, rh);
-
       const stringSemitones = ROW_SEMITONE_OFFSETS[s];
 
-      for (let n = 0; n < scale.swars.length; n++) {
-        const x = n * noteWidth;
-        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(x, y); ctx.lineTo(x, y + rh);
-        ctx.stroke();
+      for (let f = 0; f < NUM_FRETS; f++) {
+        const x = f * fretWidth;
+        const totalSemitones = stringSemitones + f;
+        const relSemitones = ((totalSemitones % 12) + 12) % 12;
+        const inScale = isSemitoneInScale(relSemitones, scale);
 
-        const totalSemitones = stringSemitones + scale.intervals[n];
-        const swar = getSwarNameForSemitones(totalSemitones, scale);
+        // Styling cells matching GeoShred UI
+        if (inScale) {
+          if (relSemitones === 0) {
+            // Tonic Sa: Vibrant Glowing Golden Orange
+            ctx.fillStyle = 'rgba(230, 126, 34, 0.45)';
+            ctx.strokeStyle = 'rgba(241, 196, 15, 0.6)';
+          } else {
+            // Other scale notes: Dark Teal blue glow
+            ctx.fillStyle = 'rgba(41, 128, 185, 0.2)';
+            ctx.strokeStyle = 'rgba(52, 152, 219, 0.45)';
+          }
+        } else {
+          // Chromatic out-of-scale notes: Dark charcoal
+          ctx.fillStyle = '#0a0d14';
+          ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+        }
 
-        // Highlight root notes in elegant golden glow, other notes in soft copper
-        ctx.fillStyle = swar.startsWith('Sa') ? 'rgba(184, 134, 11, 0.45)' : 'rgba(201, 168, 118, 0.15)';
-        ctx.font = '800 13px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(swar, x + noteWidth / 2, y + rh / 2 + 5);
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(x + 2, y + 2, fretWidth - 4, rh - 4);
+        ctx.strokeRect(x + 2, y + 2, fretWidth - 4, rh - 4);
+
+        // Render Swar names inside scale notes
+        if (inScale) {
+          const swar = getSwarNameForSemitones(totalSemitones, scale);
+          ctx.fillStyle = relSemitones === 0 ? '#ffdd55' : '#f3e6d0';
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(swar, x + fretWidth / 2, y + rh / 2 + 4);
+        }
       }
 
-      // Draw shiny copper strings wires
-      ctx.strokeStyle = 'rgba(184, 134, 11, 0.35)';
-      ctx.lineWidth = 1.8;
+      // Draw strings wires
+      ctx.strokeStyle = 'rgba(184, 134, 11, 0.4)';
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(0, y + rh / 2);
       ctx.lineTo(W, y + rh / 2);
       ctx.stroke();
     }
 
+    // Touch feedback circles
     activeVoices.forEach((t) => {
       const grad = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, 35);
       grad.addColorStop(0, 'rgba(184, 134, 11, 0.85)');
@@ -990,7 +1006,6 @@
       const stringIdx = Math.floor((H - t.y) / rhLocal);
       const stringY = H - (stringIdx + 1) * rhLocal + rhLocal / 2;
 
-      // Glowing vibrating red string wire animation
       ctx.strokeStyle = '#e74c3c';
       ctx.lineWidth = 2.8;
       ctx.beginPath();
@@ -1066,7 +1081,6 @@
     activeVoices.delete(id);
   }
 
-  // Pointer event listeners
   canvas.addEventListener('pointerdown', (e) => {
     canvas.setPointerCapture(e.pointerId);
     const rect = canvas.getBoundingClientRect();
@@ -1087,14 +1101,12 @@
     if (audioCtx) buildSympatheticResonators();
   };
 
-  // Stompbox click toggles
   function initPedals() {
     const ids = ['overdrive', 'chorus', 'delay', 'reverb'];
     ids.forEach(id => {
       const pedal = document.getElementById('pedal-' + id);
       const switchBtn = document.getElementById('switch-' + id);
       
-      // Update UI matching initial states
       if (pedalStates[id]) {
         pedal.classList.add('active');
       } else {
@@ -1104,16 +1116,13 @@
       switchBtn.onclick = () => {
         pedalStates[id] = !pedalStates[id];
         
-        // Stomp trigger animations
         if (pedalStates[id]) {
           pedal.classList.add('active');
         } else {
           pedal.classList.remove('active');
         }
         
-        // Play physical click sound
         playStompClickSound();
-
         updatePedalBypass(id);
       };
     });
@@ -1137,7 +1146,6 @@
     osc.stop(now + 0.05);
   }
 
-  // Instrument Preset Selection Modal Handler
   const presetDisplayBtn = document.getElementById('presetDisplayBtn');
   const presetModal = document.getElementById('presetModal');
   const closeModalBtn = document.getElementById('closeModalBtn');
@@ -1170,7 +1178,6 @@
 
   initPedals();
 
-  // Auto-resizing render loop with visual try-catch debugger
   function loop() {
     try {
       const parent = canvas.parentElement;
