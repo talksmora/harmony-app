@@ -18,8 +18,8 @@
     overflow: hidden;
     margin: 0;
     padding: 0;
+    font-family: system-ui, -apple-system, sans-serif;
   }
-  /* Force main-area, page-content, and pageBody to stretch and not collapse */
   .main-area {
     height: 100vh !important;
     overflow: hidden !important;
@@ -45,102 +45,291 @@
     flex-direction: column !important;
     height: 100% !important;
     width: 100% !important;
-    gap: 6px !important;
-    padding: 6px !important;
-    box-sizing: border-box !important;
+    gap: 6px;
+    padding: 6px;
+    box-sizing: border-box;
+    background: #080b0f;
   }
-  /* Premium dark console panel */
+  /* Top Control Bar styling matching premium GeoShred console */
   .controls-panel {
-    background: rgba(14, 18, 24, 0.95);
-    border: 1px solid var(--border);
-    backdrop-filter: blur(15px);
-    border-radius: 12px;
-    padding: 8px 12px;
+    background: linear-gradient(180deg, #161c24 0%, #0e1218 100%);
+    border: 1px solid rgba(184, 134, 11, 0.25);
+    border-radius: 10px;
+    padding: 8px 16px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    gap: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   }
-  .control-group {
+  .left-controls {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
+    gap: 8px;
   }
-  .control-group label {
-    font-weight: 700;
-    color: #c9a876;
-    text-transform: uppercase;
-    font-size: 0.7rem;
-    letter-spacing: 0.5px;
-  }
-  .control-group select, .control-group input[type="range"] {
-    background: #191f29;
+  .raga-selector select {
+    background: #11151d;
     color: #f3e6d0;
-    border: 1.5px solid var(--border);
-    padding: 4px 8px;
+    border: 1.5px solid rgba(184,134,11,0.4);
+    padding: 6px 12px;
     border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
     outline: none;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  .control-group input[type="range"] {
-    width: 70px;
-    height: 5px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: var(--border);
-    border-radius: 2px;
-  }
-  .control-group input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #b8860b;
-    box-shadow: 0 0 6px #b8860b;
     cursor: pointer;
   }
-  .instrument-presets {
-    display: flex;
-    gap: 4px;
-  }
-  .preset-btn {
-    background: #191f29;
-    color: #c9a876;
-    border: 1.5px solid var(--border);
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.72rem;
-    font-weight: 700;
+  /* Central Premium Preset Display */
+  .preset-display {
+    background: radial-gradient(circle, #220f00 0%, #0e0500 100%);
+    border: 2px solid #b8860b;
+    border-radius: 8px;
+    padding: 6px 20px;
+    min-width: 160px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(184,134,11,0.3);
     cursor: pointer;
     transition: all 0.2s ease;
   }
-  .preset-btn.active {
-    background: linear-gradient(135deg, #b8860b, #8a5a0a);
-    color: #080a0e;
+  .preset-display:hover {
+    box-shadow: 0 0 15px rgba(184,134,11,0.5);
     border-color: #f4c542;
-    box-shadow: 0 0 10px rgba(184, 134, 11, 0.4);
   }
-  /* Non-interactive play canvas wrap stretching to full height */
+  .preset-name {
+    color: #f4c542;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 5px rgba(244,197,66,0.5);
+  }
+  .preset-category {
+    color: rgba(243,230,208,0.5);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .right-sliders {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .slider-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .slider-item label {
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: #c9a876;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .slider-item input[type="range"] {
+    width: 60px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #202733;
+    border-radius: 2px;
+  }
+  .slider-item input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #b8860b;
+    cursor: pointer;
+    box-shadow: 0 0 4px #b8860b;
+  }
+
+  /* Performance surface */
   .canvas-wrap {
-    flex: 1 !important;
-    position: relative !important;
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
+    flex: 1;
+    position: relative;
+    border: 1.5px solid rgba(184,134,11,0.2);
+    border-radius: 12px;
     overflow: hidden;
-    background: #030406;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.6) inset;
-    width: 100% !important;
+    background: #020305;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7) inset;
   }
   #surface {
     display: block;
     width: 100%;
     height: 100%;
-    touch-action: none;
+  }
+
+  /* Interactive Vintage Guitar Stompbox Pedalboard */
+  .pedalboard {
+    background: linear-gradient(180deg, #0e1218 0%, #080a0e 100%);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+  }
+  .pedal {
+    width: 85px;
+    height: 120px;
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px;
+    box-sizing: border-box;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .pedal-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    letter-spacing: 0.5px;
+    text-align: center;
+    margin-top: 2px;
+  }
+  .pedal-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #330000;
+    margin-top: 8px;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.5);
+    transition: all 0.15s ease;
+  }
+  .pedal.active .pedal-led {
+    box-shadow: 0 0 8px currentColor;
+  }
+  /* Color theme styles for vintage stompboxes */
+  .distortion-pedal { background: #b22222; } /* Red Stompbox */
+  .distortion-pedal.active .pedal-led { background: #ff3333; color: #ff3333; }
+  
+  .chorus-pedal { background: #1f4e79; } /* Blue Stompbox */
+  .chorus-pedal.active .pedal-led { background: #3399ff; color: #3399ff; }
+  
+  .delay-pedal { background: #2e7d32; } /* Green Stompbox */
+  .delay-pedal.active .pedal-led { background: #33ff33; color: #33ff33; }
+  
+  .reverb-pedal { background: #e65100; } /* Yellow/Orange Stompbox */
+  .reverb-pedal.active .pedal-led { background: #ffaa00; color: #ffaa00; }
+
+  /* Vintage mechanical stomp switch */
+  .stomp-switch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a0a0a0 0%, #505050 100%);
+    border: 2.5px solid #303030;
+    position: absolute;
+    bottom: 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    transition: transform 0.05s ease, box-shadow 0.05s ease;
+    outline: none;
+  }
+  .stomp-switch:active {
+    transform: scale(0.9) translateY(1.5px);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.5);
+  }
+
+  /* Preset Selection Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal-content {
+    background: #121824;
+    border: 2px solid #b8860b;
+    border-radius: 14px;
+    width: 85%;
+    max-width: 500px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(184,134,11,0.2);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  .modal-header h3 {
+    color: #f4c542;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+  .close-modal {
+    background: none;
+    border: none;
+    color: #c9a876;
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .modal-body {
+    max-height: 350px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 4px;
+  }
+  .preset-group-title {
+    color: #b8860b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-left: 2px solid #b8860b;
+    padding-left: 6px;
+    margin-top: 4px;
+  }
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .modal-preset-btn {
+    background: #1a2232;
+    color: #f3e6d0;
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 8px 4px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+  }
+  .modal-preset-btn:hover {
+    background: #253147;
+    border-color: #b8860b;
+  }
+  .modal-preset-btn.active {
+    background: linear-gradient(135deg, #b8860b, #8a5a0a);
+    color: #080a0e;
+    border-color: #f4c542;
   }
 </style>
 </head>
@@ -148,48 +337,114 @@
   <div id="appShellRoot"></div>
   <div id="pageBody" style="display:none;">
     <div class="pad-container">
+      
+      <!-- Top Bar Console -->
       <div class="controls-panel">
-        <div class="control-group">
-          <label for="scaleSelect">🎵 રાગ / Raga:</label>
-          <select id="scaleSelect">
-            <option value="bilawal">Bilawal (Major)</option>
-            <option value="yaman">Yaman (Kalyan)</option>
-            <option value="bhairav">Bhairav</option>
-            <option value="bhairavi" selected>Bhairavi</option>
-            <option value="kafi">Kafi</option>
-            <option value="asavari">Asavari</option>
-          </select>
-        </div>
-        
-        <div class="control-group">
-          <label>🎻 સાઉન્ડ:</label>
-          <div class="instrument-presets">
-            <button class="preset-btn active" data-preset="sitar">Sitar</button>
-            <button class="preset-btn" data-preset="flute">Bansuri</button>
-            <button class="preset-btn" data-preset="violin">Violin</button>
-            <button class="preset-btn" data-preset="guitar">Guitar</button>
-            <button class="preset-btn" data-preset="sarangi">Sarangi</button>
+        <div class="left-controls">
+          <div class="raga-selector">
+            <select id="scaleSelect">
+              <option value="bilawal">Bilawal (Major)</option>
+              <option value="yaman">Yaman (Kalyan)</option>
+              <option value="bhairav">Bhairav</option>
+              <option value="bhairavi" selected>Bhairavi</option>
+              <option value="kafi">Kafi</option>
+              <option value="asavari">Asavari</option>
+            </select>
           </div>
         </div>
 
-        <div class="control-group">
-          <label for="glideRange">⚡ Slide:</label>
-          <input type="range" id="glideRange" min="0.01" max="0.3" step="0.01" value="0.06">
-        </div>
-        
-        <div class="control-group">
-          <label for="vibratoRange">📳 Vib Depth:</label>
-          <input type="range" id="vibratoRange" min="0" max="15" step="1" value="8">
+        <!-- Central Preset Display (Clickable) -->
+        <div class="preset-display" id="presetDisplayBtn">
+          <div class="preset-name" id="selectedPresetName">Sitar Lead</div>
+          <div class="preset-category" id="selectedPresetCategory">Naada Indian</div>
         </div>
 
-        <div class="control-group">
-          <label for="echoBtn" id="lblEcho">🔊 Reverb Echo</label>
-          <input type="checkbox" id="echoBtn" checked style="width: 15px; height: 15px; accent-color: #b8860b;">
+        <div class="right-sliders">
+          <div class="slider-item">
+            <label for="glideRange">Slide</label>
+            <input type="range" id="glideRange" min="0.01" max="0.3" step="0.01" value="0.06">
+          </div>
+          <div class="slider-item">
+            <label for="vibratoRange">Vibrato</label>
+            <input type="range" id="vibratoRange" min="0" max="15" step="1" value="8">
+          </div>
         </div>
       </div>
 
+      <!-- Fretboard Canvas -->
       <div class="canvas-wrap">
         <canvas id="surface"></canvas>
+      </div>
+
+      <!-- Effects Pedalboard -->
+      <div class="pedalboard">
+        <!-- Overdrive Pedal -->
+        <div class="pedal distortion-pedal active" id="pedal-overdrive">
+          <div class="pedal-label">OVERDRIVE</div>
+          <div class="pedal-led"></div>
+          <button class="stomp-switch" id="switch-overdrive"></button>
+        </div>
+        <!-- Chorus Pedal -->
+        <div class="pedal chorus-pedal" id="pedal-chorus">
+          <div class="pedal-label">CHORUS</div>
+          <div class="pedal-led"></div>
+          <button class="stomp-switch" id="switch-chorus"></button>
+        </div>
+        <!-- Delay Pedal -->
+        <div class="pedal delay-pedal active" id="pedal-delay">
+          <div class="pedal-label">DELAY</div>
+          <div class="pedal-led"></div>
+          <button class="stomp-switch" id="switch-delay"></button>
+        </div>
+        <!-- Reverb Pedal -->
+        <div class="pedal reverb-pedal active" id="pedal-reverb">
+          <div class="pedal-label">REVERB</div>
+          <div class="pedal-led"></div>
+          <button class="stomp-switch" id="switch-reverb"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preset Selection Modal -->
+  <div class="modal-overlay" id="presetModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>વાજિંત્ર પસંદ કરો / Select Instrument</h3>
+        <button class="close-modal" id="closeModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="preset-group-title">Core Engine (Guitars)</div>
+        <div class="preset-grid">
+          <button class="modal-preset-btn" data-preset="lead_guitar" data-cat="Core Guitar">Shred Lead</button>
+          <button class="modal-preset-btn" data-preset="nylon_guitar" data-cat="Core Guitar">Acoustic Nylon</button>
+          <button class="modal-preset-btn" data-preset="steel_guitar" data-cat="Core Guitar">Steel String</button>
+        </div>
+
+        <div class="preset-group-title">GeoSWAM Family (Western)</div>
+        <div class="preset-grid">
+          <button class="modal-preset-btn" data-preset="swam_violin" data-cat="GeoSWAM Strings">GeoViolin</button>
+          <button class="modal-preset-btn" data-preset="swam_cello" data-cat="GeoSWAM Strings">GeoCello</button>
+          <button class="modal-preset-btn" data-preset="swam_flute" data-cat="GeoSWAM Winds">GeoFlute</button>
+          <button class="modal-preset-btn" data-preset="swam_clarinet" data-cat="GeoSWAM Winds">GeoClarinet</button>
+          <button class="modal-preset-btn" data-preset="swam_oboe" data-cat="GeoSWAM Winds">GeoOboe</button>
+          <button class="modal-preset-btn" data-preset="swam_trumpet" data-cat="GeoSWAM Brass">GeoTrumpet</button>
+        </div>
+
+        <div class="preset-group-title">Naada Family (Indian & Chinese)</div>
+        <div class="preset-grid">
+          <button class="modal-preset-btn active" data-preset="sitar" data-cat="Naada Indian">Sitar</button>
+          <button class="modal-preset-btn" data-preset="sarod" data-cat="Naada Indian">Sarod</button>
+          <button class="modal-preset-btn" data-preset="sarangi" data-cat="Naada Indian">Sarangi</button>
+          <button class="modal-preset-btn" data-preset="veena" data-cat="Naada Indian">Veena</button>
+          <button class="modal-preset-btn" data-preset="bansuri" data-cat="Naada Indian">Bansuri Flute</button>
+          <button class="modal-preset-btn" data-preset="shehnai" data-cat="Naada Indian">Shehnai</button>
+          <button class="modal-preset-btn" data-preset="erhu" data-cat="Naada Chinese">Erhu</button>
+          <button class="modal-preset-btn" data-preset="pipa" data-cat="Naada Chinese">Pipa</button>
+          <button class="modal-preset-btn" data-preset="dizi" data-cat="Naada Chinese">Dizi Flute</button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -201,7 +456,7 @@
 <script>
 (function(){
   const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
-  const pageTitle = lang === 'en' ? '🎹 Riyaaz Pad' : lang === 'hi' ? '🎹  रियाज़ पैડ' : '🎹 રિયાઝ પેડ';
+  const pageTitle = lang === 'en' ? '🎹 Riyaaz Pad' : lang === 'hi' ? '🎹  रियाज़ पैड' : '🎹 રિયાઝ પેડ';
 
   const SCALE_DATA = {
     bilawal: {
@@ -230,39 +485,35 @@
     }
   };
 
+  // Detailed physical presets properties mapping
   const INSTRUMENT_PRESETS = {
-    sitar: {
-      wave1: 'sawtooth', wave2: 'square', detune2: 2.01, mix2: 0.15,
-      filterType: 'bandpass', filterMult: 3.2, filterMaxFreq: 6000, filterQ: 4.5,
-      attack: 0.005, peakGain: 0.28, sustainGain: 0.12, pluck: true, release: 1.2
-    },
-    flute: {
-      wave1: 'sine', wave2: 'triangle', detune2: 2.0, mix2: 0.08,
-      filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 4000, filterQ: 1.0,
-      attack: 0.1, peakGain: 0.28, sustainGain: 0.28, pluck: false, release: 0.25
-    },
-    violin: {
-      wave1: 'sawtooth', wave2: 'sawtooth', detune2: 1.006, mix2: 0.55,
-      filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 7000, filterQ: 1.5,
-      attack: 0.14, peakGain: 0.22, sustainGain: 0.22, pluck: false, release: 0.35
-    },
-    guitar: {
-      wave1: 'sawtooth', wave2: 'triangle', detune2: 2.0, mix2: 0.25,
-      filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 5000, filterQ: 2.0,
-      attack: 0.004, peakGain: 0.3, sustainGain: 0.1, pluck: true, release: 0.9
-    },
-    sarangi: {
-      wave1: 'sawtooth', wave2: 'sawtooth', detune2: 1.01, mix2: 0.45,
-      filterType: 'bandpass', filterMult: 2.5, filterMaxFreq: 5500, filterQ: 3.0,
-      attack: 0.12, peakGain: 0.24, sustainGain: 0.24, pluck: false, release: 0.4
-    }
+    sitar: { damping: 0.14, feedback: 0.99, filterType: 'bandpass', filterMult: 3.5, filterMaxFreq: 6000, filterQ: 4.5, attack: 0.005, peakGain: 0.28, release: 1.2 },
+    sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.3, release: 0.85 },
+    sarangi: { damping: 0.26, feedback: 0.992, filterType: 'bandpass', filterMult: 2.2, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.12, peakGain: 0.24, release: 0.45 },
+    veena: { damping: 0.15, feedback: 0.988, filterType: 'lowpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 2.0, attack: 0.008, peakGain: 0.26, release: 1.0 },
+    bansuri: { damping: 0.42, feedback: 0.97, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 4000, filterQ: 1.0, attack: 0.1, peakGain: 0.28, release: 0.25 },
+    shehnai: { damping: 0.3, feedback: 0.985, filterType: 'bandpass', filterMult: 5.5, filterMaxFreq: 6500, filterQ: 4.0, attack: 0.05, peakGain: 0.26, release: 0.3 },
+    
+    lead_guitar: { damping: 0.12, feedback: 0.994, filterType: 'lowpass', filterMult: 5.5, filterMaxFreq: 7000, filterQ: 2.0, attack: 0.003, peakGain: 0.32, release: 1.4 },
+    nylon_guitar: { damping: 0.16, feedback: 0.982, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 4500, filterQ: 1.5, attack: 0.005, peakGain: 0.28, release: 0.8 },
+    steel_guitar: { damping: 0.11, feedback: 0.988, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 5000, filterQ: 2.0, attack: 0.004, peakGain: 0.3, release: 0.95 },
+    
+    swam_violin: { damping: 0.28, feedback: 0.992, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 6000, filterQ: 1.5, attack: 0.12, peakGain: 0.22, release: 0.35 },
+    swam_cello: { damping: 0.32, feedback: 0.994, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 3000, filterQ: 1.2, attack: 0.15, peakGain: 0.24, release: 0.4 },
+    swam_flute: { damping: 0.45, feedback: 0.965, filterType: 'lowpass', filterMult: 4.2, filterMaxFreq: 3800, filterQ: 0.8, attack: 0.08, peakGain: 0.26, release: 0.2 },
+    swam_clarinet: { damping: 0.35, feedback: 0.975, filterType: 'lowpass', filterMult: 4.8, filterMaxFreq: 4200, filterQ: 1.2, attack: 0.07, peakGain: 0.26, release: 0.25 },
+    swam_oboe: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 5.2, filterMaxFreq: 4800, filterQ: 2.0, attack: 0.06, peakGain: 0.25, release: 0.28 },
+    swam_trumpet: { damping: 0.28, feedback: 0.985, filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.08, peakGain: 0.28, release: 0.3 },
+    
+    erhu: { damping: 0.24, feedback: 0.99, filterType: 'bandpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 3.5, attack: 0.1, peakGain: 0.25, release: 0.4 },
+    pipa: { damping: 0.13, feedback: 0.98, filterType: 'lowpass', filterMult: 3.5, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.004, peakGain: 0.3, release: 0.6 },
+    dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.28, release: 0.22 }
   };
 
   let activePreset = 'sitar';
   const scaleSelect = document.getElementById('scaleSelect');
   const glideRange = document.getElementById('glideRange');
   const vibratoRange = document.getElementById('vibratoRange');
-  const echoBtn = document.getElementById('echoBtn');
 
   // Canvas Setup
   const canvas = document.getElementById('surface');
@@ -282,16 +533,52 @@
 
   const NUM_STRINGS = 4;
   const BASE_SA = 130.81; // C3
-  const ROW_SEMITONE_OFFSETS = [15, 10, 5, 0]; // fourths tuning offsets
+  const ROW_SEMITONE_OFFSETS = [15, 10, 5, 0];
 
-  // Web Audio Context
+  // Web Audio Context & Effects Chain
   let audioCtx = null;
-  let reverbNode = null;
-  let resonanceFilters = []; // Sympathetic Resonators
   let workletModuleLoaded = false;
+  
+  let masterGain = null;
+  let driveNode = null;
+  let chorusDelayNode = null;
+  let chorusLfoNode = null;
+  let echoDelayNode = null;
+  let echoFeedbackNode = null;
+  let reverbNode = null;
+  let resonanceFilters = [];
+
+  // Dry/Wet Bypass nodes for stompboxes
+  const dryWetNodes = {
+    overdrive: { dry: null, wet: null },
+    chorus: { dry: null, wet: null },
+    delay: { dry: null, wet: null },
+    reverb: { dry: null, wet: null }
+  };
+
+  // Pedalboard States
+  const pedalStates = {
+    overdrive: true,
+    chorus: false,
+    delay: true,
+    reverb: true
+  };
+
   const activeVoices = new Map();
 
-  // Load AudioWorklet from Blob URL
+  function makeDistortionCurve(amount) {
+    const k = typeof amount === 'number' ? amount : 50;
+    const n_samples = 44100;
+    const curve = new Float32Array(n_samples);
+    const deg = Math.PI / 180;
+    for (let i = 0; i < n_samples; ++i) {
+      const x = (i * 2) / n_samples - 1;
+      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  // Load AudioWorklet and setup physical model chain
   async function ensureCtx() {
     if (audioCtx) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -387,12 +674,59 @@
       workletModuleLoaded = true;
     }
 
-    buildReverb();
+    buildEffectsChain();
     buildSympatheticResonators();
   }
 
-  // High-fidelity synthetic convolver reverb
-  function buildReverb() {
+  // Create full physical pedal routing chain
+  function buildEffectsChain() {
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.75;
+
+    // 1. Overdrive
+    driveNode = audioCtx.createWaveShaper();
+    driveNode.curve = makeDistortionCurve(60);
+    driveNode.oversample = '4x';
+    const driveDry = audioCtx.createGain();
+    const driveWet = audioCtx.createGain();
+    const driveOut = audioCtx.createGain();
+    masterGain.connect(driveDry).connect(driveOut);
+    masterGain.connect(driveNode).connect(driveWet).connect(driveOut);
+    dryWetNodes.overdrive.dry = driveDry;
+    dryWetNodes.overdrive.wet = driveWet;
+
+    // 2. Chorus
+    chorusDelayNode = audioCtx.createDelay();
+    chorusDelayNode.delayTime.value = 0.025;
+    chorusLfoNode = audioCtx.createOscillator();
+    chorusLfoNode.frequency.value = 1.5; // slow modulation
+    const chorusLfoGain = audioCtx.createGain();
+    chorusLfoGain.gain.value = 0.005; // 5ms wobble
+    chorusLfoNode.connect(chorusLfoGain).connect(chorusDelayNode.delayTime);
+    chorusLfoNode.start();
+    const chorusDry = audioCtx.createGain();
+    const chorusWet = audioCtx.createGain();
+    const chorusOut = audioCtx.createGain();
+    driveOut.connect(chorusDry).connect(chorusOut);
+    driveOut.connect(chorusDelayNode).connect(chorusWet).connect(chorusOut);
+    dryWetNodes.chorus.dry = chorusDry;
+    dryWetNodes.chorus.wet = chorusWet;
+
+    // 3. Delay/Echo
+    echoDelayNode = audioCtx.createDelay();
+    echoDelayNode.delayTime.value = 0.35;
+    echoFeedbackNode = audioCtx.createGain();
+    echoFeedbackNode.gain.value = 0.45;
+    echoDelayNode.connect(echoFeedbackNode).connect(echoDelayNode); // feedback loop
+    const delayDry = audioCtx.createGain();
+    const delayWet = audioCtx.createGain();
+    const delayOut = audioCtx.createGain();
+    chorusOut.connect(delayDry).connect(delayOut);
+    chorusOut.connect(echoDelayNode).connect(delayWet).connect(delayOut);
+    dryWetNodes.delay.dry = delayDry;
+    dryWetNodes.delay.wet = delayWet;
+
+    // 4. Reverb Convolver
     reverbNode = audioCtx.createConvolver();
     const len = audioCtx.sampleRate * 2.2;
     const impulse = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
@@ -403,10 +737,41 @@
       }
     }
     reverbNode.buffer = impulse;
-    reverbNode.connect(audioCtx.destination);
+    const reverbDry = audioCtx.createGain();
+    const reverbWet = audioCtx.createGain();
+    const reverbOut = audioCtx.createGain();
+    delayOut.connect(reverbDry).connect(reverbOut);
+    delayOut.connect(reverbNode).connect(reverbWet).connect(reverbOut);
+    dryWetNodes.reverb.dry = reverbDry;
+    dryWetNodes.reverb.wet = reverbWet;
+
+    reverbOut.connect(audioCtx.destination);
+
+    // Apply initial bypass configs
+    updatePedalBypass('overdrive');
+    updatePedalBypass('chorus');
+    updatePedalBypass('delay');
+    updatePedalBypass('reverb');
   }
 
-  // Sympathetic resonators representing wood/body resonance
+  function updatePedalBypass(effectKey) {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const dry = dryWetNodes[effectKey].dry;
+    const wet = dryWetNodes[effectKey].wet;
+    if (!dry || !wet) return;
+
+    if (pedalStates[effectKey]) {
+      // Stomp pedal ON (wet active, dry bypassed)
+      dry.gain.setTargetAtTime(0, now, 0.015);
+      wet.gain.setTargetAtTime(1, now, 0.015);
+    } else {
+      // Stomp pedal OFF (dry active, wet bypassed)
+      dry.gain.setTargetAtTime(1, now, 0.015);
+      wet.gain.setTargetAtTime(0, now, 0.015);
+    }
+  }
+
   function buildSympatheticResonators() {
     resonanceFilters.forEach(res => {
       try { res.filter.disconnect(); } catch(e) {}
@@ -436,12 +801,7 @@
   }
 
   function outputChain(node) {
-    node.connect(audioCtx.destination);
-    if (echoBtn.checked && reverbNode) {
-      const send = audioCtx.createGain();
-      send.gain.value = 0.35;
-      node.connect(send).connect(reverbNode);
-    }
+    node.connect(masterGain);
     resonanceFilters.forEach(res => {
       node.connect(res.filter);
     });
@@ -466,19 +826,8 @@
       this.stringNode = new AudioWorkletNode(audioCtx, 'waveguide-string-processor');
       this.stringNode.connect(this.filter);
 
-      let dampingVal = 0.18;
-      let feedbackVal = 0.99; 
-
-      if (activePreset === 'flute') {
-        dampingVal = 0.45; 
-        feedbackVal = 0.97; 
-      } else if (activePreset === 'violin' || activePreset === 'sarangi') {
-        dampingVal = 0.28;
-        feedbackVal = 0.992;
-      }
-
-      this.stringNode.parameters.get('damping').setValueAtTime(dampingVal, now);
-      this.stringNode.parameters.get('feedback').setValueAtTime(feedbackVal, now);
+      this.stringNode.parameters.get('damping').setValueAtTime(cfg.damping, now);
+      this.stringNode.parameters.get('feedback').setValueAtTime(cfg.feedback, now);
       this.stringNode.parameters.get('frequency').setValueAtTime(freq, now);
 
       this.stringNode.port.postMessage({
@@ -594,7 +943,7 @@
 
     for (let s = 0; s < NUM_STRINGS; s++) {
       const y = H - (s + 1) * rh;
-      ctx.fillStyle = s % 2 === 0 ? '#0d1117' : '#090b0e';
+      ctx.fillStyle = s % 2 === 0 ? '#0b0d12' : '#07090d';
       ctx.fillRect(0, y, W, rh);
 
       const stringSemitones = ROW_SEMITONE_OFFSETS[s];
@@ -610,14 +959,16 @@
         const totalSemitones = stringSemitones + scale.intervals[n];
         const swar = getSwarNameForSemitones(totalSemitones, scale);
 
-        ctx.fillStyle = swar.startsWith('Sa') ? 'rgba(184, 134, 11, 0.45)' : 'rgba(201, 168, 118, 0.18)';
+        // Highlight root notes in elegant golden glow, other notes in soft copper
+        ctx.fillStyle = swar.startsWith('Sa') ? 'rgba(184, 134, 11, 0.45)' : 'rgba(201, 168, 118, 0.15)';
         ctx.font = '800 13px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(swar, x + noteWidth / 2, y + rh / 2 + 5);
       }
 
+      // Draw shiny copper strings wires
       ctx.strokeStyle = 'rgba(184, 134, 11, 0.35)';
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
       ctx.moveTo(0, y + rh / 2);
       ctx.lineTo(W, y + rh / 2);
@@ -639,11 +990,12 @@
       const stringIdx = Math.floor((H - t.y) / rhLocal);
       const stringY = H - (stringIdx + 1) * rhLocal + rhLocal / 2;
 
+      // Glowing vibrating red string wire animation
       ctx.strokeStyle = '#e74c3c';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 2.8;
       ctx.beginPath();
-      ctx.moveTo(t.x - 40, stringY + Math.sin(Date.now() * 0.08) * 1.5);
-      ctx.lineTo(t.x + 40, stringY - Math.sin(Date.now() * 0.08) * 1.5);
+      ctx.moveTo(t.x - 45, stringY + Math.sin(Date.now() * 0.08) * 1.5);
+      ctx.lineTo(t.x + 45, stringY - Math.sin(Date.now() * 0.08) * 1.5);
       ctx.stroke();
     });
   }
@@ -731,17 +1083,92 @@
   canvas.addEventListener('pointercancel', (e) => handleEnd(e.pointerId));
   canvas.addEventListener('pointerleave', (e) => handleEnd(e.pointerId));
 
-  document.querySelectorAll('.preset-btn').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activePreset = btn.getAttribute('data-preset');
-    };
-  });
-
   scaleSelect.onchange = () => {
     if (audioCtx) buildSympatheticResonators();
   };
+
+  // Stompbox click toggles
+  function initPedals() {
+    const ids = ['overdrive', 'chorus', 'delay', 'reverb'];
+    ids.forEach(id => {
+      const pedal = document.getElementById('pedal-' + id);
+      const switchBtn = document.getElementById('switch-' + id);
+      
+      // Update UI matching initial states
+      if (pedalStates[id]) {
+        pedal.classList.add('active');
+      } else {
+        pedal.classList.remove('active');
+      }
+
+      switchBtn.onclick = () => {
+        pedalStates[id] = !pedalStates[id];
+        
+        // Stomp trigger animations
+        if (pedalStates[id]) {
+          pedal.classList.add('active');
+        } else {
+          pedal.classList.remove('active');
+        }
+        
+        // Play physical click sound
+        playStompClickSound();
+
+        updatePedalBypass(id);
+      };
+    });
+  }
+
+  function playStompClickSound() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(120, now);
+    osc.frequency.exponentialRampToValueAtTime(10, now + 0.04);
+    
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+    
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.05);
+  }
+
+  // Instrument Preset Selection Modal Handler
+  const presetDisplayBtn = document.getElementById('presetDisplayBtn');
+  const presetModal = document.getElementById('presetModal');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const selectedPresetName = document.getElementById('selectedPresetName');
+  const selectedPresetCategory = document.getElementById('selectedPresetCategory');
+
+  presetDisplayBtn.onclick = () => {
+    presetModal.classList.add('active');
+  };
+
+  closeModalBtn.onclick = () => {
+    presetModal.classList.remove('active');
+  };
+
+  document.querySelectorAll('.modal-preset-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.modal-preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      activePreset = btn.getAttribute('data-preset');
+      const name = btn.textContent;
+      const cat = btn.getAttribute('data-cat');
+      
+      selectedPresetName.textContent = name;
+      selectedPresetCategory.textContent = cat;
+      
+      presetModal.classList.remove('active');
+    };
+  });
+
+  initPedals();
 
   // Auto-resizing render loop with visual try-catch debugger
   function loop() {
