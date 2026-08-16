@@ -14,7 +14,7 @@
     user-select: none;
     -webkit-user-select: none;
     touch-action: none;
-    background: #06080b;
+    background: #05070a;
     overflow: hidden;
     margin: 0;
     padding: 0;
@@ -125,15 +125,16 @@
     border-color: #f4c542;
     box-shadow: 0 0 10px rgba(184, 134, 11, 0.4);
   }
-  /* Non-interactive responsive play canvas wrap */
+  /* Non-interactive play canvas wrap stretching to full height */
   .canvas-wrap {
-    flex: 1;
-    position: relative;
+    flex: 1 !important;
+    position: relative !important;
     border: 1.5px solid var(--border);
     border-radius: 14px;
     overflow: hidden;
     background: #030406;
     box-shadow: 0 8px 30px rgba(0,0,0,0.6) inset;
+    width: 100% !important;
   }
   #surface {
     display: block;
@@ -281,23 +282,22 @@
 
   const NUM_STRINGS = 4;
   const BASE_SA = 130.81; // C3
-  // Guitar fourths tuning offsets (0, 5, 10, 15 semitones from Sa)
-  const ROW_SEMITONE_OFFSETS = [15, 10, 5, 0]; // top to bottom string
+  const ROW_SEMITONE_OFFSETS = [15, 10, 5, 0]; // fourths tuning offsets
 
   // Web Audio Context
   let audioCtx = null;
   let reverbNode = null;
+  let resonanceFilters = []; // Sympathetic Resonators
   const activeVoices = new Map();
 
   function ensureCtx() {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      buildReverb();
-    }
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    buildReverb();
+    buildSympatheticResonators();
   }
 
-  // Create high-fidelity synthetic convolver impulse response
+  // High-fidelity synthetic convolver reverb
   function buildReverb() {
     reverbNode = audioCtx.createConvolver();
     const len = audioCtx.sampleRate * 2.2;
@@ -312,6 +312,33 @@
     reverbNode.connect(audioCtx.destination);
   }
 
+  // Create sympathetic resonance filters representing Indian scale strings
+  function buildSympatheticResonators() {
+    resonanceFilters = [];
+    const scaleKey = scaleSelect.value;
+    const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
+
+    // Resonator harmonics representing Sa, Ma, Pa
+    const baseOctaves = [1, 2]; 
+    const targetSemitones = [0, 5, 7]; // Sa, Ma, Pa intervals
+
+    targetSemitones.forEach(semi => {
+      baseOctaves.forEach(oct => {
+        const freq = BASE_SA * Math.pow(2, oct) * Math.pow(2, semi / 12);
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = freq;
+        filter.Q.value = 40; // High Q to create ringing sympathetic tail
+
+        const gain = audioCtx.createGain();
+        gain.gain.value = 0.08; // subtle amount
+
+        filter.connect(gain).connect(audioCtx.destination);
+        resonanceFilters.push({ filter, gain });
+      });
+    });
+  }
+
   function outputChain(node) {
     node.connect(audioCtx.destination);
     if (echoBtn.checked && reverbNode) {
@@ -319,6 +346,10 @@
       send.gain.value = 0.35;
       node.connect(send).connect(reverbNode);
     }
+    // Route to sympathetic resonators
+    resonanceFilters.forEach(res => {
+      node.connect(res.filter);
+    });
   }
 
   // Double-detuned oscillator synth voice
@@ -352,7 +383,6 @@
       this.osc1.connect(this.filter);
       this.osc2.connect(this.g2).connect(this.filter);
 
-      // Low Frequency Vibrato LFO
       this.vibratoLfo = audioCtx.createOscillator();
       this.vibratoLfo.frequency.value = 5.8;
       this.vibratoGain = audioCtx.createGain();
@@ -401,7 +431,6 @@
     }
   }
 
-  // Helper to dynamically calculate swar name based on semitone offsets
   function getSwarNameForSemitones(semitones, scale) {
     const octave = Math.floor(semitones / 12);
     const relSemitones = ((semitones % 12) + 12) % 12;
@@ -425,8 +454,8 @@
     return baseSwar;
   }
 
-  // Calculate notes based on continuous X/Y coordinates using guitar fourths tuning
-  function xyToFreq(x, y) {
+  // Calculate notes based on continuous coordinates
+  function xyToFreq(x, y, isSnap) {
     const rh = H / NUM_STRINGS;
     let stringIndex = Math.floor((H - y) / rh);
     stringIndex = Math.max(0, Math.min(NUM_STRINGS - 1, stringIndex));
@@ -439,6 +468,12 @@
 
     const noteWidth = W / scale.swars.length;
     const rawCol = x / noteWidth;
+
+    if (isSnap) {
+      const nearestCol = Math.max(0, Math.min(scale.swars.length - 1, Math.round(rawCol)));
+      const interval = scale.intervals[nearestCol];
+      return stringBaseFreq * Math.pow(2, interval / 12);
+    }
 
     const colIdx = Math.floor(rawCol);
     const fraction = rawCol - colIdx;
@@ -458,7 +493,6 @@
     return freqA * Math.pow(freqB / freqA, fraction);
   }
 
-  // Draw isomorphic visual interface on canvas
   function drawInterface() {
     ctx.clearRect(0, 0, W, H);
     const rh = H / NUM_STRINGS;
@@ -466,7 +500,6 @@
     const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
     const noteWidth = W / scale.swars.length;
 
-    // Draw string tracks
     for (let s = 0; s < NUM_STRINGS; s++) {
       const y = H - (s + 1) * rh;
       ctx.fillStyle = s % 2 === 0 ? '#0d1117' : '#090b0e';
@@ -474,7 +507,6 @@
 
       const stringSemitones = ROW_SEMITONE_OFFSETS[s];
 
-      // Draw vertical fret indicators
       for (let n = 0; n < scale.swars.length; n++) {
         const x = n * noteWidth;
         ctx.strokeStyle = 'rgba(255,255,255,0.03)';
@@ -483,7 +515,6 @@
         ctx.moveTo(x, y); ctx.lineTo(x, y + rh);
         ctx.stroke();
 
-        // Calculate dynamic swar name with correct octave indicator
         const totalSemitones = stringSemitones + scale.intervals[n];
         const swar = getSwarNameForSemitones(totalSemitones, scale);
 
@@ -493,7 +524,6 @@
         ctx.fillText(swar, x + noteWidth / 2, y + rh / 2 + 5);
       }
 
-      // Draw horizontal string wire
       ctx.strokeStyle = 'rgba(184, 134, 11, 0.35)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -502,7 +532,6 @@
       ctx.stroke();
     }
 
-    // Draw glowing touch pointers
     activeVoices.forEach((t) => {
       const grad = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, 35);
       grad.addColorStop(0, 'rgba(184, 134, 11, 0.85)');
@@ -514,7 +543,6 @@
       ctx.fillStyle = grad;
       ctx.fill();
 
-      // String vibration animation overlay
       const rhLocal = H / NUM_STRINGS;
       const stringIdx = Math.floor((H - t.y) / rhLocal);
       const stringY = H - (stringIdx + 1) * rhLocal + rhLocal / 2;
@@ -528,34 +556,71 @@
     });
   }
 
-  // Pointer interactions mapping (Supports Multi-touch)
   function handleStart(id, x, y) {
     ensureCtx();
-    const freq = xyToFreq(x, y);
+    // Magic Pitch Rounding: snap to nearest note center frequency initially
+    const freq = xyToFreq(x, y, true);
     const voice = new SynthVoice(freq);
-    activeVoices.set(id, { x, y, voice, lastY: y, wiggle: 0 });
+    activeVoices.set(id, {
+      startX: x, startY: y,
+      x, y, voice, lastY: y, lastX: x,
+      wiggleY: 0, wiggleX: 0,
+      isFretless: false,
+      lastMoveTime: Date.now()
+    });
   }
 
   function handleMove(id, x, y) {
     const t = activeVoices.get(id);
     if (!t) return;
 
-    const freq = xyToFreq(x, y);
-    const glideTime = parseFloat(glideRange.value);
-    t.voice.glideTo(freq, glideTime);
+    const dx = Math.abs(x - t.startX);
+    const now = Date.now();
 
-    // Calculate Y-axis micro wiggle speed to trigger expression vibrato
+    // Magic Pitch Rounding transition: fretless mode if slid beyond 12px
+    if (!t.isFretless && dx > 12) {
+      t.isFretless = true;
+    }
+
+    let targetFreq;
+    let glideTime = parseFloat(glideRange.value);
+
+    if (t.isFretless) {
+      // Continuous fretless slides
+      targetFreq = xyToFreq(x, y, false);
+      
+      // Calculate micro-wiggles X coordinate speed to bypass glide dampening
+      const deltaX = Math.abs(x - t.lastX);
+      t.wiggleX = t.wiggleX * 0.8 + deltaX * 0.2;
+      
+      if (t.wiggleX > 4) {
+        glideTime = 0.005; // zero delay response for natural wiggling vibrato!
+      }
+    } else {
+      // Kept snapped in tune unless dragged
+      targetFreq = xyToFreq(t.startX, t.startY, true);
+    }
+
+    t.voice.glideTo(targetFreq, glideTime);
+
+    // Y-Axis Expression Modulation: change filter cutoff frequency on slide Y
+    const relativeY = y % (H / NUM_STRINGS);
+    const normY = relativeY / (H / NUM_STRINGS); // 0 to 1
+    const cutoff = 1000 + (1 - normY) * 3500;
+    t.voice.filter.frequency.setTargetAtTime(cutoff, audioCtx.currentTime, 0.05);
+
+    // Y-Axis micro-wiggle calculations
     const dy = Math.abs(y - t.lastY);
-    t.wiggle = t.wiggle * 0.85 + dy * 0.15;
-    
-    // Scale user vibrato settings depth
+    t.wiggleY = t.wiggleY * 0.82 + dy * 0.18;
     const userMaxVib = parseFloat(vibratoRange.value);
-    const depth = Math.min(userMaxVib, t.wiggle * 2.2);
+    const depth = Math.min(userMaxVib, t.wiggleY * 2.2);
     t.voice.vibratoGain.gain.setTargetAtTime(depth, audioCtx.currentTime, 0.04);
 
     t.lastY = y;
+    t.lastX = x;
     t.x = x;
     t.y = y;
+    t.lastMoveTime = now;
   }
 
   function handleEnd(id) {
@@ -565,7 +630,7 @@
     activeVoices.delete(id);
   }
 
-  // Event Listeners Registration
+  // Pointer event listeners
   canvas.addEventListener('pointerdown', (e) => {
     canvas.setPointerCapture(e.pointerId);
     const rect = canvas.getBoundingClientRect();
@@ -582,7 +647,6 @@
   canvas.addEventListener('pointercancel', (e) => handleEnd(e.pointerId));
   canvas.addEventListener('pointerleave', (e) => handleEnd(e.pointerId));
 
-  // Presets Toggle Button Handler
   document.querySelectorAll('.preset-btn').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
@@ -592,10 +656,10 @@
   });
 
   scaleSelect.onchange = () => {
-    // Redrawn dynamically in next animation frame
+    buildSympatheticResonators();
   };
 
-  // Render loop with auto-resizing and visual try-catch diagnostics
+  // Auto-resizing render loop with visual try-catch debugger
   function loop() {
     try {
       const parent = canvas.parentElement;
@@ -606,9 +670,18 @@
           resize();
         }
       }
+
+      // Slowly auto-snap stationary active touches back to nearest scale note center (magic rounding)
+      const now = Date.now();
+      activeVoices.forEach((t) => {
+        if (t.isFretless && (now - t.lastMoveTime > 180)) {
+          const snapFreq = xyToFreq(t.x, t.y, true);
+          t.voice.glideTo(snapFreq, 0.25); // slow alignment
+        }
+      });
+
       drawInterface();
     } catch (e) {
-      // Clear screen and show error in red text for instant debugging
       ctx.fillStyle = '#06080b';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = '#ff3333';
