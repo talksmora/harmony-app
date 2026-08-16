@@ -583,8 +583,16 @@
     // Redrawn dynamically in next animation frame
   };
 
-  // Render loop
+  // Render loop with auto-resizing detection to avoid race conditions on page load
   function loop() {
+    const parent = canvas.parentElement;
+    if (parent) {
+      const currentWidth = parent.clientWidth;
+      const currentHeight = parent.clientHeight;
+      if (currentWidth !== W || currentHeight !== H) {
+        resize();
+      }
+    }
     drawInterface();
     requestAnimationFrame(loop);
   }
