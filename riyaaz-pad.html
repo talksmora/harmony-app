@@ -590,17 +590,29 @@
     // Redrawn dynamically in next animation frame
   };
 
-  // Render loop with auto-resizing detection to avoid race conditions on page load
+  // Render loop with auto-resizing and visual try-catch diagnostics
   function loop() {
-    const parent = canvas.parentElement;
-    if (parent) {
-      const currentWidth = parent.clientWidth;
-      const currentHeight = parent.clientHeight;
-      if (currentWidth !== W || currentHeight !== H) {
-        resize();
+    try {
+      const parent = canvas.parentElement;
+      if (parent) {
+        const currentWidth = parent.clientWidth;
+        const currentHeight = parent.clientHeight;
+        if (currentWidth !== W || currentHeight !== H) {
+          resize();
+        }
       }
+      drawInterface();
+    } catch (e) {
+      // Clear screen and show error in red text for instant debugging
+      ctx.fillStyle = '#06080b';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ff3333';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText("SYNTH ERROR: " + e.message, 30, 50);
+      ctx.font = '13px monospace';
+      ctx.fillText("Stack: " + e.stack.substring(0, 120), 30, 80);
+      console.error("Riyaaz Pad Crash:", e);
     }
-    drawInterface();
     requestAnimationFrame(loop);
   }
   loop();
