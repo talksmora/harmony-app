@@ -963,7 +963,6 @@
 
   function buildEffectsChain() {
     masterGain = audioCtx.createGain();
-    // Load Master volume from knobValues object
     masterGain.gain.value = knobValues.vol;
 
     // 1. Overdrive
@@ -995,7 +994,7 @@
     dryWetNodes.chorus.dry = chorusDry;
     dryWetNodes.chorus.wet = chorusWet;
 
-    // 3. Delay/Echo
+    // 3. Delay/Echo (Parallel Send Mix Setup to retain 100% dry signal volume)
     echoDelayNode = audioCtx.createDelay();
     echoDelayNode.delayTime.value = 0.35;
     echoFeedbackNode = audioCtx.createGain();
@@ -1009,7 +1008,7 @@
     dryWetNodes.delay.dry = delayDry;
     dryWetNodes.delay.wet = delayWet;
 
-    // 4. Reverb Convolver
+    // 4. Reverb Convolver (Parallel Send Mix Setup to retain 100% dry signal volume)
     reverbNode = audioCtx.createConvolver();
     const len = audioCtx.sampleRate * 2.2;
     const impulse = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
@@ -1028,7 +1027,16 @@
     dryWetNodes.reverb.dry = reverbDry;
     dryWetNodes.reverb.wet = reverbWet;
 
-    reverbOut.connect(audioCtx.destination);
+    // 5. Studio dynamics compressor to boost output volume safely and prevent clipping
+    const compressor = audioCtx.createDynamicsCompressor();
+    compressor.threshold.setValueAtTime(-14, audioCtx.currentTime);
+    compressor.knee.setValueAtTime(12, audioCtx.currentTime);
+    compressor.ratio.setValueAtTime(4.5, audioCtx.currentTime);
+    compressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
+    compressor.release.setValueAtTime(0.07, audioCtx.currentTime);
+
+    reverbOut.connect(compressor);
+    compressor.connect(audioCtx.destination);
 
     updatePedalBypass('overdrive');
     updatePedalBypass('chorus');
@@ -1044,10 +1052,22 @@
     if (!dry || !wet) return;
 
     if (pedalStates[effectKey]) {
-      dry.gain.setTargetAtTime(0, now, 0.015);
-      wet.gain.setTargetAtTime(1, now, 0.015);
+      if (effectKey === 'delay') {
+        dry.gain.setTargetAtTime(1.0, now, 0.015);
+        wet.gain.setTargetAtTime(0.48, now, 0.015); // Parallel mix
+      } else if (effectKey === 'reverb') {
+        dry.gain.setTargetAtTime(1.0, now, 0.015);
+        wet.gain.setTargetAtTime(0.42, now, 0.015); // Parallel mix
+      } else if (effectKey === 'chorus') {
+        dry.gain.setTargetAtTime(1.0, now, 0.015);
+        wet.gain.setTargetAtTime(0.70, now, 0.015); // Parallel mix
+      } else {
+        // Overdrive is insert (100% wet)
+        dry.gain.setTargetAtTime(0, now, 0.015);
+        wet.gain.setTargetAtTime(1.0, now, 0.015);
+      }
     } else {
-      dry.gain.setTargetAtTime(1, now, 0.015);
+      dry.gain.setTargetAtTime(1.0, now, 0.015);
       wet.gain.setTargetAtTime(0, now, 0.015);
     }
   }
