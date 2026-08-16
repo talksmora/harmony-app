@@ -117,7 +117,7 @@
     <div class="msg" id="loginMsg"></div>
 
     <div class="dev-note">
-      <strong>નોંધ:</strong> OTP કોડ તમારા WhatsApp અને SMS પર મોકલવામાં આવશે. કૃપા કરીને ખાતરી કરો કે તમે ક્લાસ ઓનર સાથે રજિસ્ટર્ડ છો.
+      <strong>નોંધ:</strong> અત્યારે ટેસ્ટિંગ માટે ફક્ત ઓનર નંબરથી જ લોગિન કરી શકાશે. ઓટીપી તરીકે <strong>223522</strong> દાખલ કરો.
     </div>
   </div>
 
@@ -134,10 +134,10 @@
       errPhoneEmpty: 'Mobile number લખો',
       errPhoneInvalid: 'Valid number લખો (E.164: +919876543210)',
       otpSent: 'OTP મોકલાયો ✅',
-      mockOtpSent: 'OTP મોકલાયો — કૃપા કરીને કોડ દાખલ કરો',
+      mockOtpSent: 'ઓટીપી મોકલાયો — કૃપા કરીને કોડ દાખલ કરો',
       errOtpEmpty: 'OTP લખો',
       errOtpFormat: '6-અંકી ન્યુમેરિક OTP લખો',
-      devNote: '<strong>નોંધ:</strong> OTP કોડ તમારા WhatsApp અને SMS પર મોકલવામાં આવશે. કૃપા કરીને ખાતરી કરો કે તમે ક્લાસ ઓનર સાથે રજિસ્ટર્ડ છો.'
+      devNote: '<strong>નોંધ:</strong> અત્યારે ટેસ્ટિંગ માટે ફક્ત ઓનર નંબરથી જ લોગિન કરી શકાશે. ઓટીપી તરીકે <strong>223522</strong> દાખલ કરો.'
     },
     hi: {
       desc: 'अपना मोबाइल नंबर दर्ज करके लॉगिन करें',
@@ -151,7 +151,7 @@
       mockOtpSent: 'OTP भेजा गया — कृपया कोड दर्ज करें',
       errOtpEmpty: 'OTP दर्ज करें',
       errOtpFormat: '6-अंकीय न्यूमेरिक OTP दर्ज करें',
-      devNote: '<strong>नोट:</strong> OTP कोड आपके WhatsApp और SMS पर भेजा जाएगा। कृपया सुनिश्चित करें कि आप क्लास ओनर के साथ पंजीकृत हैं।'
+      devNote: '<strong>नोट:</strong> अभी परीक्षण के लिए केवल ओनर नंबर से ही लॉगिन किया जा सकता है। ओटीपी के रूप में <strong>223522</strong> दर्ज करें।'
     },
     en: {
       desc: 'Enter your mobile number to log in',
@@ -165,7 +165,7 @@
       mockOtpSent: 'OTP Sent — please enter the code',
       errOtpEmpty: 'Please enter the OTP',
       errOtpFormat: 'Please enter a 6-digit numeric OTP',
-      devNote: '<strong>Note:</strong> OTP code will be sent to your WhatsApp and SMS. Please make sure you are registered with the class owner.'
+      devNote: '<strong>Note:</strong> Currently only owner numbers can log in for testing. Enter <strong>223522</strong> as the OTP.'
     }
   };
 
@@ -227,9 +227,9 @@
     }
     pendingPhone = normalized;
 
-    // Check if the number is in allowed_numbers database
-    const allowed = await isAllowedNumber(pendingPhone);
-    if (!allowed) {
+    // Check if the number is one of the owner numbers
+    const allowedOwners = ['+917016164239', '+918160709046', '+919687582252'];
+    if (!allowedOwners.includes(pendingPhone)) {
       const notAllowedMsg = {
         gu: 'તમને આ એપ વાપરવાની મંજૂરી નથી. કૃપા કરીને ઓનરનો સંપર્ક કરો.',
         hi: 'आपको इस ऐप का उपयोग करने की अनुमति नहीं है। कृपया ओनर से संपर्क करें।',
@@ -239,24 +239,9 @@
       return;
     }
 
-    try {
-      setMsg('Sending OTP...', 'ok');
-      await sendOtp(pendingPhone);
-      setMsg(t.otpSent, 'ok');
-      phoneStep.style.display = 'none';
-      otpStep.style.display = 'block';
-    } catch (err) {
-      console.warn("Real OTP sending failed, using developer bypass mode:", err);
-      // Friendly fallback so they can still test
-      const testingMsg = {
-        gu: 'ઓટીપી મોકલવામાં એરર આવી (ટેસ્ટિંગ માટે 999999 દાખલ કરો) ⚠️',
-        hi: 'ओटीपी भेजने में त्रुटि (परीक्षण के लिए 999999 दर्ज करें) ⚠️',
-        en: 'Error sending OTP (Enter 999999 for testing) ⚠️'
-      };
-      setMsg(testingMsg[currentLang] || testingMsg.gu, 'ok');
-      phoneStep.style.display = 'none';
-      otpStep.style.display = 'block';
-    }
+    setMsg(t.mockOtpSent || 'OTP મોકલાયો', 'ok');
+    phoneStep.style.display = 'none';
+    otpStep.style.display = 'block';
   });
 
   document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
@@ -264,23 +249,8 @@
     const t = LOGIN_TEXT[currentLang] || LOGIN_TEXT.gu;
     if (!otp) { setMsg(t.errOtpEmpty, 'error'); return; }
     if (!/^\d{6}$/.test(otp)) { setMsg(t.errOtpFormat, 'error'); return; }
-    try {
-      setMsg('Verifying OTP...', 'ok');
-      if (otp === '999999') {
-        const details = await getUserSessionDetails(pendingPhone);
-        writeMockSession({
-          phone: pendingPhone,
-          isOwner: details.role === 'owner',
-          role: details.role,
-          permissions: details.permissions
-        });
-        window.location.href = 'dashboard.html';
-        return;
-      }
-      const session = await verifyOtp(pendingPhone, otp);
-      if (!session) {
-        throw new Error(currentLang === 'en' ? 'Invalid OTP code' : currentLang === 'hi' ? 'अमान्य OTP कोड' : 'અમાન્ય OTP કોડ');
-      }
+    
+    if (otp === '223522') {
       const details = await getUserSessionDetails(pendingPhone);
       writeMockSession({
         phone: pendingPhone,
@@ -289,8 +259,13 @@
         permissions: details.permissions
       });
       window.location.href = 'dashboard.html';
-    } catch (err) {
-      setMsg(err.message || 'OTP verification failed', 'error');
+    } else {
+      const invalidMsg = {
+        gu: 'અમાન્ય OTP કોડ. કૃપા કરીને ફરીથી પ્રયાસ કરો.',
+        hi: 'अमान्य OTP कोड। कृपया पुनः प्रयास करें।',
+        en: 'Invalid OTP code. Please try again.'
+      };
+      setMsg(invalidMsg[currentLang] || invalidMsg.gu, 'error');
     }
   });
 </script>
