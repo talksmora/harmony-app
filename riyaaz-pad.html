@@ -487,28 +487,45 @@
   };
 
   const INSTRUMENT_PRESETS = {
-    sitar: { damping: 0.14, feedback: 0.99, filterType: 'bandpass', filterMult: 3.5, filterMaxFreq: 6000, filterQ: 4.5, attack: 0.005, peakGain: 0.28, release: 1.2 },
-    sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.3, release: 0.85 },
-    sarangi: { damping: 0.26, feedback: 0.992, filterType: 'bandpass', filterMult: 2.2, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.12, peakGain: 0.24, release: 0.45 },
-    veena: { damping: 0.15, feedback: 0.988, filterType: 'lowpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 2.0, attack: 0.008, peakGain: 0.26, release: 1.0 },
-    bansuri: { damping: 0.42, feedback: 0.97, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 4000, filterQ: 1.0, attack: 0.1, peakGain: 0.28, release: 0.25 },
-    shehnai: { damping: 0.3, feedback: 0.985, filterType: 'bandpass', filterMult: 5.5, filterMaxFreq: 6500, filterQ: 4.0, attack: 0.05, peakGain: 0.26, release: 0.3 },
+    sitar: { damping: 0.14, feedback: 0.99, filterType: 'bandpass', filterMult: 3.5, filterMaxFreq: 6000, filterQ: 4.5, attack: 0.005, peakGain: 0.28, release: 1.2, continuous: false },
+    sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.3, release: 0.85, continuous: false },
+    sarangi: { damping: 0.26, feedback: 0.992, filterType: 'bandpass', filterMult: 2.2, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.12, peakGain: 0.24, release: 0.45, continuous: true },
+    veena: { damping: 0.15, feedback: 0.988, filterType: 'lowpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 2.0, attack: 0.008, peakGain: 0.26, release: 1.0, continuous: false },
+    bansuri: { damping: 0.42, feedback: 0.97, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 4000, filterQ: 1.0, attack: 0.1, peakGain: 0.28, release: 0.25, continuous: true },
+    shehnai: { damping: 0.3, feedback: 0.985, filterType: 'bandpass', filterMult: 5.5, filterMaxFreq: 6500, filterQ: 4.0, attack: 0.05, peakGain: 0.26, release: 0.3, continuous: true },
     
-    lead_guitar: { damping: 0.12, feedback: 0.994, filterType: 'lowpass', filterMult: 5.5, filterMaxFreq: 7000, filterQ: 2.0, attack: 0.003, peakGain: 0.32, release: 1.4 },
-    nylon_guitar: { damping: 0.16, feedback: 0.982, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 4500, filterQ: 1.5, attack: 0.005, peakGain: 0.28, release: 0.8 },
-    steel_guitar: { damping: 0.11, feedback: 0.988, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 5000, filterQ: 2.0, attack: 0.004, peakGain: 0.3, release: 0.95 },
+    lead_guitar: { damping: 0.12, feedback: 0.994, filterType: 'lowpass', filterMult: 5.5, filterMaxFreq: 7000, filterQ: 2.0, attack: 0.003, peakGain: 0.32, release: 1.4, continuous: false },
+    nylon_guitar: { damping: 0.16, feedback: 0.982, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 4500, filterQ: 1.5, attack: 0.005, peakGain: 0.28, release: 0.8, continuous: false },
+    steel_guitar: { damping: 0.11, feedback: 0.988, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 5000, filterQ: 2.0, attack: 0.004, peakGain: 0.3, release: 0.95, continuous: false },
     
-    swam_violin: { damping: 0.28, feedback: 0.992, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 6000, filterQ: 1.5, attack: 0.12, peakGain: 0.22, release: 0.35 },
-    swam_cello: { damping: 0.32, feedback: 0.994, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 3000, filterQ: 1.2, attack: 0.15, peakGain: 0.24, release: 0.4 },
-    swam_flute: { damping: 0.45, feedback: 0.965, filterType: 'lowpass', filterMult: 4.2, filterMaxFreq: 3800, filterQ: 0.8, attack: 0.08, peakGain: 0.26, release: 0.2 },
-    swam_clarinet: { damping: 0.35, feedback: 0.975, filterType: 'lowpass', filterMult: 4.8, filterMaxFreq: 4200, filterQ: 1.2, attack: 0.07, peakGain: 0.26, release: 0.25 },
-    swam_oboe: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 5.2, filterMaxFreq: 4800, filterQ: 2.0, attack: 0.06, peakGain: 0.25, release: 0.28 },
-    swam_trumpet: { damping: 0.28, feedback: 0.985, filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.08, peakGain: 0.28, release: 0.3 },
+    swam_violin: { damping: 0.28, feedback: 0.992, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 6000, filterQ: 1.5, attack: 0.12, peakGain: 0.22, release: 0.35, continuous: true },
+    swam_cello: { damping: 0.32, feedback: 0.994, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 3000, filterQ: 1.2, attack: 0.15, peakGain: 0.24, release: 0.4, continuous: true },
+    swam_flute: { damping: 0.45, feedback: 0.965, filterType: 'lowpass', filterMult: 4.2, filterMaxFreq: 3800, filterQ: 0.8, attack: 0.08, peakGain: 0.26, release: 0.2, continuous: true },
+    swam_clarinet: { damping: 0.35, feedback: 0.975, filterType: 'lowpass', filterMult: 4.8, filterMaxFreq: 4200, filterQ: 1.2, attack: 0.07, peakGain: 0.26, release: 0.25, continuous: true },
+    swam_oboe: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 5.2, filterMaxFreq: 4800, filterQ: 2.0, attack: 0.06, peakGain: 0.25, release: 0.28, continuous: true },
+    swam_trumpet: { damping: 0.28, feedback: 0.985, filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.08, peakGain: 0.28, release: 0.3, continuous: true },
     
-    erhu: { damping: 0.24, feedback: 0.99, filterType: 'bandpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 3.5, attack: 0.1, peakGain: 0.25, release: 0.4 },
-    pipa: { damping: 0.13, feedback: 0.98, filterType: 'lowpass', filterMult: 3.5, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.004, peakGain: 0.3, release: 0.6 },
-    dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.28, release: 0.22 }
+    erhu: { damping: 0.24, feedback: 0.99, filterType: 'bandpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 3.5, attack: 0.1, peakGain: 0.25, release: 0.4, continuous: true },
+    pipa: { damping: 0.13, feedback: 0.98, filterType: 'lowpass', filterMult: 3.5, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.004, peakGain: 0.3, release: 0.6, continuous: false },
+    dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.28, release: 0.22, continuous: true }
   };
+
+  // Sleek Rainbow Color coding values matching Google images of GeoShred
+  const SWAR_COLORS = {
+    'Sa': { bg: 'rgba(231, 76, 60, 0.38)', border: '#e74c3c', text: '#ff9999' },   // Red-Orange Tonic
+    'Re': { bg: 'rgba(230, 126, 34, 0.25)', border: '#e67e22', text: '#ffbb88' },   // Orange
+    'Ga': { bg: 'rgba(241, 196, 15, 0.25)', border: '#f1c40f', text: '#ffee99' },   // Yellow
+    'Ma': { bg: 'rgba(46, 204, 113, 0.25)', border: '#2ecc71', text: '#aaffcc' },   // Green
+    'Pa': { bg: 'rgba(52, 152, 219, 0.25)', border: '#3498db', text: '#aaddff' },   // Blue
+    'Dha': { bg: 'rgba(155, 89, 182, 0.25)', border: '#9b59b6', text: '#eeddff' },  // Purple
+    'Ni': { bg: 'rgba(232, 67, 147, 0.25)', border: '#e84393', text: '#ffbbee' }   // Pink
+  };
+
+  function getSwarColorInfo(swarName) {
+    // Strip octave accents
+    const base = swarName.replace(/[\^_b#]/g, '').trim();
+    return SWAR_COLORS[base] || { bg: 'rgba(41, 128, 185, 0.2)', border: '#2980b9', text: '#f3e6d0' };
+  }
 
   let activePreset = 'sitar';
   const scaleSelect = document.getElementById('scaleSelect');
@@ -534,7 +551,7 @@
   const NUM_STRINGS = 4;
   const BASE_SA = 130.81; // C3
   const ROW_SEMITONE_OFFSETS = [15, 10, 5, 0];
-  const NUM_FRETS = 16; // Chromatic fretboard layout exactly matching GeoShred!
+  const NUM_FRETS = 16; 
 
   // Web Audio Context & Effects Chain
   let audioCtx = null;
@@ -600,16 +617,19 @@
             this.buffer = new Float32Array(this.bufferSize);
             this.writeIdx = 0;
             this.excited = false;
+            this.continuous = false;
             this.excitationLength = 0;
             this.excitationBuffer = null;
             this.lastOutput = 0;
             this.port.onmessage = (e) => {
               if (e.data.type === 'pluck') {
-                this.triggerPluck(e.data.strength, e.data.frequency);
+                this.triggerPluck(e.data.strength, e.data.frequency, e.data.continuous);
+              } else if (e.data.type === 'release') {
+                this.continuous = false;
               }
             };
           }
-          triggerPluck(strength, freq) {
+          triggerPluck(strength, freq, continuous) {
             const periodSamples = Math.floor(sampleRate / freq);
             this.excitationLength = Math.max(10, Math.min(periodSamples, 800));
             this.excitationBuffer = new Float32Array(this.excitationLength);
@@ -620,6 +640,7 @@
             this.buffer.fill(0);
             this.excited = true;
             this.excitationIdx = 0;
+            this.continuous = !!continuous;
           }
           process(inputs, outputs, parameters) {
             const output = outputs[0];
@@ -645,6 +666,7 @@
               const interpolatedSample = sampleA + frac * (sampleB - sampleA);
               const filteredSample = (1 - damping) * interpolatedSample + damping * this.lastOutput;
               this.lastOutput = filteredSample;
+              
               let inputEnergy = 0;
               if (this.excited && this.excitationBuffer && this.excitationIdx < this.excitationLength) {
                 inputEnergy = this.excitationBuffer[this.excitationIdx];
@@ -652,7 +674,11 @@
                 if (this.excitationIdx >= this.excitationLength) {
                   this.excited = false;
                 }
+              } else if (this.continuous) {
+                // Continuous bowed/blown acoustic excitation mode to sustain infinitely while touched!
+                inputEnergy = (Math.random() * 2 - 1) * 0.015;
               }
+
               const nextWriteVal = inputEnergy + filteredSample * feedback;
               this.buffer[this.writeIdx] = nextWriteVal;
               channel[i] = filteredSample;
@@ -823,10 +849,12 @@
       this.stringNode.parameters.get('feedback').setValueAtTime(cfg.feedback, now);
       this.stringNode.parameters.get('frequency').setValueAtTime(freq, now);
 
+      // Trigger excitation pluck with continuous parameter mapping
       this.stringNode.port.postMessage({
         type: 'pluck',
         strength: 0.35,
-        frequency: freq
+        frequency: freq,
+        continuous: !!cfg.continuous
       });
 
       this.vibratoLfo = audioCtx.createOscillator();
@@ -849,6 +877,9 @@
       const now = audioCtx.currentTime;
       const cfg = INSTRUMENT_PRESETS[activePreset];
       
+      // Stop continuous bowed/breath excitation immediately on finger release
+      this.stringNode.port.postMessage({ type: 'release' });
+
       this.stringNode.parameters.get('feedback').setTargetAtTime(0.85, now, cfg.release / 3);
       this.master.gain.cancelScheduledValues(now);
       this.master.gain.setValueAtTime(this.master.gain.value, now);
@@ -889,7 +920,6 @@
     return baseSwar;
   }
 
-  // Chromatic tuning math for GeoShred isomorphic fretboard grid
   function xyToFreq(x, y, isSnap) {
     const rh = H / NUM_STRINGS;
     let stringIndex = Math.floor((H - y) / rh);
@@ -906,7 +936,6 @@
       const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.round(rawFret)));
       const currentSemitones = stringSemitones + nearestFret;
       
-      // Snaps to the nearest scale interval
       const relSemitones = ((currentSemitones % 12) + 12) % 12;
       let closestInterval = scale.intervals[0];
       let minDiff = 999;
@@ -928,7 +957,6 @@
     return BASE_SA * Math.pow(2, continuousSemitones / 12);
   }
 
-  // Check if a specific relative semitone offset belongs to the scale
   function isSemitoneInScale(relSemitones, scale) {
     return scale.intervals.includes(relSemitones);
   }
@@ -950,19 +978,13 @@
         const relSemitones = ((totalSemitones % 12) + 12) % 12;
         const inScale = isSemitoneInScale(relSemitones, scale);
 
-        // Styling cells matching GeoShred UI
         if (inScale) {
-          if (relSemitones === 0) {
-            // Tonic Sa: Vibrant Glowing Golden Orange
-            ctx.fillStyle = 'rgba(230, 126, 34, 0.45)';
-            ctx.strokeStyle = 'rgba(241, 196, 15, 0.6)';
-          } else {
-            // Other scale notes: Dark Teal blue glow
-            ctx.fillStyle = 'rgba(41, 128, 185, 0.2)';
-            ctx.strokeStyle = 'rgba(52, 152, 219, 0.45)';
-          }
+          const swar = getSwarNameForSemitones(totalSemitones, scale);
+          const colors = getSwarColorInfo(swar);
+
+          ctx.fillStyle = colors.bg;
+          ctx.strokeStyle = colors.border;
         } else {
-          // Chromatic out-of-scale notes: Dark charcoal
           ctx.fillStyle = '#0a0d14';
           ctx.strokeStyle = 'rgba(255,255,255,0.03)';
         }
@@ -971,17 +993,16 @@
         ctx.fillRect(x + 2, y + 2, fretWidth - 4, rh - 4);
         ctx.strokeRect(x + 2, y + 2, fretWidth - 4, rh - 4);
 
-        // Render Swar names inside scale notes
         if (inScale) {
           const swar = getSwarNameForSemitones(totalSemitones, scale);
-          ctx.fillStyle = relSemitones === 0 ? '#ffdd55' : '#f3e6d0';
+          const colors = getSwarColorInfo(swar);
+          ctx.fillStyle = colors.text;
           ctx.font = 'bold 11px sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText(swar, x + fretWidth / 2, y + rh / 2 + 4);
         }
       }
 
-      // Draw strings wires
       ctx.strokeStyle = 'rgba(184, 134, 11, 0.4)';
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -990,7 +1011,6 @@
       ctx.stroke();
     }
 
-    // Touch feedback circles
     activeVoices.forEach((t) => {
       const grad = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, 35);
       grad.addColorStop(0, 'rgba(184, 134, 11, 0.85)');
