@@ -45,8 +45,8 @@
     flex-direction: column !important;
     height: 100% !important;
     width: 100% !important;
-    gap: 6px;
-    padding: 6px;
+    gap: 4px;
+    padding: 4px;
     box-sizing: border-box;
     background: #080b10;
   }
@@ -54,26 +54,26 @@
   .controls-panel {
     background: linear-gradient(180deg, #18202c 0%, #0d121a 100%);
     border: 1.5px solid rgba(184, 134, 11, 0.3);
-    border-radius: 12px;
-    padding: 10px 18px;
+    border-radius: 10px;
+    padding: 6px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
   }
   .left-controls {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
   .raga-selector select {
     background: #101520;
     color: #f3e6d0;
     border: 1.5px solid rgba(184,134,11,0.5);
-    padding: 6px 14px;
+    padding: 4px 8px;
     border-radius: 6px;
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     font-weight: 700;
     outline: none;
     cursor: pointer;
@@ -81,29 +81,29 @@
   /* Central Premium Preset Display */
   .preset-display {
     background: radial-gradient(circle, #2a1400 0%, #0c0400 100%);
-    border: 2px solid #d4af37;
-    border-radius: 8px;
-    padding: 8px 24px;
-    min-width: 180px;
+    border: 1.5px solid #d4af37;
+    border-radius: 6px;
+    padding: 6px 14px;
+    min-width: 110px;
     text-align: center;
-    box-shadow: 0 0 12px rgba(212,175,55,0.3);
+    box-shadow: 0 0 8px rgba(212,175,55,0.3);
     cursor: pointer;
     transition: all 0.2s ease;
   }
   .preset-display:hover {
-    box-shadow: 0 0 18px rgba(212,175,55,0.6);
+    box-shadow: 0 0 12px rgba(212,175,55,0.5);
     border-color: #fdd835;
   }
   .preset-name {
     color: #fdd835;
-    font-size: 1rem;
+    font-size: 0.82rem;
     font-weight: 800;
-    letter-spacing: 0.8px;
-    text-shadow: 0 0 6px rgba(253,216,53,0.5);
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 4px rgba(253,216,53,0.5);
   }
   .preset-category {
     color: rgba(243,230,208,0.6);
-    font-size: 0.65rem;
+    font-size: 0.55rem;
     font-weight: 800;
     text-transform: uppercase;
     margin-top: 1px;
@@ -112,24 +112,24 @@
   .right-sliders {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
   }
   .slider-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 1px;
   }
   .slider-item label {
-    font-size: 0.62rem;
+    font-size: 0.55rem;
     font-weight: 800;
     color: #c9a876;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
   .slider-item input[type="range"] {
-    width: 60px;
-    height: 4px;
+    width: 45px;
+    height: 3px;
     -webkit-appearance: none;
     appearance: none;
     background: #202733;
@@ -138,23 +138,22 @@
   .slider-item input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: #b8860b;
     cursor: pointer;
-    box-shadow: 0 0 4px #b8860b;
   }
 
   /* Performance surface */
   .canvas-wrap {
     flex: 1;
     position: relative;
-    border: 1.5px solid rgba(184,134,11,0.25);
-    border-radius: 12px;
+    border: 1.5px solid rgba(184,134,11,0.2);
+    border-radius: 10px;
     overflow: hidden;
     background: #020305;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.8) inset;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.8) inset;
     width: 100% !important;
   }
   #surface {
@@ -167,76 +166,74 @@
   .pedalboard {
     background: linear-gradient(180deg, #0e1218 0%, #080a0e 100%);
     border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 10px;
-    padding: 10px;
+    border-radius: 8px;
+    padding: 6px;
     display: flex;
     justify-content: center;
-    gap: 16px;
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+    gap: 12px;
+    box-shadow: 0 -3px 10px rgba(0,0,0,0.5);
   }
   .pedal {
-    width: 85px;
-    height: 120px;
-    border-radius: 6px;
+    width: 72px;
+    height: 78px;
+    border-radius: 5px;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px;
+    padding: 4px;
     box-sizing: border-box;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.08);
   }
   .pedal-label {
-    font-size: 0.65rem;
+    font-size: 0.52rem;
     font-weight: 800;
     color: #fff;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.8);
     letter-spacing: 0.5px;
     text-align: center;
-    margin-top: 2px;
   }
   .pedal-led {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: #330000;
-    margin-top: 8px;
+    background: #220000;
+    margin-top: 4px;
     box-shadow: inset 0 1px 1px rgba(0,0,0,0.5);
     transition: all 0.15s ease;
   }
   .pedal.active .pedal-led {
-    box-shadow: 0 0 8px currentColor;
+    box-shadow: 0 0 6px currentColor;
   }
   
-  .distortion-pedal { background: #b22222; }
-  .distortion-pedal.active .pedal-led { background: #ff3333; color: #ff3333; }
+  .distortion-pedal { background: #991b1b; }
+  .distortion-pedal.active .pedal-led { background: #ef4444; color: #ef4444; }
   
-  .chorus-pedal { background: #1f4e79; }
-  .chorus-pedal.active .pedal-led { background: #3399ff; color: #3399ff; }
+  .chorus-pedal { background: #1e3a8a; }
+  .chorus-pedal.active .pedal-led { background: #3b82f6; color: #3b82f6; }
   
-  .delay-pedal { background: #2e7d32; }
-  .delay-pedal.active .pedal-led { background: #33ff33; color: #33ff33; }
+  .delay-pedal { background: #166534; }
+  .delay-pedal.active .pedal-led { background: #22c55e; color: #22c55e; }
   
-  .reverb-pedal { background: #e65100; }
-  .reverb-pedal.active .pedal-led { background: #ffaa00; color: #ffaa00; }
+  .reverb-pedal { background: #c2410c; }
+  .reverb-pedal.active .pedal-led { background: #f97316; color: #f97316; }
 
   .stomp-switch {
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: linear-gradient(135deg, #a0a0a0 0%, #505050 100%);
-    border: 2.5px solid #303030;
+    border: 2px solid #303030;
     position: absolute;
-    bottom: 12px;
+    bottom: 6px;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    transition: transform 0.05s ease, box-shadow 0.05s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
     outline: none;
   }
   .stomp-switch:active {
-    transform: scale(0.9) translateY(1.5px);
-    box-shadow: 0 1px 1px rgba(0,0,0,0.5);
+    transform: scale(0.9) translateY(1px);
+    box-shadow: 0 0 1px rgba(0,0,0,0.5);
   }
 
   /* Preset Selection Modal */
@@ -260,77 +257,117 @@
   .modal-content {
     background: #121824;
     border: 2px solid #b8860b;
-    border-radius: 14px;
-    width: 85%;
-    max-width: 500px;
-    padding: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 460px;
+    padding: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
   }
   .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid rgba(184,134,11,0.2);
-    padding-bottom: 8px;
-    margin-bottom: 12px;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
   }
   .modal-header h3 {
     color: #f4c542;
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 800;
   }
   .close-modal {
     background: none;
     border: none;
     color: #c9a876;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 700;
     cursor: pointer;
   }
   .modal-body {
-    max-height: 350px;
+    max-height: 300px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding-right: 4px;
+    gap: 8px;
   }
   .preset-group-title {
     color: #b8860b;
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     border-left: 2px solid #b8860b;
     padding-left: 6px;
-    margin-top: 4px;
   }
   .preset-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    gap: 4px;
   }
   .modal-preset-btn {
     background: #1a2232;
     color: #f3e6d0;
     border: 1px solid rgba(255,255,255,0.05);
-    padding: 8px 4px;
-    border-radius: 6px;
-    font-size: 0.75rem;
+    padding: 6px 2px;
+    border-radius: 5px;
+    font-size: 0.7rem;
     font-weight: 700;
     cursor: pointer;
     text-align: center;
-    transition: all 0.15s ease;
-  }
-  .modal-preset-btn:hover {
-    background: #253147;
-    border-color: #b8860b;
   }
   .modal-preset-btn.active {
     background: linear-gradient(135deg, #b8860b, #8a5a0a);
     color: #080a0e;
     border-color: #f4c542;
+  }
+
+  /* Responsive layout overrides to completely prevent clipping on mobile devices */
+  @media (max-width: 600px) {
+    .controls-panel {
+      padding: 4px 8px;
+      gap: 4px;
+    }
+    .raga-selector select {
+      padding: 4px 6px;
+      font-size: 0.7rem;
+    }
+    .preset-display {
+      min-width: 90px;
+      padding: 4px 8px;
+    }
+    .preset-name {
+      font-size: 0.72rem;
+    }
+    .preset-category {
+      font-size: 0.5rem;
+    }
+    .right-sliders {
+      gap: 6px;
+    }
+    .slider-item label {
+      font-size: 0.5rem;
+    }
+    .slider-item input[type="range"] {
+      width: 32px;
+    }
+    .pedalboard {
+      gap: 8px;
+      padding: 4px;
+    }
+    .pedal {
+      width: 60px;
+      height: 65px;
+    }
+    .pedal-label {
+      font-size: 0.45rem;
+    }
+    .stomp-switch {
+      width: 14px;
+      height: 14px;
+      bottom: 4px;
+    }
   }
 </style>
 </head>
@@ -360,14 +397,24 @@
           <div class="preset-category" id="selectedPresetCategory">Naada Indian</div>
         </div>
 
+        <!-- Floating Expression XY Pad exactly matching GeoShred Corner Pad -->
+        <div class="xy-pad-container" id="xyPad" style="width: 64px; height: 38px; background: #0c1017; border: 1.5px solid #d4af37; border-radius: 6px; position: relative; cursor: crosshair; overflow: hidden; box-shadow: inset 0 0 6px rgba(212,175,55,0.6);">
+          <canvas id="xyCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+        </div>
+
         <div class="right-sliders">
           <div class="slider-item">
             <label for="glideRange">Slide</label>
             <input type="range" id="glideRange" min="0.01" max="0.3" step="0.01" value="0.06">
           </div>
           <div class="slider-item">
-            <label for="vibratoRange">Vibrato</label>
+            <label for="vibratoRange">Vib</label>
             <input type="range" id="vibratoRange" min="0" max="15" step="1" value="8">
+          </div>
+          <!-- Master Volume Slider to boost speaker volume -->
+          <div class="slider-item">
+            <label for="volumeRange">Vol</label>
+            <input type="range" id="volumeRange" min="0" max="1.5" step="0.05" value="0.95">
           </div>
         </div>
       </div>
@@ -487,42 +534,40 @@
   };
 
   const INSTRUMENT_PRESETS = {
-    sitar: { damping: 0.14, feedback: 0.99, filterType: 'bandpass', filterMult: 3.5, filterMaxFreq: 6000, filterQ: 4.5, attack: 0.005, peakGain: 0.28, release: 1.2, continuous: false },
-    sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.3, release: 0.85, continuous: false },
-    sarangi: { damping: 0.26, feedback: 0.992, filterType: 'bandpass', filterMult: 2.2, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.12, peakGain: 0.24, release: 0.45, continuous: true },
-    veena: { damping: 0.15, feedback: 0.988, filterType: 'lowpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 2.0, attack: 0.008, peakGain: 0.26, release: 1.0, continuous: false },
-    bansuri: { damping: 0.42, feedback: 0.97, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 4000, filterQ: 1.0, attack: 0.1, peakGain: 0.28, release: 0.25, continuous: true },
-    shehnai: { damping: 0.3, feedback: 0.985, filterType: 'bandpass', filterMult: 5.5, filterMaxFreq: 6500, filterQ: 4.0, attack: 0.05, peakGain: 0.26, release: 0.3, continuous: true },
+    sitar: { damping: 0.14, feedback: 0.99, filterType: 'bandpass', filterMult: 3.5, filterMaxFreq: 6000, filterQ: 4.5, attack: 0.005, peakGain: 0.65, release: 1.2, continuous: false },
+    sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.68, release: 0.85, continuous: false },
+    sarangi: { damping: 0.26, feedback: 0.992, filterType: 'bandpass', filterMult: 2.2, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.12, peakGain: 0.58, release: 0.45, continuous: true },
+    veena: { damping: 0.15, feedback: 0.988, filterType: 'lowpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 2.0, attack: 0.008, peakGain: 0.62, release: 1.0, continuous: false },
+    bansuri: { damping: 0.42, feedback: 0.97, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 4000, filterQ: 1.0, attack: 0.1, peakGain: 0.65, release: 0.25, continuous: true },
+    shehnai: { damping: 0.3, feedback: 0.985, filterType: 'bandpass', filterMult: 5.5, filterMaxFreq: 6500, filterQ: 4.0, attack: 0.05, peakGain: 0.60, release: 0.3, continuous: true },
     
-    lead_guitar: { damping: 0.12, feedback: 0.994, filterType: 'lowpass', filterMult: 5.5, filterMaxFreq: 7000, filterQ: 2.0, attack: 0.003, peakGain: 0.32, release: 1.4, continuous: false },
-    nylon_guitar: { damping: 0.16, feedback: 0.982, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 4500, filterQ: 1.5, attack: 0.005, peakGain: 0.28, release: 0.8, continuous: false },
-    steel_guitar: { damping: 0.11, feedback: 0.988, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 5000, filterQ: 2.0, attack: 0.004, peakGain: 0.3, release: 0.95, continuous: false },
+    lead_guitar: { damping: 0.12, feedback: 0.994, filterType: 'lowpass', filterMult: 5.5, filterMaxFreq: 7000, filterQ: 2.0, attack: 0.003, peakGain: 0.70, release: 1.4, continuous: false },
+    nylon_guitar: { damping: 0.16, feedback: 0.982, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 4500, filterQ: 1.5, attack: 0.005, peakGain: 0.65, release: 0.8, continuous: false },
+    steel_guitar: { damping: 0.11, feedback: 0.988, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 5000, filterQ: 2.0, attack: 0.004, peakGain: 0.68, release: 0.95, continuous: false },
     
-    swam_violin: { damping: 0.28, feedback: 0.992, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 6000, filterQ: 1.5, attack: 0.12, peakGain: 0.22, release: 0.35, continuous: true },
-    swam_cello: { damping: 0.32, feedback: 0.994, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 3000, filterQ: 1.2, attack: 0.15, peakGain: 0.24, release: 0.4, continuous: true },
-    swam_flute: { damping: 0.45, feedback: 0.965, filterType: 'lowpass', filterMult: 4.2, filterMaxFreq: 3800, filterQ: 0.8, attack: 0.08, peakGain: 0.26, release: 0.2, continuous: true },
-    swam_clarinet: { damping: 0.35, feedback: 0.975, filterType: 'lowpass', filterMult: 4.8, filterMaxFreq: 4200, filterQ: 1.2, attack: 0.07, peakGain: 0.26, release: 0.25, continuous: true },
-    swam_oboe: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 5.2, filterMaxFreq: 4800, filterQ: 2.0, attack: 0.06, peakGain: 0.25, release: 0.28, continuous: true },
-    swam_trumpet: { damping: 0.28, feedback: 0.985, filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.08, peakGain: 0.28, release: 0.3, continuous: true },
+    swam_violin: { damping: 0.28, feedback: 0.992, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 6000, filterQ: 1.5, attack: 0.12, peakGain: 0.54, release: 0.35, continuous: true },
+    swam_cello: { damping: 0.32, feedback: 0.994, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 3000, filterQ: 1.2, attack: 0.15, peakGain: 0.58, release: 0.4, continuous: true },
+    swam_flute: { damping: 0.45, feedback: 0.965, filterType: 'lowpass', filterMult: 4.2, filterMaxFreq: 3800, filterQ: 0.8, attack: 0.08, peakGain: 0.60, release: 0.2, continuous: true },
+    swam_clarinet: { damping: 0.35, feedback: 0.975, filterType: 'lowpass', filterMult: 4.8, filterMaxFreq: 4200, filterQ: 1.2, attack: 0.07, peakGain: 0.60, release: 0.25, continuous: true },
+    swam_oboe: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 5.2, filterMaxFreq: 4800, filterQ: 2.0, attack: 0.06, peakGain: 0.58, release: 0.28, continuous: true },
+    swam_trumpet: { damping: 0.28, feedback: 0.985, filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.08, peakGain: 0.62, release: 0.3, continuous: true },
     
-    erhu: { damping: 0.24, feedback: 0.99, filterType: 'bandpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 3.5, attack: 0.1, peakGain: 0.25, release: 0.4, continuous: true },
-    pipa: { damping: 0.13, feedback: 0.98, filterType: 'lowpass', filterMult: 3.5, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.004, peakGain: 0.3, release: 0.6, continuous: false },
-    dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.28, release: 0.22, continuous: true }
+    erhu: { damping: 0.24, feedback: 0.99, filterType: 'bandpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 3.5, attack: 0.1, peakGain: 0.58, release: 0.4, continuous: true },
+    pipa: { damping: 0.13, feedback: 0.98, filterType: 'lowpass', filterMult: 3.5, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.004, peakGain: 0.65, release: 0.6, continuous: false },
+    dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.62, release: 0.22, continuous: true }
   };
 
-  // Sleek Rainbow Color coding values matching Google images of GeoShred
   const SWAR_COLORS = {
-    'Sa': { bg: 'rgba(231, 76, 60, 0.38)', border: '#e74c3c', text: '#ff9999' },   // Red-Orange Tonic
-    'Re': { bg: 'rgba(230, 126, 34, 0.25)', border: '#e67e22', text: '#ffbb88' },   // Orange
-    'Ga': { bg: 'rgba(241, 196, 15, 0.25)', border: '#f1c40f', text: '#ffee99' },   // Yellow
-    'Ma': { bg: 'rgba(46, 204, 113, 0.25)', border: '#2ecc71', text: '#aaffcc' },   // Green
-    'Pa': { bg: 'rgba(52, 152, 219, 0.25)', border: '#3498db', text: '#aaddff' },   // Blue
-    'Dha': { bg: 'rgba(155, 89, 182, 0.25)', border: '#9b59b6', text: '#eeddff' },  // Purple
-    'Ni': { bg: 'rgba(232, 67, 147, 0.25)', border: '#e84393', text: '#ffbbee' }   // Pink
+    'Sa': { bg: 'rgba(231, 76, 60, 0.38)', border: '#e74c3c', text: '#ff9999' },   
+    'Re': { bg: 'rgba(230, 126, 34, 0.25)', border: '#e67e22', text: '#ffbb88' },   
+    'Ga': { bg: 'rgba(241, 196, 15, 0.25)', border: '#f1c40f', text: '#ffee99' },   
+    'Ma': { bg: 'rgba(46, 204, 113, 0.25)', border: '#2ecc71', text: '#aaffcc' },   
+    'Pa': { bg: 'rgba(52, 152, 219, 0.25)', border: '#3498db', text: '#aaddff' },   
+    'Dha': { bg: 'rgba(155, 89, 182, 0.25)', border: '#9b59b6', text: '#eeddff' },  
+    'Ni': { bg: 'rgba(232, 67, 147, 0.25)', border: '#e84393', text: '#ffbbee' }   
   };
 
   function getSwarColorInfo(swarName) {
-    // Strip octave accents
     const base = swarName.replace(/[\^_b#]/g, '').trim();
     return SWAR_COLORS[base] || { bg: 'rgba(41, 128, 185, 0.2)', border: '#2980b9', text: '#f3e6d0' };
   }
@@ -531,6 +576,7 @@
   const scaleSelect = document.getElementById('scaleSelect');
   const glideRange = document.getElementById('glideRange');
   const vibratoRange = document.getElementById('vibratoRange');
+  const volumeRange = document.getElementById('volumeRange');
 
   // Canvas Setup
   const canvas = document.getElementById('surface');
@@ -549,7 +595,7 @@
   resize();
 
   const NUM_STRINGS = 4;
-  const BASE_SA = 130.81; // C3
+  const BASE_SA = 130.81; 
   const ROW_SEMITONE_OFFSETS = [15, 10, 5, 0];
   const NUM_FRETS = 16; 
 
@@ -581,6 +627,118 @@
   };
 
   const activeVoices = new Map();
+
+  // Floating Expression XY Pad logic
+  const xyPad = document.getElementById('xyPad');
+  const xyCanvas = document.getElementById('xyCanvas');
+  const xyCtx = xyCanvas.getContext('2d');
+  let xyW = 0, xyH = 0;
+  let xyActive = false;
+  let masterPitchBend = 0; // in semitones
+  let masterFilterOffset = 0; // in Hz
+
+  function resizeXyCanvas() {
+    xyW = xyPad.clientWidth;
+    xyH = xyPad.clientHeight;
+    xyCanvas.width = xyW * window.devicePixelRatio;
+    xyCanvas.height = xyH * window.devicePixelRatio;
+    xyCtx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+    drawXyPad(0, 0, false);
+  }
+  window.addEventListener('resize', resizeXyCanvas);
+  setTimeout(resizeXyCanvas, 500); // delay to guarantee rendering sizes are set in DOM
+
+  function drawXyPad(px, py, active) {
+    xyCtx.clearRect(0, 0, xyW, xyH);
+    // Draw crosshair grid lines
+    xyCtx.strokeStyle = 'rgba(212,175,55,0.2)';
+    xyCtx.lineWidth = 1;
+    xyCtx.beginPath();
+    xyCtx.moveTo(xyW / 2, 0); xyCtx.lineTo(xyW / 2, xyH);
+    xyCtx.moveTo(0, xyH / 2); xyCtx.lineTo(xyW, xyH / 2);
+    xyCtx.stroke();
+
+    // Convert normalized coordinates back to canvas scale
+    const dx = (px + 1) / 2 * xyW;
+    const dy = (py + 1) / 2 * xyH;
+
+    if (active) {
+      xyCtx.fillStyle = '#ff6600';
+      xyCtx.shadowColor = '#ff6600';
+      xyCtx.shadowBlur = 8;
+    } else {
+      xyCtx.fillStyle = '#b8860b';
+      xyCtx.shadowBlur = 0;
+    }
+
+    xyCtx.beginPath();
+    xyCtx.arc(dx, dy, 4, 0, Math.PI * 2);
+    xyCtx.fill();
+    xyCtx.shadowBlur = 0;
+  }
+
+  function handleXyMove(clientX, clientY) {
+    const rect = xyPad.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    let px = (x / rect.width) * 2 - 1;
+    let py = (y / rect.height) * 2 - 1;
+    px = Math.max(-1, Math.min(1, px));
+    py = Math.max(-1, Math.min(1, py));
+
+    // Map X to master pitch bend (+/- 2.5 semitones)
+    masterPitchBend = px * 2.5;
+    // Map Y to filter frequency sweep (up to +2000Hz)
+    masterFilterOffset = (1 - py) * 2000;
+
+    drawXyPad(px, py, true);
+
+    // Modulate all active string notes in real time
+    activeVoices.forEach(t => {
+      const baseFreq = xyToFreq(t.x, t.y, !t.isFretless);
+      const bentFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
+      t.voice.glideTo(bentFreq, 0.02);
+
+      const relativeY = t.y % (H / NUM_STRINGS);
+      const normY = relativeY / (H / NUM_STRINGS); 
+      const baseCutoff = 1000 + (1 - normY) * 3500;
+      t.voice.filter.frequency.setTargetAtTime(baseCutoff + masterFilterOffset, audioCtx.currentTime, 0.03);
+    });
+  }
+
+  xyPad.addEventListener('pointerdown', (e) => {
+    ensureCtx();
+    xyPad.setPointerCapture(e.pointerId);
+    xyActive = true;
+    handleXyMove(e.clientX, e.clientY);
+  });
+
+  xyPad.addEventListener('pointermove', (e) => {
+    if (!xyActive) return;
+    handleXyMove(e.clientX, e.clientY);
+  });
+
+  function resetXy() {
+    xyActive = false;
+    masterPitchBend = 0;
+    masterFilterOffset = 0;
+    drawXyPad(0, 0, false);
+
+    // Smoothly restore notes back to original pitch
+    activeVoices.forEach(t => {
+      const baseFreq = xyToFreq(t.x, t.y, !t.isFretless);
+      t.voice.glideTo(baseFreq, 0.12);
+
+      const relativeY = t.y % (H / NUM_STRINGS);
+      const normY = relativeY / (H / NUM_STRINGS); 
+      const baseCutoff = 1000 + (1 - normY) * 3500;
+      t.voice.filter.frequency.setTargetAtTime(baseCutoff, audioCtx.currentTime, 0.12);
+    });
+  }
+
+  xyPad.addEventListener('pointerup', resetXy);
+  xyPad.addEventListener('pointercancel', resetXy);
 
   function makeDistortionCurve(amount) {
     const k = typeof amount === 'number' ? amount : 50;
@@ -675,7 +833,6 @@
                   this.excited = false;
                 }
               } else if (this.continuous) {
-                // Continuous bowed/blown acoustic excitation mode to sustain infinitely while touched!
                 inputEnergy = (Math.random() * 2 - 1) * 0.015;
               }
 
@@ -704,7 +861,9 @@
 
   function buildEffectsChain() {
     masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0.75;
+    // Map initial master volume slider value
+    const volVal = parseFloat(volumeRange.value);
+    masterGain.gain.value = volVal;
 
     // 1. Overdrive
     driveNode = audioCtx.createWaveShaper();
@@ -838,7 +997,11 @@
 
       this.filter = audioCtx.createBiquadFilter();
       this.filter.type = cfg.filterType;
-      this.filter.frequency.value = Math.min(cfg.filterMaxFreq, freq * cfg.filterMult);
+      
+      // Apply initial filter frequency with masterFilterOffset from XY pad!
+      const initialFreq = freq * Math.pow(2, masterPitchBend / 12);
+      this.filter.frequency.value = Math.min(cfg.filterMaxFreq, initialFreq * cfg.filterMult) + masterFilterOffset;
+      
       if (cfg.filterQ) this.filter.Q.value = cfg.filterQ;
       this.filter.connect(this.master);
 
@@ -847,9 +1010,11 @@
 
       this.stringNode.parameters.get('damping').setValueAtTime(cfg.damping, now);
       this.stringNode.parameters.get('feedback').setValueAtTime(cfg.feedback, now);
-      this.stringNode.parameters.get('frequency').setValueAtTime(freq, now);
+      
+      // Apply initial frequency with masterPitchBend from XY pad!
+      const bentFreq = freq * Math.pow(2, masterPitchBend / 12);
+      this.stringNode.parameters.get('frequency').setValueAtTime(bentFreq, now);
 
-      // Trigger excitation pluck with continuous parameter mapping
       this.stringNode.port.postMessage({
         type: 'pluck',
         strength: 0.35,
@@ -877,7 +1042,6 @@
       const now = audioCtx.currentTime;
       const cfg = INSTRUMENT_PRESETS[activePreset];
       
-      // Stop continuous bowed/breath excitation immediately on finger release
       this.stringNode.port.postMessage({ type: 'release' });
 
       this.stringNode.parameters.get('feedback').setTargetAtTime(0.85, now, cfg.release / 3);
@@ -1063,7 +1227,9 @@
     let glideTime = parseFloat(glideRange.value);
 
     if (t.isFretless) {
-      targetFreq = xyToFreq(x, y, false);
+      // Base frequency mapped with masterPitchBend!
+      const baseFreq = xyToFreq(x, y, false);
+      targetFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
       const deltaX = Math.abs(x - t.lastX);
       t.wiggleX = t.wiggleX * 0.8 + deltaX * 0.2;
       
@@ -1071,14 +1237,15 @@
         glideTime = 0.005; 
       }
     } else {
-      targetFreq = xyToFreq(t.startX, t.startY, true);
+      const baseFreq = xyToFreq(t.startX, t.startY, true);
+      targetFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
     }
 
     t.voice.glideTo(targetFreq, glideTime);
 
     const relativeY = y % (H / NUM_STRINGS);
     const normY = relativeY / (H / NUM_STRINGS); 
-    const cutoff = 1000 + (1 - normY) * 3500;
+    const cutoff = 1000 + (1 - normY) * 3500 + masterFilterOffset;
     t.voice.filter.frequency.setTargetAtTime(cutoff, audioCtx.currentTime, 0.05);
 
     const dy = Math.abs(y - t.lastY);
@@ -1119,6 +1286,13 @@
 
   scaleSelect.onchange = () => {
     if (audioCtx) buildSympatheticResonators();
+  };
+
+  volumeRange.oninput = () => {
+    if (masterGain) {
+      const now = audioCtx.currentTime;
+      masterGain.gain.setTargetAtTime(parseFloat(volumeRange.value), now, 0.01);
+    }
   };
 
   function initPedals() {
@@ -1213,7 +1387,7 @@
       activeVoices.forEach((t) => {
         if (t.isFretless && (now - t.lastMoveTime > 180)) {
           const snapFreq = xyToFreq(t.x, t.y, true);
-          t.voice.glideTo(snapFreq, 0.25); 
+          t.voice.glideTo(snapFreq * Math.pow(2, masterPitchBend / 12), 0.25); 
         }
       });
 
