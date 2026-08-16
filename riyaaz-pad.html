@@ -14,7 +14,7 @@
     user-select: none;
     -webkit-user-select: none;
     touch-action: none;
-    background: #090b0e;
+    background: #06080a;
     overflow: hidden;
   }
   .pad-container {
@@ -25,18 +25,19 @@
     padding: 8px;
     box-sizing: border-box;
   }
+  /* Futuristic Console Panel */
   .controls-panel {
-    background: rgba(20, 24, 30, 0.85);
+    background: rgba(13, 17, 23, 0.9);
     border: 1px solid var(--border);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
     border-radius: 16px;
     padding: 10px 16px;
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 15px;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
   }
   .control-group {
     display: flex;
@@ -45,17 +46,21 @@
     font-size: 0.85rem;
   }
   .control-group label {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
   }
   .control-group select, .control-group input[type="range"] {
     background: var(--surface);
     color: var(--text);
-    border: 1px solid var(--border);
-    padding: 6px 10px;
+    border: 1.5px solid var(--border);
+    padding: 6px 12px;
     border-radius: 8px;
     outline: none;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
+    font-weight: 600;
   }
   .control-group input[type="range"] {
     width: 80px;
@@ -72,6 +77,7 @@
     height: 14px;
     border-radius: 50%;
     background: #e74c3c;
+    box-shadow: 0 0 8px #e74c3c;
     cursor: pointer;
   }
   .instrument-presets {
@@ -81,25 +87,27 @@
   .preset-btn {
     background: var(--surface);
     color: var(--subtitle);
-    border: 1px solid var(--border);
-    padding: 6px 12px;
+    border: 1.5px solid var(--border);
+    padding: 6px 14px;
     border-radius: 8px;
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .preset-btn.active {
-    background: linear-gradient(135deg, #e74c3c, #e67e22);
+    background: linear-gradient(135deg, #e74c3c, #f39c12);
     color: #fff;
     border-color: #e74c3c;
-    box-shadow: 0 0 10px rgba(231, 76, 60, 0.4);
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+    transform: scale(1.05);
   }
+  /* Glowing Play Surface */
   .play-surface {
     flex: 1;
-    background: #07080a;
+    background: #040507;
     border: 1.5px solid var(--border);
-    border-radius: 16px;
+    border-radius: 20px;
     position: relative;
     overflow: hidden;
     display: flex;
@@ -107,6 +115,7 @@
     gap: 4px;
     padding: 4px;
     box-sizing: border-box;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6) inset;
   }
   .pad-row {
     flex: 1;
@@ -115,81 +124,90 @@
   }
   .pad-key {
     flex: 1;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
     box-sizing: border-box;
-    transition: background 0.05s ease;
     overflow: hidden;
   }
-  /* String overlay lines to simulate fretboard */
+  /* String overlay lines to simulate fretboard/fret lines */
   .pad-key::after {
     content: '';
     position: absolute;
     left: 0; right: 0;
     top: 50%;
     height: 2px;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.12);
     pointer-events: none;
-    box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 3px rgba(255, 255, 255, 0.1);
+  }
+  /* Key Active Glowing Strings */
+  .pad-key.active-touch::after {
+    background: #e74c3c;
+    box-shadow: 0 0 12px #e74c3c, 0 0 20px #e67e22;
+    animation: stringVibrate 0.05s infinite alternate;
   }
   .pad-key .note-name {
-    font-size: 1.15rem;
-    font-weight: 800;
+    font-size: 1.25rem;
+    font-weight: 900;
     color: var(--text);
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
     z-index: 2;
   }
   .pad-key .note-swar {
     font-size: 0.72rem;
     color: var(--subtitle);
-    margin-top: 2px;
+    margin-top: 3px;
     z-index: 2;
   }
   .pad-key.sa-root {
-    background: rgba(231, 76, 60, 0.08);
-    border-color: rgba(231, 76, 60, 0.2);
+    background: rgba(231, 76, 60, 0.05);
+    border-color: rgba(231, 76, 60, 0.15);
   }
   .pad-key.sa-root .note-name {
     color: #e74c3c;
-    text-shadow: 0 0 8px rgba(231, 76, 60, 0.5);
+    text-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
   }
   .pad-key.active-touch {
-    background: linear-gradient(135deg, rgba(231, 76, 60, 0.45), rgba(230, 126, 34, 0.45)) !important;
-    border-color: #e74c3c !important;
-    box-shadow: 0 0 20px rgba(231, 76, 60, 0.6) inset, 0 0 10px rgba(231, 76, 60, 0.3);
+    background: radial-gradient(circle, rgba(231,76,60,0.25) 0%, rgba(230,126,34,0.02) 80%) !important;
+    border-color: rgba(231, 76, 60, 0.4) !important;
   }
+  /* Fretless Pitch indicator pointer */
   .touch-pointer {
     position: absolute;
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(231,76,60,0.9) 0%, rgba(230,126,34,0) 70%);
-    box-shadow: 0 0 25px #e74c3c, 0 0 10px #e67e22;
+    background: radial-gradient(circle, rgba(231,76,60,0.85) 0%, rgba(230,126,34,0) 70%);
+    box-shadow: 0 0 30px #e74c3c, 0 0 15px #f39c12;
     pointer-events: none;
     transform: translate(-50%, -50%);
     z-index: 99;
     display: none;
   }
+  @keyframes stringVibrate {
+    0% { transform: translateY(-1px); }
+    100% { transform: translateY(1px); }
+  }
   @media (max-width: 768px) {
     .controls-panel {
       padding: 8px 12px;
-      gap: 8px;
+      gap: 10px;
     }
     .control-group {
       font-size: 0.8rem;
     }
     .preset-btn {
-      padding: 5px 8px;
+      padding: 5px 10px;
       font-size: 0.75rem;
     }
     .pad-key .note-name {
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
     .pad-key .note-swar {
       font-size: 0.65rem;
@@ -220,18 +238,18 @@
             <button class="preset-btn active" data-preset="sitar">Sitar</button>
             <button class="preset-btn" data-preset="flute">Bansuri</button>
             <button class="preset-btn" data-preset="violin">Violin</button>
-            <button class="preset-btn" data-preset="synth">Synth</button>
+            <button class="preset-btn" data-preset="shred">Shred Guitar</button>
           </div>
         </div>
 
         <div class="control-group">
-          <label for="glideRange">⚡ Slide Time:</label>
-          <input type="range" id="glideRange" min="0.01" max="0.4" step="0.01" value="0.08">
+          <label for="glideRange">⚡ Slide Speed:</label>
+          <input type="range" id="glideRange" min="0.01" max="0.35" step="0.01" value="0.06">
         </div>
         
         <div class="control-group">
           <label for="vibratoRange">📳 Vibrato:</label>
-          <input type="range" id="vibratoRange" min="0" max="15" step="1" value="6">
+          <input type="range" id="vibratoRange" min="0" max="15" step="1" value="5">
         </div>
 
         <div class="control-group">
@@ -280,46 +298,47 @@
     }
   };
 
+  // Advanced synthesis configuration preset parameters
   const INSTRUMENT_PRESETS = {
     sitar: {
-      waveform: 'fm',
-      fmRatio: 3.5,
-      fmIndex: 2.2,
-      attack: 0.01,
-      release: 0.8,
-      filterFreq: 3000,
-      vibratoRate: 8,
-      vibratoDepth: 3
+      type: 'waveguide', // plucked waveguide model
+      fmRatio: 3.2,
+      fmIndex: 2.5,
+      attack: 0.005,
+      release: 1.2,
+      filterFreq: 2800,
+      vibratoRate: 8.5,
+      vibratoDepth: 3.5
     },
     flute: {
-      waveform: 'sine',
+      type: 'sustained-sine',
       fmRatio: 0,
       fmIndex: 0,
-      attack: 0.08,
-      release: 0.25,
-      filterFreq: 1500,
-      vibratoRate: 6.5,
-      vibratoDepth: 8
+      attack: 0.1,
+      release: 0.2,
+      filterFreq: 1200,
+      vibratoRate: 6.2,
+      vibratoDepth: 8.0
     },
     violin: {
-      waveform: 'sawtooth',
+      type: 'sustained-saw',
       fmRatio: 0,
       fmIndex: 0,
-      attack: 0.12,
-      release: 0.35,
-      filterFreq: 2200,
-      vibratoRate: 5.8,
-      vibratoDepth: 7
+      attack: 0.15,
+      release: 0.3,
+      filterFreq: 2000,
+      vibratoRate: 5.5,
+      vibratoDepth: 7.0
     },
-    synth: {
-      waveform: 'triangle',
+    shred: {
+      type: 'waveguide-heavy', // waveguide pluck + feedback overdrive
       fmRatio: 2.0,
-      fmIndex: 1.5,
-      attack: 0.02,
-      release: 0.4,
-      filterFreq: 4000,
-      vibratoRate: 6,
-      vibratoDepth: 4
+      fmIndex: 4.0,
+      attack: 0.002,
+      release: 0.9,
+      filterFreq: 3500,
+      vibratoRate: 7.0,
+      vibratoDepth: 5.0
     }
   };
 
@@ -332,11 +351,24 @@
 
   const BASE_SA = 130.81; // C3 Base Frequency to cover lower register nicely
 
-  // Web Audio Context
   let audioCtx = null;
   let delayNode = null;
   let delayFeedback = null;
+  let distortionNode = null;
   const activeVoices = {}; // Map to track polyphonic voices (key: touch/pointer id)
+
+  // Configure high-quality wave shaping distortion for heavy guitar pluck
+  function makeDistortionCurve(amount) {
+    const k = typeof amount === 'number' ? amount : 50;
+    const n_samples = 44100;
+    const curve = new Float32Array(n_samples);
+    const deg = Math.PI / 180;
+    for (let i = 0; i < n_samples; ++i) {
+      const x = (i * 2) / n_samples - 1;
+      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+  }
 
   function initAudio() {
     if (audioCtx) return;
@@ -346,28 +378,36 @@
     delayNode = audioCtx.createDelay(1.5);
     delayFeedback = audioCtx.createGain();
 
-    delayNode.delayTime.value = 0.35;
-    delayFeedback.gain.value = 0.38;
+    delayNode.delayTime.value = 0.38;
+    delayFeedback.gain.value = 0.36;
 
     delayNode.connect(delayFeedback);
     delayFeedback.connect(delayNode);
     delayNode.connect(audioCtx.destination);
+
+    // Distortion Setup for heavy guitar model
+    distortionNode = audioCtx.createWaveShaper();
+    distortionNode.curve = makeDistortionCurve(60);
+    distortionNode.oversample = '4x';
+    distortionNode.connect(audioCtx.destination);
   }
 
-  // Voice Class representing a single Touch/Finger Synth
+  // Synth Voice executing Digital Waveguide String modeling and FM Synthesis
   class SynthVoice {
     constructor(freq, touchX, touchY, visualPointer) {
-      this.osc = audioCtx.createOscillator();
+      this.osc = null;
+      this.mod = null;
+      this.modGain = null;
+      this.lfo = audioCtx.createOscillator();
+      this.lfoGain = audioCtx.createGain();
+      
       this.gain = audioCtx.createGain();
       this.filter = audioCtx.createBiquadFilter();
 
-      // FM Modulator Setup
-      this.mod = null;
-      this.modGain = null;
-
-      // Vibrato LFO Setup
-      this.lfo = audioCtx.createOscillator();
-      this.lfoGain = audioCtx.createGain();
+      // Digital Waveguide (Karplus-Strong) Loop Nodes
+      this.waveguideDelay = null;
+      this.waveguideFilter = null;
+      this.waveguideFeedback = null;
 
       this.pointer = visualPointer;
       this.freq = freq;
@@ -380,48 +420,97 @@
       const now = audioCtx.currentTime;
       const preset = INSTRUMENT_PRESETS[activePreset];
 
-      this.osc.type = preset.waveform === 'fm' ? 'sine' : preset.waveform;
-      this.osc.frequency.setValueAtTime(freq, now);
-
-      this.filter.type = 'lowpass';
-      this.filter.frequency.setValueAtTime(preset.filterFreq, now);
-
-      this.gain.gain.setValueAtTime(0, now);
-
-      // Vibrato config
+      // Configuration of LFO Vibrato
       const userVibMultiplier = parseFloat(vibratoRange.value) / 6;
       this.lfo.frequency.setValueAtTime(preset.vibratoRate, now);
       this.lfoGain.gain.setValueAtTime(preset.vibratoDepth * userVibMultiplier, now);
-
-      // Connections
       this.lfo.connect(this.lfoGain);
-      this.lfoGain.connect(this.osc.frequency);
 
-      if (preset.waveform === 'fm') {
-        this.mod = audioCtx.createOscillator();
-        this.modGain = audioCtx.createGain();
-        this.mod.type = 'sine';
-        this.mod.frequency.setValueAtTime(freq * preset.fmRatio, now);
-        this.modGain.gain.setValueAtTime(freq * preset.fmIndex, now);
+      this.gain.gain.setValueAtTime(0, now);
+      this.filter.type = 'lowpass';
+      this.filter.frequency.setValueAtTime(preset.filterFreq, now);
 
-        this.mod.connect(this.modGain);
-        this.modGain.connect(this.osc.frequency);
-        this.mod.start(now);
+      if (preset.type.startsWith('waveguide')) {
+        // ---- Plucked Digital Waveguide Physical Modeling ----
+        const delaySec = 1 / freq;
+        this.waveguideDelay = audioCtx.createDelay(1.0);
+        this.waveguideDelay.delayTime.setValueAtTime(delaySec, now);
+
+        this.waveguideFilter = audioCtx.createBiquadFilter();
+        this.waveguideFilter.type = 'lowpass';
+        this.waveguideFilter.frequency.setValueAtTime(preset.filterFreq, now);
+
+        this.waveguideFeedback = audioCtx.createGain();
+        // Decay string sustainability
+        this.waveguideFeedback.gain.value = preset.type === 'waveguide-heavy' ? 0.992 : 0.985;
+
+        // Feedback loop routing
+        this.waveguideDelay.connect(this.waveguideFilter);
+        this.waveguideFilter.connect(this.waveguideFeedback);
+        this.waveguideFeedback.connect(this.waveguideDelay);
+
+        // Generate pluck impulse: Short 15ms white noise burst
+        const bufferSize = audioCtx.sampleRate * 0.015;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+        const noiseSource = audioCtx.createBufferSource();
+        noiseSource.buffer = buffer;
+
+        // Connect Exciter to Waveguide
+        noiseSource.connect(this.waveguideDelay);
+
+        // Connection to output filter
+        this.waveguideDelay.connect(this.filter);
+        this.filter.connect(this.gain);
+
+        // Add Sitar Metallic Buzz (FM modulation of waveguide string delay time)
+        if (activePreset === 'sitar') {
+          this.mod = audioCtx.createOscillator();
+          this.modGain = audioCtx.createGain();
+          this.mod.type = 'sine';
+          this.mod.frequency.setValueAtTime(freq * preset.fmRatio, now);
+          this.modGain.gain.setValueAtTime(delaySec * 0.03 * preset.fmIndex, now); // modulate delay time slightly
+
+          this.mod.connect(this.modGain);
+          this.modGain.connect(this.waveguideDelay.delayTime);
+          this.mod.start(now);
+        }
+
+        noiseSource.start(now);
+      } else {
+        // ---- Continuous Sustained Waves ----
+        this.osc = audioCtx.createOscillator();
+        this.osc.type = preset.type === 'sustained-saw' ? 'sawtooth' : 'sine';
+        this.osc.frequency.setValueAtTime(freq, now);
+
+        this.lfoGain.connect(this.osc.frequency);
+
+        this.osc.connect(this.filter);
+        this.filter.connect(this.gain);
+        this.osc.start(now);
       }
 
-      this.osc.connect(this.filter);
-      this.filter.connect(this.gain);
-      this.gain.connect(audioCtx.destination);
-
-      if (echoBtn.checked) {
-        this.gain.connect(delayNode);
+      // Route Output
+      if (preset.type === 'waveguide-heavy') {
+        // Guitar overdrive distortion line
+        this.gain.connect(distortionNode);
+        if (echoBtn.checked) {
+          this.gain.connect(delayNode);
+        }
+      } else {
+        this.gain.connect(audioCtx.destination);
+        if (echoBtn.checked) {
+          this.gain.connect(delayNode);
+        }
       }
 
       this.lfo.start(now);
-      this.osc.start(now);
 
-      // Attack
-      this.gain.gain.linearRampToValueAtTime(0.25, now + preset.attack);
+      // Trigger Gain Attack
+      this.gain.gain.linearRampToValueAtTime(0.28, now + preset.attack);
     }
 
     glideTo(targetFreq, glideTime) {
@@ -430,18 +519,21 @@
 
       this.freq = targetFreq;
 
-      this.osc.frequency.cancelScheduledValues(now);
-      this.osc.frequency.setValueAtTime(this.osc.frequency.value, now);
-      this.osc.frequency.exponentialRampToValueAtTime(targetFreq, now + glideTime);
+      if (this.waveguideDelay) {
+        const delaySec = 1 / targetFreq;
+        this.waveguideDelay.delayTime.cancelScheduledValues(now);
+        this.waveguideDelay.delayTime.setTargetAtTime(delaySec, now, glideTime);
 
-      if (this.mod && this.modGain) {
-        this.mod.frequency.cancelScheduledValues(now);
-        this.mod.frequency.setValueAtTime(this.mod.frequency.value, now);
-        this.mod.frequency.exponentialRampToValueAtTime(targetFreq * preset.fmRatio, now + glideTime);
-
-        this.modGain.gain.cancelScheduledValues(now);
-        this.modGain.gain.setValueAtTime(this.modGain.gain.value, now);
-        this.modGain.gain.exponentialRampToValueAtTime(targetFreq * preset.fmIndex, now + glideTime);
+        if (this.mod && this.modGain) {
+          this.mod.frequency.cancelScheduledValues(now);
+          this.mod.frequency.setTargetAtTime(targetFreq * preset.fmRatio, now, glideTime);
+          this.modGain.gain.cancelScheduledValues(now);
+          this.modGain.gain.setTargetAtTime(delaySec * 0.03 * preset.fmIndex, now, glideTime);
+        }
+      } else if (this.osc) {
+        this.osc.frequency.cancelScheduledValues(now);
+        this.osc.frequency.setValueAtTime(this.osc.frequency.value, now);
+        this.osc.frequency.exponentialRampToValueAtTime(targetFreq, now + glideTime);
       }
     }
 
@@ -461,8 +553,10 @@
 
       setTimeout(() => {
         try {
-          oscToStop.stop();
-          oscToStop.disconnect();
+          if (oscToStop) {
+            oscToStop.stop();
+            oscToStop.disconnect();
+          }
           if (modToStop) {
             modToStop.stop();
             modToStop.disconnect();
@@ -484,7 +578,7 @@
     }
   }
 
-  // Find exact interpolated frequency based on X coordinate relative to keys in the row
+  // Calculate fretless frequency linearly/exponentially between column centers
   function calculateFretlessFrequency(rowElement, clientX) {
     const keys = Array.from(rowElement.querySelectorAll('.pad-key'));
     if (keys.length === 0) return BASE_SA;
@@ -492,7 +586,6 @@
     const rowRect = rowElement.getBoundingClientRect();
     const relativeX = clientX - rowRect.left;
 
-    // Calculate centers of keys
     const centers = keys.map(k => {
       const rect = k.getBoundingClientRect();
       return {
@@ -502,19 +595,16 @@
       };
     });
 
-    // Check bounds
     if (relativeX <= centers[0].x) return { freq: centers[0].freq, element: centers[0].element };
     if (relativeX >= centers[centers.length - 1].x) {
       return { freq: centers[centers.length - 1].freq, element: centers[centers.length - 1].element };
     }
 
-    // Interpolate
     for (let i = 0; i < centers.length - 1; i++) {
       const left = centers[i];
       const right = centers[i+1];
       if (relativeX >= left.x && relativeX <= right.x) {
         const ratio = (relativeX - left.x) / (right.x - left.x);
-        // Exponential interpolation for frequency
         const freq = left.freq * Math.pow(right.freq / left.freq, ratio);
         const activeEl = ratio < 0.5 ? left.element : right.element;
         return { freq, element: activeEl };
@@ -524,14 +614,14 @@
     return { freq: centers[0].freq, element: centers[0].element };
   }
 
-  // Draw Grid with neon layout
+  // Render isomorphic grid rows
   function buildGrid() {
     playSurface.innerHTML = '';
     const scaleKey = scaleSelect.value;
     const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
 
-    // 4 rows grid (representing 4 strings)
-    const rowOffsets = [1, 0, -1, -2];
+    // 4 strings configuration (offset by 5 semitones fourth interval)
+    const rowOffsets = [2, 1, 0, -1];
 
     rowOffsets.forEach((rowOffset) => {
       const rowDiv = document.createElement('div');
@@ -559,7 +649,6 @@
     });
   }
 
-  // Audio Pointer Visual Indicator
   function createPointerElement() {
     const pointer = document.createElement('div');
     pointer.className = 'touch-pointer';
@@ -568,7 +657,7 @@
     return pointer;
   }
 
-  // Multi-Touch and Mouse Drag Event System
+  // Multi-touch tracking event listeners
   function handleTouchStart(e) {
     e.preventDefault();
     initAudio();
@@ -624,13 +713,12 @@
     });
   }
 
-  // Register Touch Listeners
   playSurface.addEventListener('touchstart', handleTouchStart, { passive: false });
   playSurface.addEventListener('touchmove', handleTouchMove, { passive: false });
   playSurface.addEventListener('touchend', handleTouchEnd, { passive: false });
   playSurface.addEventListener('touchcancel', handleTouchEnd, { passive: false });
 
-  // Mouse fallback
+  // Mouse inputs
   let mouseActiveId = 'mouse-voice';
   playSurface.addEventListener('mousedown', (e) => {
     initAudio();
@@ -677,7 +765,7 @@
     }
   });
 
-  // Preset Buttons Handlers
+  // Preset Buttons
   document.querySelectorAll('.preset-btn').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
