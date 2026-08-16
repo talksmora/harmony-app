@@ -109,40 +109,73 @@
     margin-top: 1px;
     letter-spacing: 0.5px;
   }
+
+  /* Premium Virtual Rotary Knobs matching GeoShred console dial */
   .right-sliders {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
-  .slider-item {
+  .knob-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1px;
+    width: 38px;
   }
-  .slider-item label {
+  .knob-item label {
     font-size: 0.55rem;
     font-weight: 800;
     color: #c9a876;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  .slider-item input[type="range"] {
-    width: 45px;
-    height: 3px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: #202733;
-    border-radius: 2px;
-  }
-  .slider-item input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 8px;
-    height: 8px;
+  .knob {
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    background: #b8860b;
-    cursor: pointer;
+    background: linear-gradient(135deg, #2c3545 0%, #0d131f 100%);
+    border: 2px solid #b8860b;
+    position: relative;
+    cursor: ns-resize;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    touch-action: none;
+  }
+  .knob-pointer {
+    width: 2px;
+    height: 9px;
+    background: #fdd835;
+    position: absolute;
+    top: 2px;
+    left: 11px;
+    transform-origin: bottom center;
+    border-radius: 1px;
+    box-shadow: 0 0 3px #fdd835;
+    transition: transform 0.05s ease;
+  }
+  .knob-value {
+    font-size: 0.52rem;
+    font-weight: 700;
+    color: rgba(243,230,208,0.6);
+    margin-top: 1px;
+  }
+
+  /* Expression XY Pad: enlarged to 100px x 60px exactly matching request */
+  .xy-pad-container {
+    width: 100px !important;
+    height: 60px !important;
+    background: #0c1017;
+    border: 1.5px solid #d4af37;
+    border-radius: 6px;
+    position: relative;
+    cursor: crosshair;
+    overflow: hidden;
+    box-shadow: inset 0 0 8px rgba(212,175,55,0.6);
+  }
+  #xyCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
   }
 
   /* Performance surface */
@@ -342,15 +375,14 @@
     }
     .xy-pad-container {
       order: 3;
+      width: 90px !important;
+      height: 50px !important;
     }
     .right-sliders {
       order: 4;
       width: 100%;
       justify-content: space-around;
       margin-top: 4px;
-    }
-    .slider-item input[type="range"] {
-      width: 50px;
     }
     .pedalboard {
       gap: 6px;
@@ -398,23 +430,32 @@
         </div>
 
         <!-- Floating Expression XY Pad exactly matching GeoShred Corner Pad -->
-        <div class="xy-pad-container" id="xyPad" style="width: 64px; height: 38px; background: #0c1017; border: 1.5px solid #d4af37; border-radius: 6px; position: relative; cursor: crosshair; overflow: hidden; box-shadow: inset 0 0 6px rgba(212,175,55,0.6);">
-          <canvas id="xyCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+        <div class="xy-pad-container" id="xyPad">
+          <canvas id="xyCanvas"></canvas>
         </div>
 
+        <!-- Interactive Rotary Dial Dials instead of sliders -->
         <div class="right-sliders">
-          <div class="slider-item">
-            <label for="glideRange">Slide</label>
-            <input type="range" id="glideRange" min="0.01" max="0.3" step="0.01" value="0.06">
+          <div class="knob-item">
+            <label>Slide</label>
+            <div class="knob" id="knob-slide" data-min="0.01" data-max="0.3" data-val="0.06" data-step="0.01">
+              <div class="knob-pointer"></div>
+            </div>
+            <span class="knob-value" id="val-slide">0.06</span>
           </div>
-          <div class="slider-item">
-            <label for="vibratoRange">Vib</label>
-            <input type="range" id="vibratoRange" min="0" max="15" step="1" value="8">
+          <div class="knob-item">
+            <label>Vib</label>
+            <div class="knob" id="knob-vib" data-min="0" data-max="15" data-val="8" data-step="1">
+              <div class="knob-pointer"></div>
+            </div>
+            <span class="knob-value" id="val-vib">8</span>
           </div>
-          <!-- Master Volume Slider to boost speaker volume -->
-          <div class="slider-item">
-            <label for="volumeRange">Vol</label>
-            <input type="range" id="volumeRange" min="0" max="1.8" step="0.05" value="1.2">
+          <div class="knob-item">
+            <label>Vol</label>
+            <div class="knob" id="knob-vol" data-min="0" data-max="1.8" data-val="1.2" data-step="0.05">
+              <div class="knob-pointer"></div>
+            </div>
+            <span class="knob-value" id="val-vol">1.20</span>
           </div>
         </div>
       </div>
@@ -504,7 +545,7 @@
 <script>
 (function(){
   const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
-  const pageTitle = lang === 'en' ? '🎹 Riyaaz Pad' : lang === 'hi' ? '🎹  रियाज़ पैડ' : '🎹 રિયાઝ પેડ';
+  const pageTitle = lang === 'en' ? '🎹 Riyaaz Pad' : lang === 'hi' ? '🎹  रियाज़ पैड' : '🎹 રિયાઝ પેડ';
 
   const SCALE_DATA = {
     bilawal: {
@@ -533,7 +574,6 @@
     }
   };
 
-  // Fine-tuned instrument parameters for authentic acoustic separation
   const INSTRUMENT_PRESETS = {
     sitar: { damping: 0.14, feedback: 0.99, filterType: 'bandpass', filterMult: 3.5, filterMaxFreq: 6000, filterQ: 4.5, attack: 0.005, peakGain: 0.95, release: 1.2, continuous: false },
     sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.98, release: 0.85, continuous: false },
@@ -558,8 +598,6 @@
     dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 1.7, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.92, release: 0.22, continuous: true }
   };
 
-  // Instrument sound families mapped to custom DSP modes inside AudioWorklet:
-  // 0: Plucked/Guitar, 1: Buzzing/Sitar, 2: Bowed/Violin, 3: Blown/Flute, 4: Sharp Metallic/Sarod
   const INSTRUMENT_TYPES = {
     sitar: 1,
     sarod: 4,
@@ -601,9 +639,13 @@
 
   let activePreset = 'sitar';
   const scaleSelect = document.getElementById('scaleSelect');
-  const glideRange = document.getElementById('glideRange');
-  const vibratoRange = document.getElementById('vibratoRange');
-  const volumeRange = document.getElementById('volumeRange');
+
+  // Knob Values Config
+  const knobValues = {
+    slide: 0.06,
+    vib: 8,
+    vol: 1.2
+  };
 
   // Canvas Setup
   const canvas = document.getElementById('surface');
@@ -697,7 +739,7 @@
     }
 
     xyCtx.beginPath();
-    xyCtx.arc(dx, dy, 4, 0, Math.PI * 2);
+    xyCtx.arc(dx, dy, 5, 0, Math.PI * 2);
     xyCtx.fill();
     xyCtx.shadowBlur = 0;
   }
@@ -854,7 +896,6 @@
               let filteredSample = (1 - damping) * interpolatedSample + damping * this.lastOutput;
               this.lastOutput = filteredSample;
               
-              // Stable soft-clipping tanh waveshaper for Sitar Jawari buzz to guarantee feedback loop stability
               if (this.instType === 1) {
                 const buzz = Math.max(0, filteredSample);
                 const buzzSample = filteredSample + buzz * buzz * 0.52;
@@ -895,7 +936,6 @@
 
               let nextWriteVal = inputEnergy + filteredSample * feedback;
               
-              // Bulletproof hard clamping safeguard to prevent Infinity / NaN runaway crashes
               if (nextWriteVal > 1.15) nextWriteVal = 1.15;
               else if (nextWriteVal < -1.15) nextWriteVal = -1.15;
 
@@ -923,8 +963,8 @@
 
   function buildEffectsChain() {
     masterGain = audioCtx.createGain();
-    const volVal = parseFloat(volumeRange.value);
-    masterGain.gain.value = volVal;
+    // Load Master volume from knobValues object
+    masterGain.gain.value = knobValues.vol;
 
     // 1. Overdrive
     driveNode = audioCtx.createWaveShaper();
@@ -1285,7 +1325,7 @@
     }
 
     let targetFreq;
-    let glideTime = parseFloat(glideRange.value);
+    let glideTime = knobValues.slide;
 
     if (t.isFretless) {
       const baseFreq = xyToFreq(x, y, false);
@@ -1310,7 +1350,7 @@
 
     const dy = Math.abs(y - t.lastY);
     t.wiggleY = t.wiggleY * 0.82 + dy * 0.18;
-    const userMaxVib = parseFloat(vibratoRange.value);
+    const userMaxVib = knobValues.vib;
     const depth = Math.min(userMaxVib, t.wiggleY * 2.2);
     t.voice.vibratoGain.gain.setTargetAtTime(depth, audioCtx.currentTime, 0.04);
 
@@ -1348,12 +1388,67 @@
     if (audioCtx) buildSympatheticResonators();
   };
 
-  volumeRange.oninput = () => {
-    if (masterGain) {
-      const now = audioCtx.currentTime;
-      masterGain.gain.setTargetAtTime(parseFloat(volumeRange.value), now, 0.01);
-    }
-  };
+  // Interactive Rotary Dial Dials Logic
+  const knobs = ['slide', 'vib', 'vol'];
+
+  function updateKnobUI(key, val) {
+    const knobEl = document.getElementById('knob-' + key);
+    if (!knobEl) return;
+    const pointer = knobEl.querySelector('.knob-pointer');
+    const valDisplay = document.getElementById('val-' + key);
+    
+    const min = parseFloat(knobEl.getAttribute('data-min'));
+    const max = parseFloat(knobEl.getAttribute('data-max'));
+    
+    const pct = (val - min) / (max - min);
+    const deg = -135 + pct * 270;
+    pointer.style.transform = `rotate(${deg}deg)`;
+    
+    valDisplay.textContent = key === 'vib' ? Math.round(val) : val.toFixed(2);
+  }
+
+  knobs.forEach(key => {
+    const knobEl = document.getElementById('knob-' + key);
+    let startY = 0;
+    let startVal = 0;
+    let dragging = false;
+    
+    updateKnobUI(key, knobValues[key]);
+
+    knobEl.addEventListener('pointerdown', (e) => {
+      ensureCtx();
+      knobEl.setPointerCapture(e.pointerId);
+      startY = e.clientY;
+      startVal = knobValues[key];
+      dragging = true;
+      e.preventDefault();
+    });
+
+    knobEl.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const min = parseFloat(knobEl.getAttribute('data-min'));
+      const max = parseFloat(knobEl.getAttribute('data-max'));
+      const step = parseFloat(knobEl.getAttribute('data-step') || '0.01');
+      
+      const deltaY = startY - e.clientY;
+      const range = max - min;
+      const sensitivity = range / 120; 
+      
+      let newVal = startVal + deltaY * sensitivity;
+      newVal = Math.round(newVal / step) * step;
+      newVal = Math.max(min, Math.min(max, newVal));
+      
+      knobValues[key] = newVal;
+      updateKnobUI(key, newVal);
+
+      if (key === 'vol' && masterGain) {
+        masterGain.gain.setTargetAtTime(newVal, audioCtx.currentTime, 0.01);
+      }
+    });
+
+    knobEl.addEventListener('pointerup', () => { dragging = false; });
+    knobEl.addEventListener('pointercancel', () => { dragging = false; });
+  });
 
   function initPedals() {
     const ids = ['overdrive', 'chorus', 'delay', 'reverb'];
