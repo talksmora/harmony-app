@@ -145,7 +145,7 @@
     cursor: pointer;
   }
 
-  /* Performance surface: set min-height to 0 to allow shrinking inside flex container */
+  /* Performance surface */
   .canvas-wrap {
     flex: 1 !important;
     min-height: 0 !important;
@@ -329,7 +329,7 @@
     .controls-panel {
       padding: 4px 6px;
       gap: 4px;
-      flex-wrap: wrap; /* allow wrapping on narrow screens */
+      flex-wrap: wrap; 
       justify-content: center;
     }
     .left-controls {
@@ -533,13 +533,14 @@
     }
   };
 
-  // Increased peakGains dynamically to boost output volume across mobile speakers
+  // Fine-tuned instrument parameters for authentic acoustic separation
   const INSTRUMENT_PRESETS = {
     sitar: { damping: 0.14, feedback: 0.99, filterType: 'bandpass', filterMult: 3.5, filterMaxFreq: 6000, filterQ: 4.5, attack: 0.005, peakGain: 0.95, release: 1.2, continuous: false },
     sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.98, release: 0.85, continuous: false },
     sarangi: { damping: 0.26, feedback: 0.992, filterType: 'bandpass', filterMult: 2.2, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.12, peakGain: 0.88, release: 0.45, continuous: true },
     veena: { damping: 0.15, feedback: 0.988, filterType: 'lowpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 2.0, attack: 0.008, peakGain: 0.92, release: 1.0, continuous: false },
-    bansuri: { damping: 0.42, feedback: 0.97, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 4000, filterQ: 1.0, attack: 0.1, peakGain: 0.95, release: 0.25, continuous: true },
+    // Lowpass filterMult set to 1.6 for Bansuri flute to ensure pure whistle resonance
+    bansuri: { damping: 0.42, feedback: 0.97, filterType: 'lowpass', filterMult: 1.6, filterMaxFreq: 4000, filterQ: 0.8, attack: 0.1, peakGain: 0.95, release: 0.25, continuous: true },
     shehnai: { damping: 0.3, feedback: 0.985, filterType: 'bandpass', filterMult: 5.5, filterMaxFreq: 6500, filterQ: 4.0, attack: 0.05, peakGain: 0.90, release: 0.3, continuous: true },
     
     lead_guitar: { damping: 0.12, feedback: 0.994, filterType: 'lowpass', filterMult: 5.5, filterMaxFreq: 7000, filterQ: 2.0, attack: 0.003, peakGain: 1.0, release: 1.4, continuous: false },
@@ -548,14 +549,40 @@
     
     swam_violin: { damping: 0.28, feedback: 0.992, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 6000, filterQ: 1.5, attack: 0.12, peakGain: 0.84, release: 0.35, continuous: true },
     swam_cello: { damping: 0.32, feedback: 0.994, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 3000, filterQ: 1.2, attack: 0.15, peakGain: 0.88, release: 0.4, continuous: true },
-    swam_flute: { damping: 0.45, feedback: 0.965, filterType: 'lowpass', filterMult: 4.2, filterMaxFreq: 3800, filterQ: 0.8, attack: 0.08, peakGain: 0.90, release: 0.2, continuous: true },
-    swam_clarinet: { damping: 0.35, feedback: 0.975, filterType: 'lowpass', filterMult: 4.8, filterMaxFreq: 4200, filterQ: 1.2, attack: 0.07, peakGain: 0.90, release: 0.25, continuous: true },
-    swam_oboe: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 5.2, filterMaxFreq: 4800, filterQ: 2.0, attack: 0.06, peakGain: 0.88, release: 0.28, continuous: true },
+    swam_flute: { damping: 0.45, feedback: 0.965, filterType: 'lowpass', filterMult: 1.6, filterMaxFreq: 3800, filterQ: 0.8, attack: 0.08, peakGain: 0.90, release: 0.2, continuous: true },
+    swam_clarinet: { damping: 0.35, feedback: 0.975, filterType: 'lowpass', filterMult: 2.0, filterMaxFreq: 4200, filterQ: 1.2, attack: 0.07, peakGain: 0.90, release: 0.25, continuous: true },
+    swam_oboe: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 2.5, filterMaxFreq: 4800, filterQ: 2.0, attack: 0.06, peakGain: 0.88, release: 0.28, continuous: true },
     swam_trumpet: { damping: 0.28, feedback: 0.985, filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.08, peakGain: 0.92, release: 0.3, continuous: true },
     
     erhu: { damping: 0.24, feedback: 0.99, filterType: 'bandpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 3.5, attack: 0.1, peakGain: 0.88, release: 0.4, continuous: true },
     pipa: { damping: 0.13, feedback: 0.98, filterType: 'lowpass', filterMult: 3.5, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.004, peakGain: 0.95, release: 0.6, continuous: false },
-    dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.92, release: 0.22, continuous: true }
+    dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 1.7, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.92, release: 0.22, continuous: true }
+  };
+
+  // Instrument sound families mapped to custom DSP modes inside AudioWorklet:
+  // 0: Plucked/Guitar, 1: Buzzing/Sitar, 2: Bowed/Violin, 3: Blown/Flute, 4: Sharp Metallic/Sarod
+  const INSTRUMENT_TYPES = {
+    sitar: 1,
+    sarod: 4,
+    sarangi: 2,
+    veena: 4,
+    bansuri: 3,
+    shehnai: 3,
+    
+    lead_guitar: 0,
+    nylon_guitar: 0,
+    steel_guitar: 0,
+    
+    swam_violin: 2,
+    swam_cello: 2,
+    swam_flute: 3,
+    swam_clarinet: 3,
+    swam_oboe: 3,
+    swam_trumpet: 3,
+    
+    erhu: 2,
+    pipa: 4,
+    dizi: 3
   };
 
   const SWAR_COLORS = {
@@ -775,8 +802,12 @@
             this.excitationBuffer = null;
             this.lastOutput = 0;
             this.noiseFilterState = 0;
+            this.phase = 0;
+            this.instType = 0;
+            this.lastExcitationSample = 0;
             this.port.onmessage = (e) => {
               if (e.data.type === 'pluck') {
+                this.instType = e.data.instType !== undefined ? e.data.instType : 0;
                 this.triggerPluck(e.data.strength, e.data.frequency, e.data.continuous);
               } else if (e.data.type === 'release') {
                 this.continuous = false;
@@ -808,9 +839,9 @@
             for (let i = 0; i < len; i++) {
               const f = freqParam.length > 1 ? freqParam[i] : freqParam[0];
               const damping = dampingParam.length > 1 ? dampingParam[i] : dampingParam[0];
+              const baseFeedback = feedbackParam.length > 1 ? feedbackParam[i] : feedbackParam[0];
               
               // Clamped minimum feedback gain for continuous wind/bowed instruments to keep sustain vibrant!
-              const baseFeedback = feedbackParam.length > 1 ? feedbackParam[i] : feedbackParam[0];
               const feedback = this.continuous ? Math.max(0.9915, baseFeedback) : baseFeedback;
 
               const delaySamples = sr / f;
@@ -822,21 +853,47 @@
               const sampleA = this.buffer[baseIdx];
               const sampleB = this.buffer[nextIdx];
               const interpolatedSample = sampleA + frac * (sampleB - sampleA);
-              const filteredSample = (1 - damping) * interpolatedSample + damping * this.lastOutput;
+              let filteredSample = (1 - damping) * interpolatedSample + damping * this.lastOutput;
               this.lastOutput = filteredSample;
               
+              // Apply custom non-linear waveshaping for Sitar Jawari buzz!
+              if (this.instType === 1) {
+                const buzz = Math.max(0, filteredSample);
+                filteredSample = filteredSample + buzz * buzz * 1.6;
+              }
+
               let inputEnergy = 0;
               if (this.excited && this.excitationBuffer && this.excitationIdx < this.excitationLength) {
-                inputEnergy = this.excitationBuffer[this.excitationIdx];
+                if (this.instType === 4) {
+                  const noise = (Math.random() * 2 - 1);
+                  const hpNoise = noise - this.lastExcitationSample;
+                  this.lastExcitationSample = noise;
+                  inputEnergy = hpNoise * strength * 0.7;
+                } else {
+                  inputEnergy = this.excitationBuffer[this.excitationIdx];
+                }
                 this.excitationIdx++;
                 if (this.excitationIdx >= this.excitationLength) {
                   this.excited = false;
                 }
               } else if (this.continuous) {
-                // Soft, lowpass filtered breath/bow noise (0.05) to ensure infinite sustain without static noise
-                const noise = (Math.random() * 2 - 1);
-                this.noiseFilterState = 0.85 * this.noiseFilterState + 0.15 * noise;
-                inputEnergy = this.noiseFilterState * 0.055;
+                if (this.instType === 2) {
+                  // Bowed/Violin/Sarangi: slip-stick friction model using sawtooth phase accumulator
+                  this.phase = (this.phase + (f / sr)) % 1;
+                  const bowForce = (this.phase < 0.2) ? (this.phase / 0.2) : ((1 - this.phase) / 0.8 * -1);
+                  const scrape = (Math.random() * 2 - 1) * 0.12;
+                  inputEnergy = (bowForce + scrape) * 0.08;
+                } else if (this.instType === 3) {
+                  // Woodwind/Flute/Bansuri: sine jet oscillation + breath noise
+                  this.phase = (this.phase + (f / sr)) % 1;
+                  const sineJet = Math.sin(this.phase * Math.PI * 2);
+                  const breath = (Math.random() * 2 - 1) * 0.15;
+                  inputEnergy = (sineJet + breath) * 0.06;
+                } else {
+                  const noise = (Math.random() * 2 - 1);
+                  this.noiseFilterState = 0.85 * this.noiseFilterState + 0.15 * noise;
+                  inputEnergy = this.noiseFilterState * 0.055;
+                }
               }
 
               const nextWriteVal = inputEnergy + filteredSample * feedback;
@@ -1015,11 +1072,13 @@
       const bentFreq = freq * Math.pow(2, masterPitchBend / 12);
       this.stringNode.parameters.get('frequency').setValueAtTime(bentFreq, now);
 
+      const instType = INSTRUMENT_TYPES[activePreset] !== undefined ? INSTRUMENT_TYPES[activePreset] : 0;
       this.stringNode.port.postMessage({
         type: 'pluck',
         strength: 0.35,
         frequency: freq,
-        continuous: !!cfg.continuous
+        continuous: !!cfg.continuous,
+        instType: instType
       });
 
       this.vibratoLfo = audioCtx.createOscillator();
