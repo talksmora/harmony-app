@@ -504,7 +504,7 @@
 <script>
 (function(){
   const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
-  const pageTitle = lang === 'en' ? '🎹 Riyaaz Pad' : lang === 'hi' ? '🎹  रियाज़ पैड' : '🎹 રિયાઝ પેડ';
+  const pageTitle = lang === 'en' ? '🎹 Riyaaz Pad' : lang === 'hi' ? '🎹  रियाज़ पैડ' : '🎹 રિયાઝ પેડ';
 
   const SCALE_DATA = {
     bilawal: {
@@ -539,7 +539,6 @@
     sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.98, release: 0.85, continuous: false },
     sarangi: { damping: 0.26, feedback: 0.992, filterType: 'bandpass', filterMult: 2.2, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.12, peakGain: 0.88, release: 0.45, continuous: true },
     veena: { damping: 0.15, feedback: 0.988, filterType: 'lowpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 2.0, attack: 0.008, peakGain: 0.92, release: 1.0, continuous: false },
-    // Lowpass filterMult set to 1.6 for Bansuri flute to ensure pure whistle resonance
     bansuri: { damping: 0.42, feedback: 0.97, filterType: 'lowpass', filterMult: 1.6, filterMaxFreq: 4000, filterQ: 0.8, attack: 0.1, peakGain: 0.95, release: 0.25, continuous: true },
     shehnai: { damping: 0.3, feedback: 0.985, filterType: 'bandpass', filterMult: 5.5, filterMaxFreq: 6500, filterQ: 4.0, attack: 0.05, peakGain: 0.90, release: 0.3, continuous: true },
     
@@ -841,7 +840,6 @@
               const damping = dampingParam.length > 1 ? dampingParam[i] : dampingParam[0];
               const baseFeedback = feedbackParam.length > 1 ? feedbackParam[i] : feedbackParam[0];
               
-              // Clamped minimum feedback gain for continuous wind/bowed instruments to keep sustain vibrant!
               const feedback = this.continuous ? Math.max(0.9915, baseFeedback) : baseFeedback;
 
               const delaySamples = sr / f;
@@ -856,10 +854,11 @@
               let filteredSample = (1 - damping) * interpolatedSample + damping * this.lastOutput;
               this.lastOutput = filteredSample;
               
-              // Apply custom non-linear waveshaping for Sitar Jawari buzz!
+              // Stable soft-clipping tanh waveshaper for Sitar Jawari buzz to guarantee feedback loop stability
               if (this.instType === 1) {
                 const buzz = Math.max(0, filteredSample);
-                filteredSample = filteredSample + buzz * buzz * 1.6;
+                const buzzSample = filteredSample + buzz * buzz * 0.52;
+                filteredSample = Math.tanh(buzzSample) * 0.92;
               }
 
               let inputEnergy = 0;
@@ -878,13 +877,11 @@
                 }
               } else if (this.continuous) {
                 if (this.instType === 2) {
-                  // Bowed/Violin/Sarangi: slip-stick friction model using sawtooth phase accumulator
                   this.phase = (this.phase + (f / sr)) % 1;
                   const bowForce = (this.phase < 0.2) ? (this.phase / 0.2) : ((1 - this.phase) / 0.8 * -1);
                   const scrape = (Math.random() * 2 - 1) * 0.12;
                   inputEnergy = (bowForce + scrape) * 0.08;
                 } else if (this.instType === 3) {
-                  // Woodwind/Flute/Bansuri: sine jet oscillation + breath noise
                   this.phase = (this.phase + (f / sr)) % 1;
                   const sineJet = Math.sin(this.phase * Math.PI * 2);
                   const breath = (Math.random() * 2 - 1) * 0.15;
@@ -896,7 +893,12 @@
                 }
               }
 
-              const nextWriteVal = inputEnergy + filteredSample * feedback;
+              let nextWriteVal = inputEnergy + filteredSample * feedback;
+              
+              // Bulletproof hard clamping safeguard to prevent Infinity / NaN runaway crashes
+              if (nextWriteVal > 1.15) nextWriteVal = 1.15;
+              else if (nextWriteVal < -1.15) nextWriteVal = -1.15;
+
               this.buffer[this.writeIdx] = nextWriteVal;
               channel[i] = filteredSample;
               this.writeIdx = (this.writeIdx + 1) % this.bufferSize;
