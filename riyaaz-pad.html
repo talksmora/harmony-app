@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riyaaz Pad - Harmony Music</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="shared/theme.css">
+<style>
+  body {
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  .pad-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 85px);
+    gap: 12px;
+  }
+  .controls-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+  .control-group select, .control-group input[type="range"] {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    border-radius: 8px;
+    outline: none;
+  }
+  .control-group input[type="range"] {
+    width: 90px;
+    height: 6px;
+    -webkit-appearance: none;
+    background: var(--border);
+    border-radius: 3px;
+  }
+  .control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #e74c3c;
+    cursor: pointer;
+  }
+  .play-surface {
+    flex: 1;
+    background: #0d0f12;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    gap: 4px;
+    padding: 4px;
+  }
+  .pad-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+  }
+  .pad-key {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.1s ease;
+  }
+  .pad-key .note-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .pad-key .note-swar {
+    font-size: 0.75rem;
+    color: var(--subtitle);
+  }
+  .pad-key.sa-root {
+    background: rgba(231, 76, 60, 0.15);
+    border-color: rgba(231, 76, 60, 0.3);
+  }
+  .pad-key.sa-root .note-name {
+    color: #e74c3c;
+  }
+  .pad-key.active-hover {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.4), rgba(230, 126, 34, 0.4)) !important;
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.6) inset;
+    border-color: #e74c3c;
+  }
+  .pad-key.active-slide {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.4), rgba(155, 89, 182, 0.4)) !important;
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.6) inset;
+    border-color: #3498db;
+  }
+  .glissando-indicator {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(231, 76, 60, 0.8);
+    box-shadow: 0 0 20px #e74c3c;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 99;
+  }
+</style>
+</head>
+<body data-page="riyaaz-pad">
+  <div id="appShellRoot"></div>
+  <div id="pageBody" style="display:none;">
+    <div class="pad-container">
+      <div class="controls-panel">
+        <div class="control-group">
+          <label for="scaleSelect">🎵 Raga / Scale:</label>
+          <select id="scaleSelect">
+            <option value="bilawal">Bilawal (Major)</option>
+            <option value="yaman">Yaman (Kalyan)</option>
+            <option value="bhairav">Bhairav</option>
+            <option value="bhairavi" selected>Bhairavi</option>
+            <option value="kafi">Kafi</option>
+            <option value="asavari">Asavari</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="octaveSelect">🎼 Octave Shift:</label>
+          <select id="octaveSelect">
+            <option value="-1">Low (-1)</option>
+            <option value="0" selected>Normal (0)</option>
+            <option value="1">High (+1)</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="glideRange">⚡ Glide Time:</label>
+          <input type="range" id="glideRange" min="0" max="0.5" step="0.02" value="0.12">
+        </div>
+        <div class="control-group">
+          <label for="timbreSelect">🔊 Waveform:</label>
+          <select id="timbreSelect">
+            <option value="triangle" selected>Triangle (Mellow)</option>
+            <option value="sawtooth">Sawtooth (Bright)</option>
+            <option value="sine">Sine (Pure)</option>
+            <option value="fm">FM Synth (Sitar-like)</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="echoBtn" id="lblEcho">🔊 Echo: On</label>
+          <input type="checkbox" id="echoBtn" checked style="width: 16px; height: 16px; accent-color: #e74c3c;">
+        </div>
+      </div>
+
+      <div class="play-surface" id="playSurface">
+        <div class="glissando-indicator" id="glideIndicator"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared/utils.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/app-shell.js"></script>
+<script>
+(function(){
+  const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
+  const pageTitle = lang === 'en' ? '🎹 Riyaaz Pad' : lang === 'hi' ? '🎹 रियाज़ पैડ' : '🎹 રિયાઝ પેડ';
+
+  const SCALE_DATA = {
+    bilawal: {
+      swars: ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni', 'Sa^'],
+      intervals: [0, 2, 4, 5, 7, 9, 11, 12]
+    },
+    yaman: {
+      swars: ['Sa', 'Re', 'Ga', 'Ma#', 'Pa', 'Dha', 'Ni', 'Sa^'],
+      intervals: [0, 2, 4, 6, 7, 9, 11, 12]
+    },
+    bhairav: {
+      swars: ['Sa', 'Re_b', 'Ga', 'Ma', 'Pa', 'Dha_b', 'Ni', 'Sa^'],
+      intervals: [0, 1, 4, 5, 7, 8, 11, 12]
+    },
+    bhairavi: {
+      swars: ['Sa', 'Re_b', 'Ga_b', 'Ma', 'Pa', 'Dha_b', 'Ni_b', 'Sa^'],
+      intervals: [0, 1, 3, 5, 7, 8, 10, 12]
+    },
+    kafi: {
+      swars: ['Sa', 'Re', 'Ga_b', 'Ma', 'Pa', 'Dha', 'Ni_b', 'Sa^'],
+      intervals: [0, 2, 3, 5, 7, 9, 10, 12]
+    },
+    asavari: {
+      swars: ['Sa', 'Re', 'Ga_b', 'Ma', 'Pa', 'Dha_b', 'Ni_b', 'Sa^'],
+      intervals: [0, 2, 3, 5, 7, 8, 10, 12]
+    }
+  };
+
+  const scaleSelect = document.getElementById('scaleSelect');
+  const octaveSelect = document.getElementById('octaveSelect');
+  const glideRange = document.getElementById('glideRange');
+  const timbreSelect = document.getElementById('timbreSelect');
+  const echoBtn = document.getElementById('echoBtn');
+  const playSurface = document.getElementById('playSurface');
+  const glideIndicator = document.getElementById('glideIndicator');
+
+  // Base frequency for Sa (C4 = 261.63 Hz)
+  const BASE_SA = 261.63;
+
+  // Web Audio Synth Engine
+  let audioCtx = null;
+  let synthGain = null;
+  let synthOsc = null;
+  let fmModulator = null;
+  let fmModGain = null;
+  let delayNode = null;
+  let delayFeedback = null;
+  let activeFreq = 0;
+
+  function initAudio() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    synthGain = audioCtx.createGain();
+    synthGain.gain.value = 0;
+
+    // Echo/Delay Setup
+    delayNode = audioCtx.createDelay(1.0);
+    delayFeedback = audioCtx.createGain();
+    
+    delayNode.delayTime.value = 0.35;
+    delayFeedback.gain.value = 0.35;
+
+    // Connect feedback loop
+    delayNode.connect(delayFeedback);
+    delayFeedback.connect(delayNode);
+
+    // Dry/Wet connections
+    synthGain.connect(audioCtx.destination);
+    
+    // Connect synth to delay
+    if (echoBtn.checked) {
+      synthGain.connect(delayNode);
+    }
+    delayNode.connect(audioCtx.destination);
+  }
+
+  function startNote(freq) {
+    initAudio();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const type = timbreSelect.value;
+    const now = audioCtx.currentTime;
+
+    // Stop current nodes
+    stopCurrentNodes();
+
+    activeFreq = freq;
+
+    if (type === 'fm') {
+      // FM Synthesis Sitar-like Tone
+      synthOsc = audioCtx.createOscillator();
+      synthOsc.type = 'sine';
+      synthOsc.frequency.setValueAtTime(freq, now);
+
+      fmModulator = audioCtx.createOscillator();
+      fmModulator.type = 'sine';
+      fmModulator.frequency.setValueAtTime(freq * 3, now); // Harmonic ratio
+
+      fmModGain = audioCtx.createGain();
+      fmModGain.gain.setValueAtTime(freq * 1.5, now); // Modulation index
+
+      fmModulator.connect(fmModGain);
+      fmModGain.connect(synthOsc.frequency);
+      synthOsc.connect(synthGain);
+
+      fmModulator.start(now);
+      synthOsc.start(now);
+    } else {
+      // Traditional Waveform Synth
+      synthOsc = audioCtx.createOscillator();
+      synthOsc.type = type;
+      synthOsc.frequency.setValueAtTime(freq, now);
+      synthOsc.connect(synthGain);
+      synthOsc.start(now);
+    }
+
+    // Trigger Envelope Attack
+    synthGain.gain.cancelScheduledValues(now);
+    synthGain.gain.setValueAtTime(synthGain.gain.value, now);
+    synthGain.gain.linearRampToValueAtTime(0.3, now + 0.05); // quick attack
+  }
+
+  function stopCurrentNodes() {
+    const now = audioCtx ? audioCtx.currentTime : 0;
+    try {
+      if (synthOsc) {
+        synthOsc.stop(now);
+        synthOsc.disconnect();
+      }
+      if (fmModulator) {
+        fmModulator.stop(now);
+        fmModulator.disconnect();
+      }
+      if (fmModGain) {
+        fmModGain.disconnect();
+      }
+    } catch(e) {}
+    synthOsc = null;
+    fmModulator = null;
+    fmModGain = null;
+  }
+
+  function glideTo(freq) {
+    if (!audioCtx || !synthOsc) return;
+    const now = audioCtx.currentTime;
+    const glideTime = parseFloat(glideRange.value);
+
+    activeFreq = freq;
+
+    synthOsc.frequency.cancelScheduledValues(now);
+    synthOsc.frequency.setValueAtTime(synthOsc.frequency.value, now);
+    synthOsc.frequency.exponentialRampToValueAtTime(freq, now + glideTime);
+
+    if (fmModulator && fmModGain) {
+      fmModulator.frequency.cancelScheduledValues(now);
+      fmModulator.frequency.setValueAtTime(fmModulator.frequency.value, now);
+      fmModulator.frequency.exponentialRampToValueAtTime(freq * 3, now + glideTime);
+
+      fmModGain.gain.cancelScheduledValues(now);
+      fmModGain.gain.setValueAtTime(fmModGain.gain.value, now);
+      fmModGain.gain.exponentialRampToValueAtTime(freq * 1.5, now + glideTime);
+    }
+  }
+
+  function releaseNote() {
+    if (!audioCtx || !synthGain) return;
+    const now = audioCtx.currentTime;
+    synthGain.gain.cancelScheduledValues(now);
+    synthGain.gain.setValueAtTime(synthGain.gain.value, now);
+    synthGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3); // release envelope
+  }
+
+  // Update echo routing dynamically
+  echoBtn.onchange = () => {
+    if (!synthGain || !delayNode) return;
+    if (echoBtn.checked) {
+      synthGain.connect(delayNode);
+      document.getElementById('lblEcho').textContent = lang === 'en' ? '🔊 Echo: On' : lang === 'hi' ? '🔊 गूंज: चालू' : '🔊 પડઘો: ચાલુ';
+    } else {
+      try { synthGain.disconnect(delayNode); } catch(e) {}
+      document.getElementById('lblEcho').textContent = lang === 'en' ? '🔇 Echo: Off' : lang === 'hi' ? '🔇 गूंज: बंद' : '🔇 પડઘો: બંધ';
+    }
+  };
+
+  // Build play grid dynamically
+  function buildGrid() {
+    // Clear rows
+    const keys = playSurface.querySelectorAll('.pad-key');
+    keys.forEach(k => k.remove());
+
+    const scaleKey = scaleSelect.value;
+    const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
+    const octShift = parseInt(octaveSelect.value);
+
+    // 4 rows grid (from Octave +1 down to Octave -2)
+    const rowOffsets = [1, 0, -1, -2];
+
+    rowOffsets.forEach((rowOffset) => {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'pad-row';
+
+      scale.swars.forEach((swar, colIdx) => {
+        const interval = scale.intervals[colIdx];
+        
+        // Calculate frequency
+        const totalOctShift = octShift + rowOffset;
+        const noteFreq = BASE_SA * Math.pow(2, totalOctShift) * Math.pow(2, interval / 12);
+
+        const keyDiv = document.createElement('div');
+        keyDiv.className = 'pad-key';
+        if (swar === 'Sa') {
+          keyDiv.classList.add('sa-root');
+        }
+        
+        // Data attributes for dynamic mapping
+        keyDiv.setAttribute('data-freq', noteFreq);
+        keyDiv.setAttribute('data-swar', swar);
+        
+        keyDiv.innerHTML = `
+          <div class="note-name">${swar}</div>
+          <div class="note-swar">${noteFreq.toFixed(1)} Hz</div>
+        `;
+
+        rowDiv.appendChild(keyDiv);
+      });
+
+      playSurface.appendChild(rowDiv);
+    });
+  }
+
+  // Touch and Drag Interaction Engine
+  let activeTouchId = null;
+  let activeKeyElement = null;
+
+  function getElementFromTouch(touch) {
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!el) return null;
+    return el.closest('.pad-key');
+  }
+
+  // Handle Touch Start
+  playSurface.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (activeTouchId !== null) return; // Monophonic prioritised touch
+
+    const touch = e.changedTouches[0];
+    activeTouchId = touch.identifier;
+
+    const keyEl = getElementFromTouch(touch);
+    if (keyEl) {
+      activeKeyElement = keyEl;
+      keyEl.classList.add('active-hover');
+
+      const freq = parseFloat(keyEl.getAttribute('data-freq'));
+      startNote(freq);
+
+      // Trigger Glide Indicator
+      showIndicator(touch.clientX, touch.clientY);
+    }
+  }, { passive: false });
+
+  // Handle Touch Move (Continuous Pitch Bend Glissando)
+  playSurface.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (activeTouchId === null) return;
+
+    // Find the tracked touch
+    let trackedTouch = null;
+    for (let i = 0; i < e.touches.length; i++) {
+      if (e.touches[i].identifier === activeTouchId) {
+        trackedTouch = e.touches[i];
+        break;
+      }
+    }
+    if (!trackedTouch) return;
+
+    // Move indicators
+    moveIndicator(trackedTouch.clientX, trackedTouch.clientY);
+
+    const keyEl = getElementFromTouch(trackedTouch);
+    if (keyEl && keyEl !== activeKeyElement) {
+      if (activeKeyElement) {
+        activeKeyElement.classList.remove('active-hover');
+      }
+      activeKeyElement = keyEl;
+      keyEl.classList.add('active-hover');
+
+      const freq = parseFloat(keyEl.getAttribute('data-freq'));
+      glideTo(freq);
+    }
+  }, { passive: false });
+
+  // Handle Touch End
+  const handleTouchEnd = (e) => {
+    if (activeTouchId === null) return;
+    
+    let ended = false;
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === activeTouchId) {
+        ended = true;
+        break;
+      }
+    }
+    if (!ended) return;
+
+    activeTouchId = null;
+    if (activeKeyElement) {
+      activeKeyElement.classList.remove('active-hover');
+      activeKeyElement = null;
+    }
+    releaseNote();
+    hideIndicator();
+  };
+
+  playSurface.addEventListener('touchend', handleTouchEnd);
+  playSurface.addEventListener('touchcancel', handleTouchEnd);
+
+  // Mouse Drag Fallbacks for Desktop compatibility
+  let isMouseDown = false;
+  playSurface.addEventListener('mousedown', (e) => {
+    const keyEl = e.target.closest('.pad-key');
+    if (keyEl) {
+      isMouseDown = true;
+      activeKeyElement = keyEl;
+      keyEl.classList.add('active-hover');
+      const freq = parseFloat(keyEl.getAttribute('data-freq'));
+      startNote(freq);
+      showIndicator(e.clientX, e.clientY);
+    }
+  });
+
+  playSurface.addEventListener('mousemove', (e) => {
+    if (!isMouseDown) return;
+    const keyEl = e.target.closest('.pad-key');
+    if (keyEl && keyEl !== activeKeyElement) {
+      if (activeKeyElement) {
+        activeKeyElement.classList.remove('active-hover');
+      }
+      activeKeyElement = keyEl;
+      keyEl.classList.add('active-hover');
+      const freq = parseFloat(keyEl.getAttribute('data-freq'));
+      glideTo(freq);
+      moveIndicator(e.clientX, e.clientY);
+    }
+  });
+
+  const handleMouseUp = () => {
+    if (!isMouseDown) return;
+    isMouseDown = false;
+    if (activeKeyElement) {
+      activeKeyElement.classList.remove('active-hover');
+      activeKeyElement = null;
+    }
+    releaseNote();
+    hideIndicator();
+  };
+  window.addEventListener('mouseup', handleMouseUp);
+
+  // Indicator visuals helper
+  function showIndicator(x, y) {
+    const rect = playSurface.getBoundingClientRect();
+    glideIndicator.style.left = `${x - rect.left}px`;
+    glideIndicator.style.top = `${y - rect.top}px`;
+    glideIndicator.style.display = 'block';
+  }
+  function moveIndicator(x, y) {
+    const rect = playSurface.getBoundingClientRect();
+    glideIndicator.style.left = `${x - rect.left}px`;
+    glideIndicator.style.top = `${y - rect.top}px`;
+  }
+  function hideIndicator() {
+    glideIndicator.style.display = 'none';
+  }
+
+  // Dropdown change handlers
+  scaleSelect.onchange = buildGrid;
+  octaveSelect.onchange = buildGrid;
+
+  // Build grid on init
+  buildGrid();
+
+  initAppShell({ title: pageTitle });
+})();
+</script>
+</body>
+</html>

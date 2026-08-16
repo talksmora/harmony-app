@@ -1,8 +1,8 @@
-const CACHE_NAME = 'harmony-music-app-v123';
+const CACHE_NAME = 'harmony-music-app-v124';
 const ASSETS = [
   './', './index.html', './login.html', './dashboard.html', './profile.html', './daily-riyaz.html',
   './pitch-monitor.html', './pitch-monitor.css',
-  './progress.html', './owner-console.html', './practice-tool.html', './metronome.html', './tabla.html', './instruments.html', './harmonium.html', './santoor.html', './piano.html', './keyboard-piano.html', './organ.html', './accordion.html', './stylophone.html', './synthesizer.html', './guitar.html', './bass-guitar.html', './kalimba.html', './handpan.html', './xylophone.html', './glockenspiel.html', './guitar-tuner.html', './bpm-tapper.html', './ukulele.html', './universal-instrument.html',
+  './progress.html', './owner-console.html', './practice-tool.html', './metronome.html', './tabla.html', './riyaaz-pad.html', './instruments.html', './harmonium.html', './santoor.html', './piano.html', './keyboard-piano.html', './organ.html', './accordion.html', './stylophone.html', './synthesizer.html', './guitar.html', './bass-guitar.html', './kalimba.html', './handpan.html', './xylophone.html', './glockenspiel.html', './guitar-tuner.html', './bpm-tapper.html', './ukulele.html', './universal-instrument.html',
   './attendance.html', './fee-management.html', './class-schedule.html', './student-list.html',
   './shared/theme.css', './shared/app-shell.css', './shared/components.css',
   './shared/app-shell.js', './shared/supabase-client.js', './shared/utils.js',

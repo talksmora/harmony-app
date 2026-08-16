@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { page: 'practice', icon: '🎧', label: { gu: 'Song Practice Tool', hi: 'Song Practice Tool', en: 'Song Practice Tool' }, href: 'practice-tool.html' },
   { page: 'metronome', icon: '⏱️', label: { gu: 'લયબદ્ધ મેટ્રોનોમ', hi: 'लयबद्ध मेट्रोनोम', en: 'Rhythmic Metronome' }, href: 'metronome.html' },
   { page: 'tabla', icon: '🥁', label: { gu: 'વર્ચ્યુઅલ તબલા', hi: 'वर्चुअल तबला', en: 'Virtual Tabla' }, href: 'tabla.html' },
+  { page: 'riyaaz-pad', icon: '🎹', label: { gu: 'રિયાઝ પેડ', hi: 'रियाज़ पैड', en: 'Riyaaz Pad' }, href: 'riyaaz-pad.html' },
   { page: 'instruments', icon: '🎵', label: { gu: 'બધા વાદ્ય સાધનો', hi: 'सभी वाद्य यंत्र', en: 'All Instruments' }, href: 'instruments.html' },
   { page: 'attendance', icon: '🗓️', label: { gu: 'હાજરી', hi: 'उपस्थिति', en: 'Attendance' }, href: 'attendance.html' },
   { page: 'fees', icon: '💳', label: { gu: 'ફી મેનેજમેન્ટ', hi: 'फीस प्रबंधन', en: 'Fee Management' }, href: 'fee-management.html' },
