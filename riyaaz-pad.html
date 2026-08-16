@@ -14,34 +14,42 @@
     user-select: none;
     -webkit-user-select: none;
     touch-action: none;
-    background: #050608;
+    background: #080a0e;
     overflow: hidden;
     margin: 0;
     padding: 0;
   }
-  /* Strict CSS Grid Layout to prevent any vertical scrollbars */
+  /* Override padding of app-shell page content specifically to allow full-height layout */
+  body[data-page="riyaaz-pad"] .page-content {
+    padding: 0 !important;
+    overflow: hidden !important;
+    height: calc(100vh - 62px) !important;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
   .pad-container {
     display: grid;
     grid-template-rows: auto 1fr;
-    height: calc(100vh - 65px);
-    gap: 8px;
-    padding: 8px;
+    height: 100%;
+    width: 100%;
+    gap: 6px;
+    padding: 6px;
     box-sizing: border-box;
   }
-  /* Responsive Control Panel Console */
+  /* Premium dark console panel */
   .controls-panel {
-    background: rgba(12, 16, 22, 0.92);
+    background: rgba(14, 18, 24, 0.95);
     border: 1px solid var(--border);
     backdrop-filter: blur(15px);
-    border-radius: 16px;
-    padding: 8px 14px;
+    border-radius: 12px;
+    padding: 8px 12px;
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-    z-index: 10;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
   }
   .control-group {
     display: flex;
@@ -51,23 +59,23 @@
   }
   .control-group label {
     font-weight: 700;
-    color: var(--text);
+    color: #f3e6d0;
     text-transform: uppercase;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     letter-spacing: 0.5px;
   }
   .control-group select, .control-group input[type="range"] {
-    background: var(--surface);
-    color: var(--text);
+    background: #191f29;
+    color: #f3e6d0;
     border: 1.5px solid var(--border);
-    padding: 5px 8px;
-    border-radius: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
     outline: none;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 600;
   }
   .control-group input[type="range"] {
-    width: 75px;
+    width: 70px;
     height: 5px;
     -webkit-appearance: none;
     appearance: none;
@@ -89,131 +97,37 @@
     gap: 4px;
   }
   .preset-btn {
-    background: var(--surface);
-    color: var(--subtitle);
+    background: #191f29;
+    color: #c9a876;
     border: 1.5px solid var(--border);
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.72rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
   }
   .preset-btn.active {
-    background: linear-gradient(135deg, #e74c3c, #f39c12);
-    color: #fff;
-    border-color: #e74c3c;
-    box-shadow: 0 0 12px rgba(231, 76, 60, 0.5);
-    transform: scale(1.03);
+    background: linear-gradient(135deg, #b8860b, #8a5a0a);
+    color: #080a0e;
+    border-color: #f4c542;
+    box-shadow: 0 0 10px rgba(184, 134, 11, 0.4);
   }
-  /* Grid stretching surface */
-  .play-surface {
-    background: #030406;
+  /* Non-interactive responsive play canvas wrap */
+  .canvas-wrap {
+    flex: 1;
+    position: relative;
     border: 1.5px solid var(--border);
-    border-radius: 18px;
-    position: relative;
+    border-radius: 14px;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 3px;
-    box-sizing: border-box;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.7) inset;
+    background: #040507;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6) inset;
   }
-  .pad-row {
-    flex: 1;
-    display: flex;
-    gap: 3px;
-  }
-  .pad-key {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.01);
-    border: 1px solid rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    box-sizing: border-box;
-    overflow: hidden;
-  }
-  .pad-key::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0;
-    top: 50%;
-    height: 1.5px;
-    background: rgba(255, 255, 255, 0.1);
-    pointer-events: none;
-    box-shadow: 0 0 2px rgba(255, 255, 255, 0.08);
-  }
-  /* Active neon feedback */
-  .pad-key.active-touch::after {
-    background: #e74c3c;
-    box-shadow: 0 0 10px #e74c3c, 0 0 18px #e67e22;
-    animation: stringVibrate 0.06s infinite alternate;
-  }
-  .pad-key .note-name {
-    font-size: 1.1rem;
-    font-weight: 900;
-    color: var(--text);
-    text-shadow: 0 2px 4px rgba(0,0,0,0.7);
-    z-index: 2;
-  }
-  .pad-key .note-swar {
-    font-size: 0.68rem;
-    color: var(--subtitle);
-    margin-top: 1px;
-    z-index: 2;
-  }
-  .pad-key.sa-root {
-    background: rgba(231, 76, 60, 0.04);
-    border-color: rgba(231, 76, 60, 0.12);
-  }
-  .pad-key.sa-root .note-name {
-    color: #e74c3c;
-    text-shadow: 0 0 8px rgba(231, 76, 60, 0.5);
-  }
-  .pad-key.active-touch {
-    background: radial-gradient(circle, rgba(231,76,60,0.22) 0%, rgba(230,126,34,0.01) 80%) !important;
-    border-color: rgba(231, 76, 60, 0.35) !important;
-  }
-  .touch-pointer {
-    position: absolute;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(231,76,60,0.85) 0%, rgba(230,126,34,0) 75%);
-    box-shadow: 0 0 25px #e74c3c, 0 0 12px #f39c12;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    z-index: 99;
-    display: none;
-  }
-  @keyframes stringVibrate {
-    0% { transform: translateY(-0.8px); }
-    100% { transform: translateY(0.8px); }
-  }
-  @media (max-width: 768px) {
-    .controls-panel {
-      padding: 6px 10px;
-      gap: 6px;
-      border-radius: 12px;
-    }
-    .control-group {
-      font-size: 0.75rem;
-    }
-    .preset-btn {
-      padding: 4px 8px;
-      font-size: 0.7rem;
-    }
-    .pad-key .note-name {
-      font-size: 0.9rem;
-    }
-    .pad-key .note-swar {
-      font-size: 0.6rem;
-    }
+  #surface {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
   }
 </style>
 </head>
@@ -223,7 +137,7 @@
     <div class="pad-container">
       <div class="controls-panel">
         <div class="control-group">
-          <label for="scaleSelect">🎵 રાગ:</label>
+          <label for="scaleSelect">🎵 રાગ / Raga:</label>
           <select id="scaleSelect">
             <option value="bilawal">Bilawal (Major)</option>
             <option value="yaman">Yaman (Kalyan)</option>
@@ -235,32 +149,35 @@
         </div>
         
         <div class="control-group">
-          <label>🎻 Presets:</label>
+          <label>🎻 સાઉન્ડ:</label>
           <div class="instrument-presets">
             <button class="preset-btn active" data-preset="sitar">Sitar</button>
             <button class="preset-btn" data-preset="flute">Bansuri</button>
             <button class="preset-btn" data-preset="violin">Violin</button>
-            <button class="preset-btn" data-preset="shred">Shred</button>
+            <button class="preset-btn" data-preset="guitar">Guitar</button>
+            <button class="preset-btn" data-preset="sarangi">Sarangi</button>
           </div>
         </div>
 
         <div class="control-group">
           <label for="glideRange">⚡ Slide:</label>
-          <input type="range" id="glideRange" min="0.01" max="0.3" step="0.01" value="0.08">
+          <input type="range" id="glideRange" min="0.01" max="0.3" step="0.01" value="0.06">
         </div>
         
         <div class="control-group">
-          <label for="vibratoRange">📳 Vib:</label>
-          <input type="range" id="vibratoRange" min="0" max="12" step="1" value="4">
+          <label for="vibratoRange">📳 Vib Depth:</label>
+          <input type="range" id="vibratoRange" min="0" max="15" step="1" value="8">
         </div>
 
         <div class="control-group">
-          <label for="echoBtn" id="lblEcho">🔊 Space Echo</label>
-          <input type="checkbox" id="echoBtn" checked style="width: 15px; height: 15px; accent-color: #e74c3c;">
+          <label for="echoBtn" id="lblEcho">🔊 Reverb Echo</label>
+          <input type="checkbox" id="echoBtn" checked style="width: 15px; height: 15px; accent-color: #b8860b;">
         </div>
       </div>
 
-      <div class="play-surface" id="playSurface"></div>
+      <div class="canvas-wrap">
+        <canvas id="surface"></canvas>
+      </div>
     </div>
   </div>
 
@@ -302,44 +219,29 @@
 
   const INSTRUMENT_PRESETS = {
     sitar: {
-      type: 'waveguide',
-      fmRatio: 3.0,
-      fmIndex: 2.2,
-      attack: 0.004,
-      release: 1.0,
-      filterFreq: 2600,
-      vibratoRate: 8.0,
-      vibratoDepth: 3.0
+      wave1: 'sawtooth', wave2: 'square', detune2: 2.01, mix2: 0.15,
+      filterType: 'bandpass', filterMult: 3.2, filterMaxFreq: 6000, filterQ: 4.5,
+      attack: 0.005, peakGain: 0.28, sustainGain: 0.12, pluck: true, release: 1.2
     },
     flute: {
-      type: 'sustained-sine',
-      fmRatio: 0,
-      fmIndex: 0,
-      attack: 0.08,
-      release: 0.2,
-      filterFreq: 1400,
-      vibratoRate: 6.0,
-      vibratoDepth: 7.0
+      wave1: 'sine', wave2: 'triangle', detune2: 2.0, mix2: 0.08,
+      filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 4000, filterQ: 1.0,
+      attack: 0.1, peakGain: 0.28, sustainGain: 0.28, pluck: false, release: 0.25
     },
     violin: {
-      type: 'sustained-saw',
-      fmRatio: 0,
-      fmIndex: 0,
-      attack: 0.12,
-      release: 0.28,
-      filterFreq: 1800,
-      vibratoRate: 5.5,
-      vibratoDepth: 6.0
+      wave1: 'sawtooth', wave2: 'sawtooth', detune2: 1.006, mix2: 0.55,
+      filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 7000, filterQ: 1.5,
+      attack: 0.14, peakGain: 0.22, sustainGain: 0.22, pluck: false, release: 0.35
     },
-    shred: {
-      type: 'waveguide-heavy',
-      fmRatio: 1.8,
-      fmIndex: 3.5,
-      attack: 0.002,
-      release: 0.8,
-      filterFreq: 3200,
-      vibratoRate: 6.8,
-      vibratoDepth: 4.5
+    guitar: {
+      wave1: 'sawtooth', wave2: 'triangle', detune2: 2.0, mix2: 0.25,
+      filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 5000, filterQ: 2.0,
+      attack: 0.004, peakGain: 0.3, sustainGain: 0.1, pluck: true, release: 0.9
+    },
+    sarangi: {
+      wave1: 'sawtooth', wave2: 'sawtooth', detune2: 1.01, mix2: 0.45,
+      filterType: 'bandpass', filterMult: 2.5, filterMaxFreq: 5500, filterQ: 3.0,
+      attack: 0.12, peakGain: 0.24, sustainGain: 0.24, pluck: false, release: 0.4
     }
   };
 
@@ -348,405 +250,301 @@
   const glideRange = document.getElementById('glideRange');
   const vibratoRange = document.getElementById('vibratoRange');
   const echoBtn = document.getElementById('echoBtn');
-  const playSurface = document.getElementById('playSurface');
 
-  const BASE_SA = 130.81; // C3 Base
+  // Canvas Setup
+  const canvas = document.getElementById('surface');
+  const ctx = canvas.getContext('2d');
+  let W = 0, H = 0;
 
+  function resize() {
+    const parent = canvas.parentElement;
+    W = parent.clientWidth;
+    H = parent.clientHeight;
+    canvas.width = W * window.devicePixelRatio;
+    canvas.height = H * window.devicePixelRatio;
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const NUM_STRINGS = 4;
+  const BASE_SA = 130.81; // C3
+  const STRING_INTERVAL = 5; // offset strings by fourth interval (5 semitones)
+
+  // Web Audio Context
   let audioCtx = null;
-  let delayNode = null;
-  let delayFeedback = null;
-  let distortionNode = null;
-  const activeVoices = {}; // Polyphonic voices tracker
+  let reverbNode = null;
+  const activeVoices = new Map();
 
-  function makeDistortionCurve(amount) {
-    const k = typeof amount === 'number' ? amount : 50;
-    const n_samples = 44100;
-    const curve = new Float32Array(n_samples);
-    const deg = Math.PI / 180;
-    for (let i = 0; i < n_samples; ++i) {
-      const x = (i * 2) / n_samples - 1;
-      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+  function ensureCtx() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      buildReverb();
     }
-    return curve;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
   }
 
-  function initAudio() {
-    if (audioCtx) return;
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    // Reverb / Echo Delay
-    delayNode = audioCtx.createDelay(1.5);
-    delayFeedback = audioCtx.createGain();
-
-    delayNode.delayTime.value = 0.36;
-    delayFeedback.gain.value = 0.35;
-
-    delayNode.connect(delayFeedback);
-    delayFeedback.connect(delayNode);
-    delayNode.connect(audioCtx.destination);
-
-    // Distortion
-    distortionNode = audioCtx.createWaveShaper();
-    distortionNode.curve = makeDistortionCurve(50);
-    distortionNode.oversample = '4x';
-    distortionNode.connect(audioCtx.destination);
+  // Create high-fidelity synthetic convolver impulse response
+  function buildReverb() {
+    reverbNode = audioCtx.createConvolver();
+    const len = audioCtx.sampleRate * 2.2;
+    const impulse = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = impulse.getChannelData(ch);
+      for (let i = 0; i < len; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.2);
+      }
+    }
+    reverbNode.buffer = impulse;
+    reverbNode.connect(audioCtx.destination);
   }
 
+  function outputChain(node) {
+    node.connect(audioCtx.destination);
+    if (echoBtn.checked && reverbNode) {
+      const send = audioCtx.createGain();
+      send.gain.value = 0.35;
+      node.connect(send).connect(reverbNode);
+    }
+  }
+
+  // Double-detuned oscillator synth voice
   class SynthVoice {
-    constructor(freq, touchX, touchY, visualPointer) {
-      this.osc = null;
-      this.mod = null;
-      this.modGain = null;
-      this.lfo = audioCtx.createOscillator();
-      this.lfoGain = audioCtx.createGain();
-      this.gain = audioCtx.createGain();
+    constructor(freq) {
+      const now = audioCtx.currentTime;
+      const cfg = INSTRUMENT_PRESETS[activePreset];
+
+      this.master = audioCtx.createGain();
+      this.master.gain.setValueAtTime(0, now);
+      outputChain(this.master);
+
       this.filter = audioCtx.createBiquadFilter();
+      this.filter.type = cfg.filterType;
+      this.filter.frequency.value = Math.min(cfg.filterMaxFreq, freq * cfg.filterMult);
+      if (cfg.filterQ) this.filter.Q.value = cfg.filterQ;
+      this.filter.connect(this.master);
 
-      // Waveguide string nodes
-      this.waveguideDelay = null;
-      this.waveguideFilter = null;
-      this.waveguideFeedback = null;
+      this.osc1 = audioCtx.createOscillator();
+      this.osc1.type = cfg.wave1;
+      this.osc1.frequency.value = freq;
 
-      this.pointer = visualPointer;
-      this.freq = freq;
+      this.osc2 = audioCtx.createOscillator();
+      this.osc2.type = cfg.wave2;
+      this.osc2.frequency.value = freq * cfg.detune2;
+      this.osc2._ratio = cfg.detune2;
 
-      this.setup(freq);
-      this.updatePointerPosition(touchX, touchY);
+      this.g2 = audioCtx.createGain();
+      this.g2.gain.value = cfg.mix2;
+
+      this.osc1.connect(this.filter);
+      this.osc2.connect(this.g2).connect(this.filter);
+
+      // Low Frequency Vibrato LFO
+      this.vibratoLfo = audioCtx.createOscillator();
+      this.vibratoLfo.frequency.value = 5.8;
+      this.vibratoGain = audioCtx.createGain();
+      this.vibratoGain.gain.value = 0;
+
+      this.vibratoLfo.connect(this.vibratoGain).connect(this.osc1.frequency);
+      this.vibratoGain.connect(this.osc2.frequency);
+
+      this.osc1.start(now);
+      this.osc2.start(now);
+      this.vibratoLfo.start(now);
+
+      if (cfg.pluck) {
+        this.master.gain.setValueAtTime(0.0001, now);
+        this.master.gain.exponentialRampToValueAtTime(cfg.peakGain, now + 0.015);
+        this.master.gain.exponentialRampToValueAtTime(cfg.sustainGain, now + 0.6);
+      } else {
+        this.master.gain.setTargetAtTime(cfg.peakGain, now, cfg.attack);
+      }
     }
 
-    setup(freq) {
+    glideTo(freq, glideTime) {
       const now = audioCtx.currentTime;
-      const preset = INSTRUMENT_PRESETS[activePreset];
-
-      // Smooth click-free Vibrato LFO configuration
-      const userVibMultiplier = parseFloat(vibratoRange.value) / 6;
-      this.lfo.frequency.setValueAtTime(preset.vibratoRate, now);
-      this.lfoGain.gain.setValueAtTime(preset.vibratoDepth * userVibMultiplier, now);
-      this.lfo.connect(this.lfoGain);
-
-      this.gain.gain.setValueAtTime(0, now);
-      this.filter.type = 'lowpass';
-      this.filter.frequency.setValueAtTime(preset.filterFreq, now);
-
-      if (preset.type.startsWith('waveguide')) {
-        const delaySec = 1 / freq;
-        this.waveguideDelay = audioCtx.createDelay(1.0);
-        this.waveguideDelay.delayTime.setValueAtTime(delaySec, now);
-
-        this.waveguideFilter = audioCtx.createBiquadFilter();
-        this.waveguideFilter.type = 'lowpass';
-        this.waveguideFilter.frequency.setValueAtTime(preset.filterFreq, now);
-
-        this.waveguideFeedback = audioCtx.createGain();
-        
-        // Dynamically scale feedback decay to make higher frequencies decay faster
-        const scaledFeedback = Math.min(0.995, 0.94 + (1 / freq) * 12);
-        this.waveguideFeedback.gain.value = preset.type === 'waveguide-heavy' ? Math.max(0.99, scaledFeedback) : scaledFeedback;
-
-        this.waveguideDelay.connect(this.waveguideFilter);
-        this.waveguideFilter.connect(this.waveguideFeedback);
-        this.waveguideFeedback.connect(this.waveguideDelay);
-
-        // Filtered white noise exciter buffer (18ms string pluck)
-        const bufferSize = audioCtx.sampleRate * 0.018;
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          data[i] = Math.random() * 2 - 1;
-        }
-        const noiseSource = audioCtx.createBufferSource();
-        noiseSource.buffer = buffer;
-        noiseSource.connect(this.waveguideDelay);
-
-        this.waveguideDelay.connect(this.filter);
-        this.filter.connect(this.gain);
-
-        if (activePreset === 'sitar') {
-          this.mod = audioCtx.createOscillator();
-          this.modGain = audioCtx.createGain();
-          this.mod.type = 'sine';
-          this.mod.frequency.setValueAtTime(freq * preset.fmRatio, now);
-          this.modGain.gain.setValueAtTime(delaySec * 0.02 * preset.fmIndex, now);
-
-          this.mod.connect(this.modGain);
-          this.modGain.connect(this.waveguideDelay.delayTime);
-          this.mod.start(now);
-        }
-
-        noiseSource.start(now);
-      } else {
-        this.osc = audioCtx.createOscillator();
-        this.osc.type = preset.type === 'sustained-saw' ? 'sawtooth' : 'sine';
-        this.osc.frequency.setValueAtTime(freq, now);
-
-        this.lfoGain.connect(this.osc.frequency);
-
-        this.osc.connect(this.filter);
-        this.filter.connect(this.gain);
-        this.osc.start(now);
-      }
-
-      // Output routing
-      if (preset.type === 'waveguide-heavy') {
-        this.gain.connect(distortionNode);
-        if (echoBtn.checked) {
-          this.gain.connect(delayNode);
-        }
-      } else {
-        this.gain.connect(audioCtx.destination);
-        if (echoBtn.checked) {
-          this.gain.connect(delayNode);
-        }
-      }
-
-      this.lfo.start(now);
-
-      // Smooth click-free Attack Transition using setTargetAtTime
-      this.gain.gain.setTargetAtTime(0.26, now, preset.attack);
-    }
-
-    glideTo(targetFreq, glideTime) {
-      const now = audioCtx.currentTime;
-      const preset = INSTRUMENT_PRESETS[activePreset];
-
-      this.freq = targetFreq;
-
-      // Safe, pop-free frequency transitions using setTargetAtTime
-      if (this.waveguideDelay) {
-        const delaySec = 1 / targetFreq;
-        this.waveguideDelay.delayTime.setTargetAtTime(delaySec, now, glideTime);
-
-        if (this.mod && this.modGain) {
-          this.mod.frequency.setTargetAtTime(targetFreq * preset.fmRatio, now, glideTime);
-          this.modGain.gain.setTargetAtTime(delaySec * 0.02 * preset.fmIndex, now, glideTime);
-        }
-      } else if (this.osc) {
-        this.osc.frequency.setTargetAtTime(targetFreq, now, glideTime);
-      }
+      this.osc1.frequency.setTargetAtTime(freq, now, glideTime);
+      this.osc2.frequency.setTargetAtTime(freq * this.osc2._ratio, now, glideTime);
     }
 
     release() {
       const now = audioCtx.currentTime;
-      const preset = INSTRUMENT_PRESETS[activePreset];
+      const cfg = INSTRUMENT_PRESETS[activePreset];
+      this.master.gain.cancelScheduledValues(now);
+      this.master.gain.setValueAtTime(this.master.gain.value, now);
+      this.master.gain.setTargetAtTime(0, now, cfg.release / 4);
 
-      // Safe, click-free exponential release using setTargetAtTime
-      this.gain.gain.setTargetAtTime(0, now, preset.release / 4);
-
-      const oscToStop = this.osc;
-      const modToStop = this.mod;
-      const lfoToStop = this.lfo;
-      const pointerToRemove = this.pointer;
+      const o1 = this.osc1;
+      const o2 = this.osc2;
+      const lfo = this.vibratoLfo;
 
       setTimeout(() => {
         try {
-          if (oscToStop) {
-            oscToStop.stop();
-            oscToStop.disconnect();
-          }
-          if (modToStop) {
-            modToStop.stop();
-            modToStop.disconnect();
-          }
-          lfoToStop.stop();
-          lfoToStop.disconnect();
+          o1.stop(); o1.disconnect();
+          o2.stop(); o2.disconnect();
+          lfo.stop(); lfo.disconnect();
         } catch(e) {}
-        if (pointerToRemove) {
-          pointerToRemove.remove();
-        }
-      }, (preset.release + 0.3) * 1000);
-    }
-
-    updatePointerPosition(x, y) {
-      if (!this.pointer) return;
-      const rect = playSurface.getBoundingClientRect();
-      this.pointer.style.left = `${x - rect.left}px`;
-      this.pointer.style.top = `${y - rect.top}px`;
+      }, (cfg.release + 0.3) * 1000);
     }
   }
 
-  function calculateFretlessFrequency(rowElement, clientX) {
-    const keys = Array.from(rowElement.querySelectorAll('.pad-key'));
-    if (keys.length === 0) return BASE_SA;
+  // Calculate notes based on continuous X/Y coordinates
+  function xyToFreq(x, y) {
+    const rh = H / NUM_STRINGS;
+    let stringIndex = Math.floor((H - y) / rh);
+    stringIndex = Math.max(0, Math.min(NUM_STRINGS - 1, stringIndex));
 
-    const rowRect = rowElement.getBoundingClientRect();
-    const relativeX = clientX - rowRect.left;
-
-    const centers = keys.map(k => {
-      const rect = k.getBoundingClientRect();
-      return {
-        x: rect.left + rect.width / 2 - rowRect.left,
-        freq: parseFloat(k.getAttribute('data-freq')),
-        element: k
-      };
-    });
-
-    if (relativeX <= centers[0].x) return { freq: centers[0].freq, element: centers[0].element };
-    if (relativeX >= centers[centers.length - 1].x) {
-      return { freq: centers[centers.length - 1].freq, element: centers[centers.length - 1].element };
-    }
-
-    for (let i = 0; i < centers.length - 1; i++) {
-      const left = centers[i];
-      const right = centers[i+1];
-      if (relativeX >= left.x && relativeX <= right.x) {
-        const ratio = (relativeX - left.x) / (right.x - left.x);
-        const freq = left.freq * Math.pow(right.freq / left.freq, ratio);
-        const activeEl = ratio < 0.5 ? left.element : right.element;
-        return { freq, element: activeEl };
-      }
-    }
-
-    return { freq: centers[0].freq, element: centers[0].element };
-  }
-
-  function buildGrid() {
-    playSurface.innerHTML = '';
     const scaleKey = scaleSelect.value;
     const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
 
-    const rowOffsets = [2, 1, 0, -1];
+    // Calculate base frequency of the string
+    const stringOffset = stringIndex * STRING_INTERVAL;
+    const stringBaseFreq = BASE_SA * Math.pow(2, stringOffset / 12);
 
-    rowOffsets.forEach((rowOffset) => {
-      const rowDiv = document.createElement('div');
-      rowDiv.className = 'pad-row';
+    const noteWidth = W / scale.swars.length;
+    const rawCol = x / noteWidth;
 
-      scale.swars.forEach((swar, colIdx) => {
-        const interval = scale.intervals[colIdx];
-        const freq = BASE_SA * Math.pow(2, rowOffset) * Math.pow(2, interval / 12);
+    // Continuous float value representing intermediate slide notes
+    const colIdx = Math.floor(rawCol);
+    const fraction = rawCol - colIdx;
 
-        const keyDiv = document.createElement('div');
-        keyDiv.className = 'pad-key';
-        if (swar === 'Sa') {
-          keyDiv.classList.add('sa-root');
-        }
-        keyDiv.setAttribute('data-freq', freq);
+    if (colIdx < 0) return stringBaseFreq;
+    if (colIdx >= scale.swars.length - 1) {
+      const lastInterval = scale.intervals[scale.swars.length - 1];
+      return stringBaseFreq * Math.pow(2, lastInterval / 12);
+    }
 
-        keyDiv.innerHTML = `
-          <div class="note-name">${swar}</div>
-          <div class="note-swar">${freq.toFixed(1)} Hz</div>
-        `;
-        rowDiv.appendChild(keyDiv);
-      });
+    const intervalA = scale.intervals[colIdx];
+    const intervalB = scale.intervals[colIdx + 1];
 
-      playSurface.appendChild(rowDiv);
-    });
+    // Exponentially interpolate frequency for continuous sliding
+    const freqA = stringBaseFreq * Math.pow(2, intervalA / 12);
+    const freqB = stringBaseFreq * Math.pow(2, intervalB / 12);
+
+    return freqA * Math.pow(freqB / freqA, fraction);
   }
 
-  function createPointerElement() {
-    const pointer = document.createElement('div');
-    pointer.className = 'touch-pointer';
-    pointer.style.display = 'block';
-    playSurface.appendChild(pointer);
-    return pointer;
-  }
+  // Draw isomorphic visual interface on canvas
+  function drawInterface() {
+    ctx.clearRect(0, 0, W, H);
+    const rh = H / NUM_STRINGS;
+    const scaleKey = scaleSelect.value;
+    const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
+    const noteWidth = W / scale.swars.length;
 
-  function handleTouchStart(e) {
-    e.preventDefault();
-    initAudio();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    // Draw string tracks
+    for (let s = 0; s < NUM_STRINGS; s++) {
+      const y = H - (s + 1) * rh;
+      ctx.fillStyle = s % 2 === 0 ? '#0d1117' : '#090b0e';
+      ctx.fillRect(0, y, W, rh);
 
-    Array.from(e.changedTouches).forEach(touch => {
-      const rowEl = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.pad-row');
-      if (rowEl) {
-        const { freq, element } = calculateFretlessFrequency(rowEl, touch.clientX);
-        const pointer = createPointerElement();
-        
-        element.classList.add('active-touch');
-        
-        const voice = new SynthVoice(freq, touch.clientX, touch.clientY, pointer);
-        activeVoices[touch.identifier] = { voice, lastElement: element, rowEl };
+      // Draw vertical fret indicators
+      for (let n = 0; n < scale.swars.length; n++) {
+        const x = n * noteWidth;
+        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, y); ctx.lineTo(x, y + rh);
+        ctx.stroke();
+
+        // Draw note names inside cells
+        const swar = scale.swars[n];
+        ctx.fillStyle = swar === 'Sa' ? 'rgba(231, 76, 60, 0.4)' : 'rgba(201, 168, 118, 0.15)';
+        ctx.font = '800 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(swar, x + noteWidth / 2, y + rh / 2 + 5);
       }
-    });
-  }
 
-  function handleTouchMove(e) {
-    e.preventDefault();
-    Array.from(e.touches).forEach(touch => {
-      const voiceData = activeVoices[touch.identifier];
-      if (voiceData) {
-        const { freq, element } = calculateFretlessFrequency(voiceData.rowEl, touch.clientX);
-        const glideTime = parseFloat(glideRange.value);
+      // Draw horizontal string wire
+      ctx.strokeStyle = 'rgba(184, 134, 11, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, y + rh / 2);
+      ctx.lineTo(W, y + rh / 2);
+      ctx.stroke();
+    }
 
-        voiceData.voice.glideTo(freq, glideTime);
-        voiceData.voice.updatePointerPosition(touch.clientX, touch.clientY);
-
-        if (element !== voiceData.lastElement) {
-          if (voiceData.lastElement) {
-            voiceData.lastElement.classList.remove('active-touch');
-          }
-          voiceData.lastElement = element;
-          element.classList.add('active-touch');
-        }
-      }
-    });
-  }
-
-  function handleTouchEnd(e) {
-    e.preventDefault();
-    Array.from(e.changedTouches).forEach(touch => {
-      const voiceData = activeVoices[touch.identifier];
-      if (voiceData) {
-        voiceData.voice.release();
-        if (voiceData.lastElement) {
-          voiceData.lastElement.classList.remove('active-touch');
-        }
-        delete activeVoices[touch.identifier];
-      }
-    });
-  }
-
-  playSurface.addEventListener('touchstart', handleTouchStart, { passive: false });
-  playSurface.addEventListener('touchmove', handleTouchMove, { passive: false });
-  playSurface.addEventListener('touchend', handleTouchEnd, { passive: false });
-  playSurface.addEventListener('touchcancel', handleTouchEnd, { passive: false });
-
-  // Mouse inputs fallback
-  let mouseActiveId = 'mouse-voice';
-  playSurface.addEventListener('mousedown', (e) => {
-    initAudio();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    const rowEl = e.target.closest('.pad-row');
-    if (rowEl) {
-      const { freq, element } = calculateFretlessFrequency(rowEl, e.clientX);
-      const pointer = createPointerElement();
-      element.classList.add('active-touch');
+    // Draw glowing touch pointers
+    activeVoices.forEach((t) => {
+      const grad = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, 35);
+      grad.addColorStop(0, 'rgba(184, 134, 11, 0.8)');
+      grad.addColorStop(0.3, 'rgba(231, 76, 60, 0.3)');
+      grad.addColorStop(1, 'rgba(231, 76, 60, 0)');
       
-      const voice = new SynthVoice(freq, e.clientX, e.clientY, pointer);
-      activeVoices[mouseActiveId] = { voice, lastElement: element, rowEl };
-    }
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 35, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // String vibration animation overlay
+      const rhLocal = H / NUM_STRINGS;
+      const stringIdx = Math.floor((H - t.y) / rhLocal);
+      const stringY = H - (stringIdx + 1) * rhLocal + rhLocal / 2;
+
+      ctx.strokeStyle = '#e74c3c';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(t.x - 40, stringY + Math.sin(Date.now() * 0.08) * 1.5);
+      ctx.lineTo(t.x + 40, stringY - Math.sin(Date.now() * 0.08) * 1.5);
+      ctx.stroke();
+    });
+  }
+
+  // Pointer interactions mapping (Supports Multi-touch)
+  function handleStart(id, x, y) {
+    ensureCtx();
+    const freq = xyToFreq(x, y);
+    const voice = new SynthVoice(freq);
+    activeVoices.set(id, { x, y, voice, lastY: y, wiggle: 0 });
+  }
+
+  function handleMove(id, x, y) {
+    const t = activeVoices.get(id);
+    if (!t) return;
+
+    const freq = xyToFreq(x, y);
+    const glideTime = parseFloat(glideRange.value);
+    t.voice.glideTo(freq, glideTime);
+
+    // Calculate Y-axis micro wiggle speed to trigger expression vibrato
+    const dy = Math.abs(y - t.lastY);
+    t.wiggle = t.wiggle * 0.85 + dy * 0.15;
+    
+    // Scale user vibrato settings depth
+    const userMaxVib = parseFloat(vibratoRange.value);
+    const depth = Math.min(userMaxVib, t.wiggle * 2.2);
+    t.voice.vibratoGain.gain.setTargetAtTime(depth, audioCtx.currentTime, 0.04);
+
+    t.lastY = y;
+    t.x = x;
+    t.y = y;
+  }
+
+  function handleEnd(id) {
+    const t = activeVoices.get(id);
+    if (!t) return;
+    t.voice.release();
+    activeVoices.delete(id);
+  }
+
+  // Event Listeners Registration
+  canvas.addEventListener('pointerdown', (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    const rect = canvas.getBoundingClientRect();
+    handleStart(e.pointerId, e.clientX - rect.left, e.clientY - rect.top);
   });
 
-  playSurface.addEventListener('mousemove', (e) => {
-    const voiceData = activeVoices[mouseActiveId];
-    if (voiceData && e.buttons === 1) {
-      const { freq, element } = calculateFretlessFrequency(voiceData.rowEl, e.clientX);
-      const glideTime = parseFloat(glideRange.value);
-
-      voiceData.voice.glideTo(freq, glideTime);
-      voiceData.voice.updatePointerPosition(e.clientX, e.clientY);
-
-      if (element !== voiceData.lastElement) {
-        if (voiceData.lastElement) {
-          voiceData.lastElement.classList.remove('active-touch');
-        }
-        voiceData.lastElement = element;
-        element.classList.add('active-touch');
-      }
-    }
+  canvas.addEventListener('pointermove', (e) => {
+    if (!activeVoices.has(e.pointerId)) return;
+    const rect = canvas.getBoundingClientRect();
+    handleMove(e.pointerId, e.clientX - rect.left, e.clientY - rect.top);
   });
 
-  window.addEventListener('mouseup', () => {
-    const voiceData = activeVoices[mouseActiveId];
-    if (voiceData) {
-      voiceData.voice.release();
-      if (voiceData.lastElement) {
-        voiceData.lastElement.classList.remove('active-touch');
-      }
-      delete activeVoices[mouseActiveId];
-    }
-  });
+  canvas.addEventListener('pointerup', (e) => handleEnd(e.pointerId));
+  canvas.addEventListener('pointercancel', (e) => handleEnd(e.pointerId));
+  canvas.addEventListener('pointerleave', (e) => handleEnd(e.pointerId));
 
+  // Presets Toggle Button Handler
   document.querySelectorAll('.preset-btn').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
@@ -755,9 +553,12 @@
     };
   });
 
-  scaleSelect.onchange = buildGrid;
-
-  buildGrid();
+  // Render loop
+  function loop() {
+    drawInterface();
+    requestAnimationFrame(loop);
+  }
+  loop();
 
   initAppShell({ title: pageTitle });
 })();
