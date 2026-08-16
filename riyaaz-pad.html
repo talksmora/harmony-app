@@ -201,7 +201,7 @@
 <script>
 (function(){
   const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
-  const pageTitle = lang === 'en' ? '🎹 Riyaaz Pad' : lang === 'hi' ? '🎹  रियाज़ पैड' : '🎹 રિયાઝ પેડ';
+  const pageTitle = lang === 'en' ? '🎹 Riyaaz Pad' : lang === 'hi' ? '🎹  रियाज़ पैડ' : '🎹 રિયાઝ પેડ';
 
   const SCALE_DATA = {
     bilawal: {
@@ -288,11 +288,105 @@
   let audioCtx = null;
   let reverbNode = null;
   let resonanceFilters = []; // Sympathetic Resonators
+  let workletModuleLoaded = false;
   const activeVoices = new Map();
 
-  function ensureCtx() {
-    if (audioCtx) return;
+  // Load AudioWorklet from Blob URL
+  async function ensureCtx() {
+    if (audioCtx) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return;
+    }
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    if (!workletModuleLoaded) {
+      const code = `
+        class WaveguideStringProcessor extends AudioWorkletProcessor {
+          static get parameterDescriptors() {
+            return [
+              { name: 'frequency', defaultValue: 440, min: 20, max: 20000 },
+              { name: 'damping', defaultValue: 0.18, min: 0.0, max: 0.99 },
+              { name: 'feedback', defaultValue: 0.988, min: 0.8, max: 0.9999 }
+            ];
+          }
+          constructor() {
+            super();
+            this.bufferSize = 44100 * 2;
+            this.buffer = new Float32Array(this.bufferSize);
+            this.writeIdx = 0;
+            this.excited = false;
+            this.excitationLength = 0;
+            this.excitationBuffer = null;
+            this.lastOutput = 0;
+            this.port.onmessage = (e) => {
+              if (e.data.type === 'pluck') {
+                this.triggerPluck(e.data.strength, e.data.frequency);
+              }
+            };
+          }
+          triggerPluck(strength, freq) {
+            const periodSamples = Math.floor(sampleRate / freq);
+            this.excitationLength = Math.max(10, Math.min(periodSamples, 800));
+            this.excitationBuffer = new Float32Array(this.excitationLength);
+            for (let i = 0; i < this.excitationLength; i++) {
+              this.excitationBuffer[i] = (Math.random() * 2 - 1) * strength * Math.pow(1 - i / this.excitationLength, 1.8);
+            }
+            this.writeIdx = 0;
+            this.buffer.fill(0);
+            this.excited = true;
+            this.excitationIdx = 0;
+          }
+          process(inputs, outputs, parameters) {
+            const output = outputs[0];
+            const channel = output[0];
+            if (!channel) return true;
+            const freqParam = parameters.frequency;
+            const dampingParam = parameters.damping;
+            const feedbackParam = parameters.feedback;
+            const sr = sampleRate;
+            const len = channel.length;
+            for (let i = 0; i < len; i++) {
+              const f = freqParam.length > 1 ? freqParam[i] : freqParam[0];
+              const damping = dampingParam.length > 1 ? dampingParam[i] : dampingParam[0];
+              const feedback = feedbackParam.length > 1 ? feedbackParam[i] : feedbackParam[0];
+              const delaySamples = sr / f;
+              let readIdx = this.writeIdx - delaySamples;
+              if (readIdx < 0) readIdx += this.bufferSize;
+              const baseIdx = Math.floor(readIdx);
+              const frac = readIdx - baseIdx;
+              const nextIdx = (baseIdx + 1) % this.bufferSize;
+              const sampleA = this.buffer[baseIdx];
+              const sampleB = this.buffer[nextIdx];
+              const interpolatedSample = sampleA + frac * (sampleB - sampleA);
+              const filteredSample = (1 - damping) * interpolatedSample + damping * this.lastOutput;
+              this.lastOutput = filteredSample;
+              let inputEnergy = 0;
+              if (this.excited && this.excitationBuffer && this.excitationIdx < this.excitationLength) {
+                inputEnergy = this.excitationBuffer[this.excitationIdx];
+                this.excitationIdx++;
+                if (this.excitationIdx >= this.excitationLength) {
+                  this.excited = false;
+                }
+              }
+              const nextWriteVal = inputEnergy + filteredSample * feedback;
+              this.buffer[this.writeIdx] = nextWriteVal;
+              channel[i] = filteredSample;
+              this.writeIdx = (this.writeIdx + 1) % this.bufferSize;
+            }
+            for (let c = 1; c < output.length; c++) {
+              output[c].set(channel);
+            }
+            return true;
+          }
+        }
+        registerProcessor('waveguide-string-processor', WaveguideStringProcessor);
+      `;
+      const blob = new Blob([code], { type: 'application/javascript' });
+      const url = URL.createObjectURL(blob);
+      await audioCtx.audioWorklet.addModule(url);
+      workletModuleLoaded = true;
+    }
+
     buildReverb();
     buildSympatheticResonators();
   }
@@ -312,15 +406,17 @@
     reverbNode.connect(audioCtx.destination);
   }
 
-  // Create sympathetic resonance filters representing Indian scale strings
+  // Sympathetic resonators representing wood/body resonance
   function buildSympatheticResonators() {
+    resonanceFilters.forEach(res => {
+      try { res.filter.disconnect(); } catch(e) {}
+    });
     resonanceFilters = [];
     const scaleKey = scaleSelect.value;
     const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
 
-    // Resonator harmonics representing Sa, Ma, Pa
     const baseOctaves = [1, 2]; 
-    const targetSemitones = [0, 5, 7]; // Sa, Ma, Pa intervals
+    const targetSemitones = [0, 5, 7]; 
 
     targetSemitones.forEach(semi => {
       baseOctaves.forEach(oct => {
@@ -328,10 +424,10 @@
         const filter = audioCtx.createBiquadFilter();
         filter.type = 'bandpass';
         filter.frequency.value = freq;
-        filter.Q.value = 40; // High Q to create ringing sympathetic tail
+        filter.Q.value = 40; 
 
         const gain = audioCtx.createGain();
-        gain.gain.value = 0.08; // subtle amount
+        gain.gain.value = 0.08; 
 
         filter.connect(gain).connect(audioCtx.destination);
         resonanceFilters.push({ filter, gain });
@@ -346,13 +442,12 @@
       send.gain.value = 0.35;
       node.connect(send).connect(reverbNode);
     }
-    // Route to sympathetic resonators
     resonanceFilters.forEach(res => {
       node.connect(res.filter);
     });
   }
 
-  // Double-detuned oscillator synth voice
+  // Waveguide physical string SynthVoice
   class SynthVoice {
     constructor(freq) {
       const now = audioCtx.currentTime;
@@ -368,66 +463,64 @@
       if (cfg.filterQ) this.filter.Q.value = cfg.filterQ;
       this.filter.connect(this.master);
 
-      this.osc1 = audioCtx.createOscillator();
-      this.osc1.type = cfg.wave1;
-      this.osc1.frequency.value = freq;
+      this.stringNode = new AudioWorkletNode(audioCtx, 'waveguide-string-processor');
+      this.stringNode.connect(this.filter);
 
-      this.osc2 = audioCtx.createOscillator();
-      this.osc2.type = cfg.wave2;
-      this.osc2.frequency.value = freq * cfg.detune2;
-      this.osc2._ratio = cfg.detune2;
+      let dampingVal = 0.18;
+      let feedbackVal = 0.99; 
 
-      this.g2 = audioCtx.createGain();
-      this.g2.gain.value = cfg.mix2;
+      if (activePreset === 'flute') {
+        dampingVal = 0.45; 
+        feedbackVal = 0.97; 
+      } else if (activePreset === 'violin' || activePreset === 'sarangi') {
+        dampingVal = 0.28;
+        feedbackVal = 0.992;
+      }
 
-      this.osc1.connect(this.filter);
-      this.osc2.connect(this.g2).connect(this.filter);
+      this.stringNode.parameters.get('damping').setValueAtTime(dampingVal, now);
+      this.stringNode.parameters.get('feedback').setValueAtTime(feedbackVal, now);
+      this.stringNode.parameters.get('frequency').setValueAtTime(freq, now);
+
+      this.stringNode.port.postMessage({
+        type: 'pluck',
+        strength: 0.35,
+        frequency: freq
+      });
 
       this.vibratoLfo = audioCtx.createOscillator();
       this.vibratoLfo.frequency.value = 5.8;
       this.vibratoGain = audioCtx.createGain();
       this.vibratoGain.gain.value = 0;
 
-      this.vibratoLfo.connect(this.vibratoGain).connect(this.osc1.frequency);
-      this.vibratoGain.connect(this.osc2.frequency);
-
-      this.osc1.start(now);
-      this.osc2.start(now);
+      this.vibratoLfo.connect(this.vibratoGain).connect(this.stringNode.parameters.get('frequency'));
       this.vibratoLfo.start(now);
 
-      if (cfg.pluck) {
-        this.master.gain.setValueAtTime(0.0001, now);
-        this.master.gain.exponentialRampToValueAtTime(cfg.peakGain, now + 0.015);
-        this.master.gain.exponentialRampToValueAtTime(cfg.sustainGain, now + 0.6);
-      } else {
-        this.master.gain.setTargetAtTime(cfg.peakGain, now, cfg.attack);
-      }
+      this.master.gain.setTargetAtTime(cfg.peakGain, now, cfg.attack);
     }
 
     glideTo(freq, glideTime) {
       const now = audioCtx.currentTime;
-      this.osc1.frequency.setTargetAtTime(freq, now, glideTime);
-      this.osc2.frequency.setTargetAtTime(freq * this.osc2._ratio, now, glideTime);
+      this.stringNode.parameters.get('frequency').setTargetAtTime(freq, now, glideTime);
     }
 
     release() {
       const now = audioCtx.currentTime;
       const cfg = INSTRUMENT_PRESETS[activePreset];
+      
+      this.stringNode.parameters.get('feedback').setTargetAtTime(0.85, now, cfg.release / 3);
       this.master.gain.cancelScheduledValues(now);
       this.master.gain.setValueAtTime(this.master.gain.value, now);
       this.master.gain.setTargetAtTime(0, now, cfg.release / 4);
 
-      const o1 = this.osc1;
-      const o2 = this.osc2;
-      const lfo = this.vibratoLfo;
+      const nodeRef = this.stringNode;
+      const lfoRef = this.vibratoLfo;
 
       setTimeout(() => {
         try {
-          o1.stop(); o1.disconnect();
-          o2.stop(); o2.disconnect();
-          lfo.stop(); lfo.disconnect();
+          nodeRef.disconnect();
+          lfoRef.stop(); lfoRef.disconnect();
         } catch(e) {}
-      }, (cfg.release + 0.3) * 1000);
+      }, (cfg.release + 0.5) * 1000);
     }
   }
 
@@ -454,7 +547,6 @@
     return baseSwar;
   }
 
-  // Calculate notes based on continuous coordinates
   function xyToFreq(x, y, isSnap) {
     const rh = H / NUM_STRINGS;
     let stringIndex = Math.floor((H - y) / rh);
@@ -556,9 +648,8 @@
     });
   }
 
-  function handleStart(id, x, y) {
-    ensureCtx();
-    // Magic Pitch Rounding: snap to nearest note center frequency initially
+  async function handleStart(id, x, y) {
+    await ensureCtx();
     const freq = xyToFreq(x, y, true);
     const voice = new SynthVoice(freq);
     activeVoices.set(id, {
@@ -577,7 +668,6 @@
     const dx = Math.abs(x - t.startX);
     const now = Date.now();
 
-    // Magic Pitch Rounding transition: fretless mode if slid beyond 12px
     if (!t.isFretless && dx > 12) {
       t.isFretless = true;
     }
@@ -586,30 +676,24 @@
     let glideTime = parseFloat(glideRange.value);
 
     if (t.isFretless) {
-      // Continuous fretless slides
       targetFreq = xyToFreq(x, y, false);
-      
-      // Calculate micro-wiggles X coordinate speed to bypass glide dampening
       const deltaX = Math.abs(x - t.lastX);
       t.wiggleX = t.wiggleX * 0.8 + deltaX * 0.2;
       
       if (t.wiggleX > 4) {
-        glideTime = 0.005; // zero delay response for natural wiggling vibrato!
+        glideTime = 0.005; 
       }
     } else {
-      // Kept snapped in tune unless dragged
       targetFreq = xyToFreq(t.startX, t.startY, true);
     }
 
     t.voice.glideTo(targetFreq, glideTime);
 
-    // Y-Axis Expression Modulation: change filter cutoff frequency on slide Y
     const relativeY = y % (H / NUM_STRINGS);
-    const normY = relativeY / (H / NUM_STRINGS); // 0 to 1
+    const normY = relativeY / (H / NUM_STRINGS); 
     const cutoff = 1000 + (1 - normY) * 3500;
     t.voice.filter.frequency.setTargetAtTime(cutoff, audioCtx.currentTime, 0.05);
 
-    // Y-Axis micro-wiggle calculations
     const dy = Math.abs(y - t.lastY);
     t.wiggleY = t.wiggleY * 0.82 + dy * 0.18;
     const userMaxVib = parseFloat(vibratoRange.value);
@@ -656,7 +740,7 @@
   });
 
   scaleSelect.onchange = () => {
-    buildSympatheticResonators();
+    if (audioCtx) buildSympatheticResonators();
   };
 
   // Auto-resizing render loop with visual try-catch debugger
@@ -671,12 +755,11 @@
         }
       }
 
-      // Slowly auto-snap stationary active touches back to nearest scale note center (magic rounding)
       const now = Date.now();
       activeVoices.forEach((t) => {
         if (t.isFretless && (now - t.lastMoveTime > 180)) {
           const snapFreq = xyToFreq(t.x, t.y, true);
-          t.voice.glideTo(snapFreq, 0.25); // slow alignment
+          t.voice.glideTo(snapFreq, 0.25); 
         }
       });
 
