@@ -579,7 +579,9 @@
     };
   });
 
-  scaleSelect.onchange = buildGrid;
+  scaleSelect.onchange = () => {
+    // Redrawn dynamically in next animation frame
+  };
 
   // Render loop
   function loop() {
