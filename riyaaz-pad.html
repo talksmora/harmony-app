@@ -55,7 +55,7 @@
     background: linear-gradient(180deg, #18202c 0%, #0d121a 100%);
     border: 1.5px solid rgba(184, 134, 11, 0.3);
     border-radius: 10px;
-    padding: 6px 12px;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -145,10 +145,11 @@
     cursor: pointer;
   }
 
-  /* Performance surface */
+  /* Performance surface: set min-height to 0 to allow shrinking inside flex container */
   .canvas-wrap {
-    flex: 1;
-    position: relative;
+    flex: 1 !important;
+    min-height: 0 !important;
+    position: relative !important;
     border: 1.5px solid rgba(184,134,11,0.2);
     border-radius: 10px;
     overflow: hidden;
@@ -326,46 +327,45 @@
   /* Responsive layout overrides to completely prevent clipping on mobile devices */
   @media (max-width: 600px) {
     .controls-panel {
-      padding: 4px 8px;
-      gap: 4px;
-    }
-    .raga-selector select {
       padding: 4px 6px;
-      font-size: 0.7rem;
+      gap: 4px;
+      flex-wrap: wrap; /* allow wrapping on narrow screens */
+      justify-content: center;
+    }
+    .left-controls {
+      order: 1;
     }
     .preset-display {
-      min-width: 90px;
-      padding: 4px 8px;
+      order: 2;
+      min-width: 80px;
+      padding: 4px 6px;
     }
-    .preset-name {
-      font-size: 0.72rem;
-    }
-    .preset-category {
-      font-size: 0.5rem;
+    .xy-pad-container {
+      order: 3;
     }
     .right-sliders {
-      gap: 6px;
-    }
-    .slider-item label {
-      font-size: 0.5rem;
+      order: 4;
+      width: 100%;
+      justify-content: space-around;
+      margin-top: 4px;
     }
     .slider-item input[type="range"] {
-      width: 32px;
+      width: 50px;
     }
     .pedalboard {
-      gap: 8px;
+      gap: 6px;
       padding: 4px;
     }
     .pedal {
-      width: 60px;
-      height: 65px;
+      width: 58px;
+      height: 60px;
     }
     .pedal-label {
       font-size: 0.45rem;
     }
     .stomp-switch {
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       bottom: 4px;
     }
   }
@@ -414,7 +414,7 @@
           <!-- Master Volume Slider to boost speaker volume -->
           <div class="slider-item">
             <label for="volumeRange">Vol</label>
-            <input type="range" id="volumeRange" min="0" max="1.5" step="0.05" value="0.95">
+            <input type="range" id="volumeRange" min="0" max="1.8" step="0.05" value="1.2">
           </div>
         </div>
       </div>
@@ -533,28 +533,29 @@
     }
   };
 
+  // Increased peakGains dynamically to boost output volume across mobile speakers
   const INSTRUMENT_PRESETS = {
-    sitar: { damping: 0.14, feedback: 0.99, filterType: 'bandpass', filterMult: 3.5, filterMaxFreq: 6000, filterQ: 4.5, attack: 0.005, peakGain: 0.65, release: 1.2, continuous: false },
-    sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.68, release: 0.85, continuous: false },
-    sarangi: { damping: 0.26, feedback: 0.992, filterType: 'bandpass', filterMult: 2.2, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.12, peakGain: 0.58, release: 0.45, continuous: true },
-    veena: { damping: 0.15, feedback: 0.988, filterType: 'lowpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 2.0, attack: 0.008, peakGain: 0.62, release: 1.0, continuous: false },
-    bansuri: { damping: 0.42, feedback: 0.97, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 4000, filterQ: 1.0, attack: 0.1, peakGain: 0.65, release: 0.25, continuous: true },
-    shehnai: { damping: 0.3, feedback: 0.985, filterType: 'bandpass', filterMult: 5.5, filterMaxFreq: 6500, filterQ: 4.0, attack: 0.05, peakGain: 0.60, release: 0.3, continuous: true },
+    sitar: { damping: 0.14, feedback: 0.99, filterType: 'bandpass', filterMult: 3.5, filterMaxFreq: 6000, filterQ: 4.5, attack: 0.005, peakGain: 0.95, release: 1.2, continuous: false },
+    sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.98, release: 0.85, continuous: false },
+    sarangi: { damping: 0.26, feedback: 0.992, filterType: 'bandpass', filterMult: 2.2, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.12, peakGain: 0.88, release: 0.45, continuous: true },
+    veena: { damping: 0.15, feedback: 0.988, filterType: 'lowpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 2.0, attack: 0.008, peakGain: 0.92, release: 1.0, continuous: false },
+    bansuri: { damping: 0.42, feedback: 0.97, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 4000, filterQ: 1.0, attack: 0.1, peakGain: 0.95, release: 0.25, continuous: true },
+    shehnai: { damping: 0.3, feedback: 0.985, filterType: 'bandpass', filterMult: 5.5, filterMaxFreq: 6500, filterQ: 4.0, attack: 0.05, peakGain: 0.90, release: 0.3, continuous: true },
     
-    lead_guitar: { damping: 0.12, feedback: 0.994, filterType: 'lowpass', filterMult: 5.5, filterMaxFreq: 7000, filterQ: 2.0, attack: 0.003, peakGain: 0.70, release: 1.4, continuous: false },
-    nylon_guitar: { damping: 0.16, feedback: 0.982, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 4500, filterQ: 1.5, attack: 0.005, peakGain: 0.65, release: 0.8, continuous: false },
-    steel_guitar: { damping: 0.11, feedback: 0.988, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 5000, filterQ: 2.0, attack: 0.004, peakGain: 0.68, release: 0.95, continuous: false },
+    lead_guitar: { damping: 0.12, feedback: 0.994, filterType: 'lowpass', filterMult: 5.5, filterMaxFreq: 7000, filterQ: 2.0, attack: 0.003, peakGain: 1.0, release: 1.4, continuous: false },
+    nylon_guitar: { damping: 0.16, feedback: 0.982, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 4500, filterQ: 1.5, attack: 0.005, peakGain: 0.95, release: 0.8, continuous: false },
+    steel_guitar: { damping: 0.11, feedback: 0.988, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 5000, filterQ: 2.0, attack: 0.004, peakGain: 0.98, release: 0.95, continuous: false },
     
-    swam_violin: { damping: 0.28, feedback: 0.992, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 6000, filterQ: 1.5, attack: 0.12, peakGain: 0.54, release: 0.35, continuous: true },
-    swam_cello: { damping: 0.32, feedback: 0.994, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 3000, filterQ: 1.2, attack: 0.15, peakGain: 0.58, release: 0.4, continuous: true },
-    swam_flute: { damping: 0.45, feedback: 0.965, filterType: 'lowpass', filterMult: 4.2, filterMaxFreq: 3800, filterQ: 0.8, attack: 0.08, peakGain: 0.60, release: 0.2, continuous: true },
-    swam_clarinet: { damping: 0.35, feedback: 0.975, filterType: 'lowpass', filterMult: 4.8, filterMaxFreq: 4200, filterQ: 1.2, attack: 0.07, peakGain: 0.60, release: 0.25, continuous: true },
-    swam_oboe: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 5.2, filterMaxFreq: 4800, filterQ: 2.0, attack: 0.06, peakGain: 0.58, release: 0.28, continuous: true },
-    swam_trumpet: { damping: 0.28, feedback: 0.985, filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.08, peakGain: 0.62, release: 0.3, continuous: true },
+    swam_violin: { damping: 0.28, feedback: 0.992, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 6000, filterQ: 1.5, attack: 0.12, peakGain: 0.84, release: 0.35, continuous: true },
+    swam_cello: { damping: 0.32, feedback: 0.994, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 3000, filterQ: 1.2, attack: 0.15, peakGain: 0.88, release: 0.4, continuous: true },
+    swam_flute: { damping: 0.45, feedback: 0.965, filterType: 'lowpass', filterMult: 4.2, filterMaxFreq: 3800, filterQ: 0.8, attack: 0.08, peakGain: 0.90, release: 0.2, continuous: true },
+    swam_clarinet: { damping: 0.35, feedback: 0.975, filterType: 'lowpass', filterMult: 4.8, filterMaxFreq: 4200, filterQ: 1.2, attack: 0.07, peakGain: 0.90, release: 0.25, continuous: true },
+    swam_oboe: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 5.2, filterMaxFreq: 4800, filterQ: 2.0, attack: 0.06, peakGain: 0.88, release: 0.28, continuous: true },
+    swam_trumpet: { damping: 0.28, feedback: 0.985, filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.08, peakGain: 0.92, release: 0.3, continuous: true },
     
-    erhu: { damping: 0.24, feedback: 0.99, filterType: 'bandpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 3.5, attack: 0.1, peakGain: 0.58, release: 0.4, continuous: true },
-    pipa: { damping: 0.13, feedback: 0.98, filterType: 'lowpass', filterMult: 3.5, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.004, peakGain: 0.65, release: 0.6, continuous: false },
-    dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.62, release: 0.22, continuous: true }
+    erhu: { damping: 0.24, feedback: 0.99, filterType: 'bandpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 3.5, attack: 0.1, peakGain: 0.88, release: 0.4, continuous: true },
+    pipa: { damping: 0.13, feedback: 0.98, filterType: 'lowpass', filterMult: 3.5, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.004, peakGain: 0.95, release: 0.6, continuous: false },
+    dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.92, release: 0.22, continuous: true }
   };
 
   const SWAR_COLORS = {
@@ -646,11 +647,10 @@
     drawXyPad(0, 0, false);
   }
   window.addEventListener('resize', resizeXyCanvas);
-  setTimeout(resizeXyCanvas, 500); // delay to guarantee rendering sizes are set in DOM
+  setTimeout(resizeXyCanvas, 500); 
 
   function drawXyPad(px, py, active) {
     xyCtx.clearRect(0, 0, xyW, xyH);
-    // Draw crosshair grid lines
     xyCtx.strokeStyle = 'rgba(212,175,55,0.2)';
     xyCtx.lineWidth = 1;
     xyCtx.beginPath();
@@ -658,7 +658,6 @@
     xyCtx.moveTo(0, xyH / 2); xyCtx.lineTo(xyW, xyH / 2);
     xyCtx.stroke();
 
-    // Convert normalized coordinates back to canvas scale
     const dx = (px + 1) / 2 * xyW;
     const dy = (py + 1) / 2 * xyH;
 
@@ -687,14 +686,11 @@
     px = Math.max(-1, Math.min(1, px));
     py = Math.max(-1, Math.min(1, py));
 
-    // Map X to master pitch bend (+/- 2.5 semitones)
     masterPitchBend = px * 2.5;
-    // Map Y to filter frequency sweep (up to +2000Hz)
     masterFilterOffset = (1 - py) * 2000;
 
     drawXyPad(px, py, true);
 
-    // Modulate all active string notes in real time
     activeVoices.forEach(t => {
       const baseFreq = xyToFreq(t.x, t.y, !t.isFretless);
       const bentFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
@@ -725,7 +721,6 @@
     masterFilterOffset = 0;
     drawXyPad(0, 0, false);
 
-    // Smoothly restore notes back to original pitch
     activeVoices.forEach(t => {
       const baseFreq = xyToFreq(t.x, t.y, !t.isFretless);
       t.voice.glideTo(baseFreq, 0.12);
@@ -779,6 +774,7 @@
             this.excitationLength = 0;
             this.excitationBuffer = null;
             this.lastOutput = 0;
+            this.noiseFilterState = 0;
             this.port.onmessage = (e) => {
               if (e.data.type === 'pluck') {
                 this.triggerPluck(e.data.strength, e.data.frequency, e.data.continuous);
@@ -812,7 +808,11 @@
             for (let i = 0; i < len; i++) {
               const f = freqParam.length > 1 ? freqParam[i] : freqParam[0];
               const damping = dampingParam.length > 1 ? dampingParam[i] : dampingParam[0];
-              const feedback = feedbackParam.length > 1 ? feedbackParam[i] : feedbackParam[0];
+              
+              // Clamped minimum feedback gain for continuous wind/bowed instruments to keep sustain vibrant!
+              const baseFeedback = feedbackParam.length > 1 ? feedbackParam[i] : feedbackParam[0];
+              const feedback = this.continuous ? Math.max(0.9915, baseFeedback) : baseFeedback;
+
               const delaySamples = sr / f;
               let readIdx = this.writeIdx - delaySamples;
               if (readIdx < 0) readIdx += this.bufferSize;
@@ -833,7 +833,10 @@
                   this.excited = false;
                 }
               } else if (this.continuous) {
-                inputEnergy = (Math.random() * 2 - 1) * 0.015;
+                // Soft, lowpass filtered breath/bow noise (0.05) to ensure infinite sustain without static noise
+                const noise = (Math.random() * 2 - 1);
+                this.noiseFilterState = 0.85 * this.noiseFilterState + 0.15 * noise;
+                inputEnergy = this.noiseFilterState * 0.055;
               }
 
               const nextWriteVal = inputEnergy + filteredSample * feedback;
@@ -861,7 +864,6 @@
 
   function buildEffectsChain() {
     masterGain = audioCtx.createGain();
-    // Map initial master volume slider value
     const volVal = parseFloat(volumeRange.value);
     masterGain.gain.value = volVal;
 
@@ -998,7 +1000,6 @@
       this.filter = audioCtx.createBiquadFilter();
       this.filter.type = cfg.filterType;
       
-      // Apply initial filter frequency with masterFilterOffset from XY pad!
       const initialFreq = freq * Math.pow(2, masterPitchBend / 12);
       this.filter.frequency.value = Math.min(cfg.filterMaxFreq, initialFreq * cfg.filterMult) + masterFilterOffset;
       
@@ -1011,7 +1012,6 @@
       this.stringNode.parameters.get('damping').setValueAtTime(cfg.damping, now);
       this.stringNode.parameters.get('feedback').setValueAtTime(cfg.feedback, now);
       
-      // Apply initial frequency with masterPitchBend from XY pad!
       const bentFreq = freq * Math.pow(2, masterPitchBend / 12);
       this.stringNode.parameters.get('frequency').setValueAtTime(bentFreq, now);
 
@@ -1227,7 +1227,6 @@
     let glideTime = parseFloat(glideRange.value);
 
     if (t.isFretless) {
-      // Base frequency mapped with masterPitchBend!
       const baseFreq = xyToFreq(x, y, false);
       targetFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
       const deltaX = Math.abs(x - t.lastX);
