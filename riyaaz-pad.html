@@ -14,7 +14,7 @@
     user-select: none;
     -webkit-user-select: none;
     touch-action: none;
-    background: #080a0e;
+    background: #06080b;
     overflow: hidden;
     margin: 0;
     padding: 0;
@@ -59,7 +59,7 @@
   }
   .control-group label {
     font-weight: 700;
-    color: #f3e6d0;
+    color: #c9a876;
     text-transform: uppercase;
     font-size: 0.7rem;
     letter-spacing: 0.5px;
@@ -88,8 +88,8 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #e74c3c;
-    box-shadow: 0 0 6px #e74c3c;
+    background: #b8860b;
+    box-shadow: 0 0 6px #b8860b;
     cursor: pointer;
   }
   .instrument-presets {
@@ -120,7 +120,7 @@
     border: 1.5px solid var(--border);
     border-radius: 14px;
     overflow: hidden;
-    background: #040507;
+    background: #030406;
     box-shadow: 0 8px 30px rgba(0,0,0,0.6) inset;
   }
   #surface {
@@ -269,7 +269,8 @@
 
   const NUM_STRINGS = 4;
   const BASE_SA = 130.81; // C3
-  const STRING_INTERVAL = 5; // offset strings by fourth interval (5 semitones)
+  // Guitar fourths tuning offsets (0, 5, 10, 15 semitones from Sa)
+  const ROW_SEMITONE_OFFSETS = [15, 10, 5, 0]; // top to bottom string
 
   // Web Audio Context
   let audioCtx = null;
@@ -388,7 +389,31 @@
     }
   }
 
-  // Calculate notes based on continuous X/Y coordinates
+  // Helper to dynamically calculate swar name based on semitone offsets
+  function getSwarNameForSemitones(semitones, scale) {
+    const octave = Math.floor(semitones / 12);
+    const relSemitones = ((semitones % 12) + 12) % 12;
+
+    let closestIdx = 0;
+    let minDiff = 999;
+    for (let i = 0; i < scale.intervals.length; i++) {
+      const diff = Math.abs(scale.intervals[i] - relSemitones);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestIdx = i;
+      }
+    }
+
+    const baseSwar = scale.swars[closestIdx];
+    if (octave > 0) {
+      return baseSwar + '^'.repeat(octave);
+    } else if (octave < 0) {
+      return baseSwar + '_'.repeat(-octave);
+    }
+    return baseSwar;
+  }
+
+  // Calculate notes based on continuous X/Y coordinates using guitar fourths tuning
   function xyToFreq(x, y) {
     const rh = H / NUM_STRINGS;
     let stringIndex = Math.floor((H - y) / rh);
@@ -397,14 +422,12 @@
     const scaleKey = scaleSelect.value;
     const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
 
-    // Calculate base frequency of the string
-    const stringOffset = stringIndex * STRING_INTERVAL;
-    const stringBaseFreq = BASE_SA * Math.pow(2, stringOffset / 12);
+    const stringSemitones = ROW_SEMITONE_OFFSETS[stringIndex];
+    const stringBaseFreq = BASE_SA * Math.pow(2, stringSemitones / 12);
 
     const noteWidth = W / scale.swars.length;
     const rawCol = x / noteWidth;
 
-    // Continuous float value representing intermediate slide notes
     const colIdx = Math.floor(rawCol);
     const fraction = rawCol - colIdx;
 
@@ -417,7 +440,6 @@
     const intervalA = scale.intervals[colIdx];
     const intervalB = scale.intervals[colIdx + 1];
 
-    // Exponentially interpolate frequency for continuous sliding
     const freqA = stringBaseFreq * Math.pow(2, intervalA / 12);
     const freqB = stringBaseFreq * Math.pow(2, intervalB / 12);
 
@@ -438,6 +460,8 @@
       ctx.fillStyle = s % 2 === 0 ? '#0d1117' : '#090b0e';
       ctx.fillRect(0, y, W, rh);
 
+      const stringSemitones = ROW_SEMITONE_OFFSETS[s];
+
       // Draw vertical fret indicators
       for (let n = 0; n < scale.swars.length; n++) {
         const x = n * noteWidth;
@@ -447,9 +471,11 @@
         ctx.moveTo(x, y); ctx.lineTo(x, y + rh);
         ctx.stroke();
 
-        // Draw note names inside cells
-        const swar = scale.swars[n];
-        ctx.fillStyle = swar === 'Sa' ? 'rgba(231, 76, 60, 0.4)' : 'rgba(201, 168, 118, 0.15)';
+        // Calculate dynamic swar name with correct octave indicator
+        const totalSemitones = stringSemitones + scale.intervals[n];
+        const swar = getSwarNameForSemitones(totalSemitones, scale);
+
+        ctx.fillStyle = swar.startsWith('Sa') ? 'rgba(184, 134, 11, 0.45)' : 'rgba(201, 168, 118, 0.18)';
         ctx.font = '800 13px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(swar, x + noteWidth / 2, y + rh / 2 + 5);
@@ -467,8 +493,8 @@
     // Draw glowing touch pointers
     activeVoices.forEach((t) => {
       const grad = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, 35);
-      grad.addColorStop(0, 'rgba(184, 134, 11, 0.8)');
-      grad.addColorStop(0.3, 'rgba(231, 76, 60, 0.3)');
+      grad.addColorStop(0, 'rgba(184, 134, 11, 0.85)');
+      grad.addColorStop(0.3, 'rgba(231, 76, 60, 0.35)');
       grad.addColorStop(1, 'rgba(231, 76, 60, 0)');
       
       ctx.beginPath();
@@ -552,6 +578,8 @@
       activePreset = btn.getAttribute('data-preset');
     };
   });
+
+  scaleSelect.onchange = buildGrid;
 
   // Render loop
   function loop() {
