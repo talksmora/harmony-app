@@ -62,148 +62,388 @@
     background: linear-gradient(180deg, #242930 0%, #15181d 100%);
     border: 2px solid #3c424a;
     border-radius: 10px;
-    padding: 8px 12px;
+    padding: 4px 8px;
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: space-between;
     gap: 8px;
+    height: 90px;
+    box-sizing: border-box;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 15px rgba(0,0,0,0.6);
   }
-  .left-controls {
+  .console-module {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    padding: 1px 6px;
+    height: 100%;
+    box-sizing: border-box;
+    border-right: 1px solid rgba(255,255,255,0.05);
+    border-left: 1px solid rgba(0,0,0,0.4);
   }
-  .exit-btn {
-    background: linear-gradient(135deg, #7c1a1a 0%, #4a0d0d 100%);
-    color: #ffffff;
-    border: 1.5px solid #a83232;
-    border-radius: 6px;
-    font-size: 1.05rem;
-    font-weight: 800;
-    width: 32px !important;
-    height: 32px !important;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-    transition: all 0.2s ease;
-    flex-shrink: 0 !important;
+  .console-module:first-child {
+    border-left: none;
   }
-  .exit-btn:hover {
-    background: linear-gradient(135deg, #962222 0%, #5e0f0f 100%);
-    border-color: #ff5555;
-    box-shadow: 0 0 8px rgba(255,85,85,0.4);
+  .console-module:last-child {
+    border-right: none;
   }
-  .raga-selector select {
-    background: #0f1216;
-    color: #f3e6d0;
-    border: 1.5px solid #4b5563;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    outline: none;
-    cursor: pointer;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-  }
-  /* Central Premium Preset Display styled like a digital display screen */
-  .preset-display {
-    background: #080a0e;
-    border: 2px solid #4b5563;
-    border-radius: 6px;
-    padding: 6px 14px;
-    min-width: 110px;
-    text-align: center;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  .preset-display:hover {
-    border-color: #00d2ff;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 0 8px rgba(0,210,255,0.25);
-  }
-  .preset-name {
-    color: #ff9f00; /* Amber/orange digital look */
-    font-size: 0.82rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-shadow: 0 0 3px rgba(255,159,0,0.4);
-  }
-  .preset-category {
-    color: rgba(243,230,208,0.5);
+  .module-title {
     font-size: 0.55rem;
     font-weight: 800;
+    color: #c9a876;
     text-transform: uppercase;
-    margin-top: 1px;
     letter-spacing: 0.5px;
+    margin-bottom: 2px;
   }
-
-  /* Octave Flipper container styled like GeoShred */
-  .octave-control {
-    display: flex;
-    align-items: center;
-    background: #0c0f12;
-    border: 1.5px solid #4b5563;
-    border-radius: 6px;
-    padding: 3px 6px;
-    gap: 8px;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-  }
-  .oct-btn {
-    background: none;
-    border: none;
-    color: #00d2ff; /* Glowing blue triangular arrows */
-    font-size: 0.75rem;
-    font-weight: 800;
-    cursor: pointer;
-    padding: 2px 6px;
-    transition: all 0.2s ease;
-  }
-  .oct-btn:hover {
-    color: #ffffff;
-    text-shadow: 0 0 6px #00d2ff;
-  }
-  .oct-val {
-    color: #ffffff;
-    font-size: 0.85rem;
-    font-weight: 800;
-    min-width: 14px;
-    text-align: center;
-  }
-
-  /* FX Toggle button matching premium layout */
-  .fx-toggle-btn {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    color: #f3e6d0;
-    border: 1.5px solid #b8860b;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    padding: 6px 10px;
-    cursor: pointer;
+  .octave-control-row {
     display: flex;
     align-items: center;
     gap: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    transition: all 0.2s ease;
   }
-  .fx-toggle-btn:hover {
-    border-color: #f4c542;
-    box-shadow: 0 0 8px rgba(244,197,66,0.3);
-  }
-  .fx-toggle-btn.active {
-    background: linear-gradient(135deg, #b8860b 0%, #8a5a0a 100%);
-    color: #080a0e;
-    border-color: #f4c542;
-  }
-
-  .preset-display-wrap {
+  .cyan-nav-btn {
+    background: #0284c7;
+    border: 1px solid #38bdf8;
+    color: #ffffff;
+    font-size: 0.58rem;
+    width: 17px;
+    height: 17px;
+    border-radius: 3px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    box-shadow: 0 0 4px rgba(2, 132, 199, 0.4);
+    cursor: pointer;
   }
+  .cyan-nav-btn:hover {
+    background: #0369a1;
+  }
+  .digital-num-display {
+    background: #080a0f;
+    border: 1px solid #334155;
+    color: #38bdf8;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 0.8rem;
+    width: 22px;
+    height: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 0 4px rgba(56, 189, 248, 0.6);
+    border-radius: 3px;
+  }
+  .auto-toggle-btn {
+    background: #1e293b;
+    border: 1px solid #475569;
+    color: #94a3b8;
+    font-size: 0.48rem;
+    padding: 1px 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-top: 1px;
+    transition: all 0.15s ease;
+  }
+  .auto-toggle-btn.active {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #38bdf8;
+    box-shadow: 0 0 5px rgba(56, 189, 248, 0.5);
+  }
+
+  /* Expression XY Pad Wrapper */
+  .pad-wrapper-outer {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .vertical-label {
+    font-size: 0.38rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+    white-space: nowrap;
+  }
+  .vertical-label.right-label {
+    transform: rotate(0deg);
+  }
+  .bottom-label {
+    font-size: 0.38rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+
+  /* Sliders Module (Whammy, Vib Depth, Filter) */
+  .sliders-module {
+    flex-direction: row !important;
+    gap: 6px;
+    align-items: stretch !important;
+  }
+  .slider-vertical-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    position: relative;
+  }
+  .slider-vertical-label {
+    font-size: 0.38rem;
+    font-weight: 700;
+    color: #c9a876;
+    text-transform: uppercase;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .slider-vertical-label.left-side {
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+    margin-top: 0;
+  }
+  .whammy-item {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 2px;
+  }
+  .whammy-track {
+    width: 10px;
+    height: 52px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    touch-action: none;
+  }
+  .whammy-fill {
+    width: 100%;
+    height: 0;
+    background: #2ecc71;
+    position: absolute;
+    bottom: 50%;
+    transition: height 0.05s ease;
+  }
+  .whammy-thumb {
+    width: 10px;
+    height: 6px;
+    background: #ffffff;
+    border: 1px solid #27ae60;
+    border-radius: 2px;
+    position: absolute;
+    top: calc(50% - 3px);
+    box-shadow: 0 0 5px #2ecc71;
+    transition: top 0.05s ease;
+    pointer-events: none;
+  }
+  .slider-track-wrap {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 12px;
+  }
+  .vertical-range {
+    writing-mode: bt-lr; /* IE */
+    appearance: slider-vertical; /* Webkit */
+    -webkit-appearance: slider-vertical;
+    width: 6px;
+    height: 48px;
+    background: #090d16;
+    outline: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  /* Switches / Mode Grid */
+  .switches-module {
+    display: grid !important;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 3px;
+    padding: 1px 2px !important;
+    width: 125px;
+  }
+  .switch-row {
+    display: flex;
+    gap: 3px;
+    width: 100%;
+    height: 100%;
+  }
+  .switch-btn, .mode-stack-btn {
+    flex: 1;
+    background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+    border: 1px solid #475569;
+    border-radius: 3px;
+    color: #94a3b8;
+    font-size: 0.38rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    transition: all 0.15s ease;
+    padding: 0;
+    line-height: 1.1;
+    text-align: center;
+  }
+  .switch-btn.active, .mode-stack-btn.active {
+    background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+    border-color: #38bdf8;
+    color: #ffffff;
+    box-shadow: 0 0 5px rgba(56, 189, 248, 0.4);
+    text-shadow: 0 0 2px rgba(255,255,255,0.6);
+  }
+  .empty-switch-slot {
+    flex: 1;
+    visibility: hidden;
+  }
+
+  /* Volume & Preset Display */
+  .volume-preset-module {
+    flex-direction: row !important;
+    gap: 8px;
+    align-items: stretch !important;
+  }
+  .dials-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    gap: 2px;
+  }
+  .dial-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .dial-item label {
+    font-size: 0.42rem;
+    font-weight: 800;
+    color: #c9a876;
+    text-transform: uppercase;
+    width: 36px;
+    text-align: right;
+  }
+  .preset-display-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+  }
+  .preset-digital-screen {
+    display: flex;
+    align-items: center;
+    background: #080a0f;
+    border: 1px solid #334155;
+    border-radius: 4px;
+    padding: 2px 4px;
+    gap: 4px;
+  }
+  .preset-display {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    min-width: 78px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+  }
+  .preset-index {
+    font-size: 0.4rem;
+    color: #38bdf8;
+    font-family: monospace;
+    font-weight: bold;
+  }
+  .preset-name {
+    color: #ff9f00;
+    font-size: 0.68rem !important;
+    font-weight: 800;
+  }
+  .preset-category {
+    font-size: 0.42rem !important;
+  }
+  .play-mode-label {
+    font-size: 0.42rem;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  /* Right Utility Toolbar */
+  .right-toolbar-module {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 4px;
+    width: 46px;
+  }
+  .toolbar-btn {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid #475569;
+    border-radius: 3px;
+    color: #38bdf8;
+    font-size: 0.65rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    transition: all 0.15s ease;
+    padding: 0;
+    width: 21px !important;
+    height: 21px !important;
+  }
+  .toolbar-btn:hover {
+    border-color: #38bdf8;
+    box-shadow: 0 0 5px rgba(56, 189, 248, 0.3);
+  }
+  .right-toolbar-module .exit-btn {
+    width: 21px !important;
+    height: 21px !important;
+    font-size: 0.65rem !important;
+    border-radius: 3px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-color: #a83232 !important;
+  }
+
+  /* Raga Selection Modal styles */
+  .modal-raga-btn {
+    background: #1a2232;
+    color: #f3e6d0;
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+  }
+  .modal-raga-btn:hover {
+    border-color: #00d2ff;
+    box-shadow: 0 0 5px rgba(0,210,255,0.2);
+  }
+  .modal-raga-btn.active {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border-color: #38bdf8;
+    box-shadow: 0 0 8px rgba(56,189,248,0.4);
+  }
+
   .preset-nav-btn {
     background: none;
     border: none;
@@ -791,75 +1031,117 @@
       
       <!-- Top Bar Console (Authentic GeoShred UI look) -->
       <div class="controls-panel">
-        <!-- Floating Expression XY Pad exactly matching GeoShred Corner Pad (Now at left side corner) -->
-        <div class="xy-pad-container" id="xyPad">
-          <canvas id="xyCanvas"></canvas>
+        
+        <!-- Module 1: Octave Controls (GeoShred Style) -->
+        <div class="console-module octave-module">
+          <div class="module-title">Octave</div>
+          <div class="octave-control-row">
+            <button class="cyan-nav-btn" id="octDown">◀</button>
+            <div class="digital-num-display" id="octVal">0</div>
+            <button class="cyan-nav-btn" id="octUp">▶</button>
+          </div>
+          <button class="auto-toggle-btn" id="octAutoBtn">Auto</button>
         </div>
 
-        <div class="left-controls">
-          <div class="raga-selector">
-            <select id="scaleSelect">
-              <option value="bilawal">બિલાવલ (મેજર)</option>
-              <option value="yaman">યમન (કલ્યાણ)</option>
-              <option value="bhairav">ભૈરવ</option>
-              <option value="bhairavi" selected>ભૈરવી</option>
-              <option value="kafi">કાફી</option>
-              <option value="asavari">આસાવરી</option>
-              <option value="bhupali">ભૂપાલી / મોહનમ (૫ સૂર)</option>
-              <option value="malkauns">માલકૌંસ / હિંડોલમ (૫ સૂર)</option>
-            </select>
-          </div>
-
-          <div class="octave-control">
-            <button class="oct-btn" id="octDown" title="Octave Down">◀</button>
-            <span class="oct-val" id="octVal">0</span>
-            <button class="oct-btn" id="octUp" title="Octave Up">▶</button>
-          </div>
-        </div>
-
-        <!-- Central Preset Display Wrap with Next/Prev navigation (GeoShred style) -->
-        <div class="preset-display-wrap">
-          <button class="preset-nav-btn" id="prevPreset" title="અગાઉનું વાજિંત્ર">◀</button>
-          <div class="preset-display" id="presetDisplayBtn" title="વાજિંત્ર પસંદ કરો">
-            <div class="preset-name" id="selectedPresetName">સિતાર</div>
-            <div class="preset-category" id="selectedPresetCategory">ભારતીય શાસ્ત્રીય</div>
-          </div>
-          <button class="preset-nav-btn" id="nextPreset" title="આગળનું વાજિંત્ર">▶</button>
-        </div>
-
-        <!-- Diatonic Button Mode (Authentic GeoShred Scale Lock Toggle) -->
-        <button class="diatonic-btn active" id="diatonicToggleBtn" title="રાગ-લોક પદ્ધતિ ચાલુ/બંધ કરો">ડાયાટોનિક</button>
-
-        <!-- FX Toggle Button to open/close vintage pedalboard -->
-        <button class="fx-toggle-btn" id="fxToggleBtn" title="અવાજની ઇફેક્ટ પેનલ ખોલો">⚙️ ઇફેક્ટ</button>
-
-        <!-- Interactive Rotary Dial Dials instead of sliders -->
-        <div class="right-sliders">
-          <div class="knob-item">
-            <label>સ્લાઇડ</label>
-            <div class="knob" id="knob-slide" data-min="0.01" data-max="0.3" data-val="0.06" data-step="0.01">
-              <div class="knob-pointer"></div>
+        <!-- Module 2: Expression XY Pad (GeoShred style with labels) -->
+        <div class="console-module expression-module">
+          <div class="module-title">Expression</div>
+          <div class="pad-wrapper-outer">
+            <span class="vertical-label left-label">Guitar/Feedback</span>
+            <div class="xy-pad-container" id="xyPad">
+              <canvas id="xyCanvas"></canvas>
             </div>
-            <span class="knob-value" id="val-slide">0.06</span>
+            <span class="vertical-label right-label">Fret Excitation</span>
           </div>
-          <div class="knob-item">
-            <label>કંપન</label>
-            <div class="knob" id="knob-vib" data-min="0" data-max="15" data-val="8" data-step="1">
-              <div class="knob-pointer"></div>
+          <div class="bottom-label">Guitar/Distance</div>
+        </div>
+
+        <!-- Module 3: Vertical Sliders / Bars (Whammy, Vibrato Depth, Filter) -->
+        <div class="console-module sliders-module">
+          <!-- Whammy Bar -->
+          <div class="slider-vertical-item whammy-item">
+            <span class="slider-vertical-label left-side">Whammy</span>
+            <div class="whammy-track" id="whammyTrack">
+              <div class="whammy-fill" id="whammyFill"></div>
+              <div class="whammy-thumb" id="whammyThumb"></div>
             </div>
-            <span class="knob-value" id="val-vib">8</span>
           </div>
-          <div class="knob-item">
-            <label>અવાજ</label>
-            <div class="knob" id="knob-vol" data-min="0" data-max="1.8" data-val="1.2" data-step="0.05">
-              <div class="knob-pointer"></div>
+
+          <!-- Vibrato Depth -->
+          <div class="slider-vertical-item">
+            <div class="slider-track-wrap">
+              <input type="range" min="0" max="15" value="8" class="vertical-range" id="vibSlider">
             </div>
-            <span class="knob-value" id="val-vol">1.20</span>
+            <span class="slider-vertical-label">Vibrato Depth</span>
+          </div>
+
+          <!-- Filter -->
+          <div class="slider-vertical-item">
+            <div class="slider-track-wrap">
+              <input type="range" min="-2000" max="4000" value="0" class="vertical-range" id="filterSlider">
+            </div>
+            <span class="slider-vertical-label">Filter</span>
           </div>
         </div>
 
-        <!-- Back/Exit Button to return to dashboard (Now on right side upper corner) -->
-        <button class="exit-btn" id="exitPageBtn" title="ડેશબોર્ડ પર પાછા જાઓ">✕</button>
+        <!-- Module 4: Mode Selector & FX Switches (Guitar FX & Modes) -->
+        <div class="console-module switches-module">
+          <div class="switch-row">
+            <button class="switch-btn" id="btn2ndHarmonic">2nd Hrmnic</button>
+            <button class="mode-stack-btn" id="btnModePiano">Piano</button>
+            <button class="switch-btn" id="playTrackBtn">Play Track</button>
+          </div>
+          <div class="switch-row">
+            <button class="switch-btn" id="btnPinchHarmonic">Pinch Hrmnic On Release</button>
+            <button class="mode-stack-btn active" id="btnModeGuitar">Guitar</button>
+            <button class="diatonic-btn active" id="diatonicToggleBtn">Diatonic</button>
+          </div>
+          <div class="switch-row">
+            <div class="empty-switch-slot"></div>
+            <button class="mode-stack-btn" id="btnModeSlide">Slide</button>
+            <button class="fx-toggle-btn" id="fxToggleBtn">⚙️ ઇફેક્ટ</button>
+          </div>
+        </div>
+
+        <!-- Module 5: Rotary Dials & Preset Displays (All Presets Play) -->
+        <div class="console-module volume-preset-module">
+          <div class="dials-col">
+            <div class="dial-item">
+              <label>Track Vol</label>
+              <div class="knob" id="knob-track-vol" data-min="0" data-max="1.5" data-val="1.0" data-step="0.05">
+                <div class="knob-pointer"></div>
+              </div>
+            </div>
+            <div class="dial-item">
+              <label>Amp Vol</label>
+              <div class="knob" id="knob-vol" data-min="0" data-max="1.8" data-val="1.2" data-step="0.05">
+                <div class="knob-pointer"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="preset-display-panel">
+            <div class="module-title">All Presets Play</div>
+            <div class="preset-digital-screen">
+              <button class="preset-nav-btn" id="prevPreset">◀</button>
+              <div class="preset-display" id="presetDisplayBtn">
+                <div class="preset-index" id="presetIndexDisp">4/32</div>
+                <div class="preset-name" id="selectedPresetName">સિતાર</div>
+                <div class="preset-category" id="selectedPresetCategory">ભારતીય શાસ્ત્રીય</div>
+              </div>
+              <button class="preset-nav-btn" id="nextPreset">▶</button>
+            </div>
+            <div class="play-mode-label">Play Mode: String</div>
+          </div>
+        </div>
+
+        <!-- Module 6: Far Right Utility Toolbar -->
+        <div class="console-module right-toolbar-module">
+          <button class="toolbar-btn" id="menuBtn" title="રાગ / સ્કેલ પસંદ કરો">⋮</button>
+          <button class="toolbar-btn" id="speakerBtn" title="ઓડિયો ચાલુ/બંધ">🔊</button>
+          <button class="toolbar-btn" id="helpBtn" title="મદદ (Help)">?</button>
+          <button class="exit-btn" id="exitPageBtn" title="બહાર નીકળો">✕</button>
+        </div>
       </div>
 
       <!-- Fretboard Canvas -->
@@ -958,6 +1240,65 @@
           <button class="modal-preset-btn" data-preset="suona" data-cat="ચાઇનીઝ શાસ્ત્રીય">સુઓના હોર્ન</button>
         </div>
  
+      </div>
+    </div>
+  </div>
+
+  <!-- Raga/Scale Selection Modal (GeoShred style) -->
+  <div class="modal-overlay" id="ragaModal">
+    <select id="scaleSelect" style="display: none;">
+      <option value="bilawal">બિલાવલ (મેજર)</option>
+      <option value="yaman">યમન (કલ્યાણ)</option>
+      <option value="bhairav">ભૈરવ</option>
+      <option value="bhairavi" selected>ભૈરવી</option>
+      <option value="kafi">કાફી</option>
+      <option value="asavari">આસાવરી</option>
+      <option value="bhupali">ભૂપાલી / મોહનમ (૫ સૂર)</option>
+      <option value="malkauns">માલકૌંસ / હિંડોલમ (૫ સૂર)</option>
+    </select>
+    <div class="modal-content" style="max-width: 400px !important;">
+      <div class="modal-header">
+        <h3>રાગ / સ્કેલ પસંદ કરો</h3>
+        <button class="close-modal" id="closeRagaModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 10px;">
+        <div class="preset-group-title">ભારતીય રાગો અને પશ્ચિમી સ્કેલ્સ</div>
+        <div class="preset-grid" style="grid-template-columns: 1fr !important; gap: 6px !important;">
+          <button class="modal-raga-btn active" data-raga="bhairavi">ભૈરવી (કોમળ રે, ગ, ધ, ની)</button>
+          <button class="modal-raga-btn" data-raga="bilawal">બિલાવલ (મેજર સ્કેલ - શુદ્ધ સ્વરો)</button>
+          <button class="modal-raga-btn" data-raga="yaman">યમન (તીવ્ર મધ્યમ)</button>
+          <button class="modal-raga-btn" data-raga="bhairav">ભૈરવ (કોમળ રે, ધ - શુદ્ધ ગ, ની)</button>
+          <button class="modal-raga-btn" data-raga="kafi">કાફી (કોમળ ગ, ની)</button>
+          <button class="modal-raga-btn" data-raga="asavari">આસાવરી (કોમળ ગ, ધ, ની)</button>
+          <button class="modal-raga-btn" data-raga="bhupali">ભૂપાલી / મોહનમ (૫ સૂર)</button>
+          <button class="modal-raga-btn" data-raga="malkauns">માલકૌંસ / હિંડોલમ (૫ સૂર)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal Overlay -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal-content" style="max-width: 500px !important;">
+      <div class="modal-header">
+        <h3>મદદ અને માર્ગદર્શિકા (Help Guide)</h3>
+        <button class="close-modal" id="closeHelpModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 15px; line-height: 1.5; color: #f3e6d0; max-height: calc(85vh - 50px) !important; overflow-y: auto !important;">
+        <p style="font-weight: bold; color: #ff9f00; font-size: 1rem; margin-bottom: 8px;">નિયંત્રણ પૅનલની વિગત:</p>
+        <ul style="margin-left: 20px; list-style-type: disc;">
+          <li style="margin-bottom: 6px;"><strong>Octave (સપ્તક):</strong> ◀ અને ▶ દબાવીને પ્લે ગ્રીડને નીચી કે ઊંચી પિચ પર લઈ જઈ શકાય છે. <strong>Auto</strong> બટન ઓટોમેટિક ઓક્ટેવ ટ્રેકિંગ એક્ટિવ કરે છે.</li>
+          <li style="margin-bottom: 6px;"><strong>Expression XY Pad:</strong> આ પેડમાં આંગળી ફેરવવાથી ગિટાર જેવી પિચ બેન્ડ (આડું) અને ફિલ્ટર કટઓફ મોડ્યુલેશન (ઊભું) કંટ્રોલ થાય છે.</li>
+          <li style="margin-bottom: 6px;"><strong>Whammy Bar:</strong> આ લીલા બારને ઉપર-નીચે કરવાથી વાગતા સૂરની પિચ સળંગ બદલી શકાય છે. આંગળી હટાવતા તે પાછું કેન્દ્રમાં સ્પ્રિંગની જેમ આવી જશે.</li>
+          <li style="margin-bottom: 6px;"><strong>Vibrato & Filter Sliders:</strong> આ સ્લાઇડર્સથી વાઇબ્રેટો (કંપન) ની તીવ્રતા અને ફિલ્ટર (અવાજની તેજસ્વીતા) કંટ્રોલ થાય છે.</li>
+          <li style="margin-bottom: 6px;"><strong>Piano / Guitar / Slide (પ્લે મોડ):</strong> 
+            <br>- <em>Piano:</em> સૂર સરક્યા વિના તૂટક વાગે.
+            <br>- <em>Guitar:</em> કુદરતી હળવો વળાંક.
+            <br>- <em>Slide:</em> પિચ સળંગ સરકીને વાગે (ભારતીય મીંડ અને રાગો માટે સર્વશ્રેષ્ઠ).
+          </li>
+          <li style="margin-bottom: 6px;"><strong>Play Track:</strong> આ બટન ચાલુ કરવાથી બેકગ્રાઉન્ડમાં સૂર પુરાવવા માટે સુંદર <strong>તાનપુરા ડ્રોન (Tanpura Drone)</strong> શરૂ થઈ જશે. <strong>Track Vol</strong> થી તાનપુરાનો અવાજ નાનો-મોટો થશે.</li>
+          <li style="margin-bottom: 6px;"><strong>Diatonic:</strong> ચાલુ રાખવાથી માત્ર તમારા પસંદ કરેલા રાગના શુદ્ધ સ્વરો જ વાગશે (ખોટો સૂર ક્યારેય નહીં વાગે).</li>
+        </ul>
       </div>
     </div>
   </div>
@@ -1133,7 +1474,8 @@
   const knobValues = {
     slide: 0.06,
     vib: 8,
-    vol: 1.2
+    vol: 1.2,
+    trackVol: 1.0
   };
 
   // Canvas Setup
@@ -1663,6 +2005,7 @@
       if (cfg.filterQ) this.filter.Q.value = cfg.filterQ;
       this.filter.connect(this.master);
 
+      // Main String Node
       this.stringNode = new AudioWorkletNode(audioCtx, 'waveguide-string-processor');
       this.stringNode.connect(this.filter);
 
@@ -1670,7 +2013,16 @@
       this.stringNode.parameters.get('feedback').setValueAtTime(cfg.feedback, now);
       
       const bentFreq = freq * Math.pow(2, masterPitchBend / 12);
-      this.stringNode.parameters.get('frequency').setValueAtTime(bentFreq, now);
+      
+      // Pinch Harmonic: starts 2 octaves higher and ramps down to the base frequency in 150ms
+      let startingFreq = bentFreq;
+      if (isPinchHarmonicActive) {
+        startingFreq = bentFreq * 4;
+      }
+      this.stringNode.parameters.get('frequency').setValueAtTime(startingFreq, now);
+      if (isPinchHarmonicActive) {
+        this.stringNode.parameters.get('frequency').exponentialRampToValueAtTime(bentFreq, now + 0.15);
+      }
 
       const instType = INSTRUMENT_TYPES[activePreset] !== undefined ? INSTRUMENT_TYPES[activePreset] : 0;
       this.stringNode.port.postMessage({
@@ -1681,12 +2033,33 @@
         instType: instType
       });
 
+      // Optional 2nd Harmonic String Node
+      this.secondStringNode = null;
+      if (is2ndHarmonicActive) {
+        this.secondStringNode = new AudioWorkletNode(audioCtx, 'waveguide-string-processor');
+        this.secondStringNode.connect(this.filter);
+        this.secondStringNode.parameters.get('damping').setValueAtTime(cfg.damping, now);
+        this.secondStringNode.parameters.get('feedback').setValueAtTime(cfg.feedback, now);
+        this.secondStringNode.parameters.get('frequency').setValueAtTime(bentFreq * 2, now);
+        
+        this.secondStringNode.port.postMessage({
+          type: 'pluck',
+          strength: 0.15, // slightly quieter overlay
+          frequency: freq * 2,
+          continuous: !!cfg.continuous,
+          instType: instType
+        });
+      }
+
       this.vibratoLfo = audioCtx.createOscillator();
       this.vibratoLfo.frequency.value = 5.8;
       this.vibratoGain = audioCtx.createGain();
       this.vibratoGain.gain.value = 0;
 
       this.vibratoLfo.connect(this.vibratoGain).connect(this.stringNode.parameters.get('frequency'));
+      if (this.secondStringNode) {
+        this.vibratoLfo.connect(this.vibratoGain).connect(this.secondStringNode.parameters.get('frequency'));
+      }
       this.vibratoLfo.start(now);
 
       this.master.gain.setTargetAtTime(cfg.peakGain, now, cfg.attack);
@@ -1696,6 +2069,9 @@
       if (isNaN(freq) || !isFinite(freq) || freq < 20) return;
       const now = audioCtx.currentTime;
       this.stringNode.parameters.get('frequency').setTargetAtTime(freq, now, glideTime);
+      if (this.secondStringNode) {
+        this.secondStringNode.parameters.get('frequency').setTargetAtTime(freq * 2, now, glideTime);
+      }
     }
 
     release() {
@@ -1703,8 +2079,13 @@
       const cfg = INSTRUMENT_PRESETS[activePreset] || INSTRUMENT_PRESETS['sitar'];
       
       this.stringNode.port.postMessage({ type: 'release' });
-
       this.stringNode.parameters.get('feedback').setTargetAtTime(0.85, now, cfg.release / 3);
+      
+      if (this.secondStringNode) {
+        this.secondStringNode.port.postMessage({ type: 'release' });
+        this.secondStringNode.parameters.get('feedback').setTargetAtTime(0.85, now, cfg.release / 3);
+      }
+
       this.master.gain.cancelScheduledValues(now);
       this.master.gain.setValueAtTime(this.master.gain.value, now);
       this.master.gain.setTargetAtTime(0, now, cfg.release / 4);
@@ -1713,6 +2094,7 @@
       releasingVoices.add(this);
 
       const nodeRef = this.stringNode;
+      const secondNodeRef = this.secondStringNode;
       const lfoRef = this.vibratoLfo;
       const masterRef = this.master;
       const filterRef = this.filter;
@@ -1721,6 +2103,7 @@
       setTimeout(() => {
         try {
           nodeRef.disconnect();
+          if (secondNodeRef) secondNodeRef.disconnect();
           filterRef.disconnect();
           masterRef.disconnect();
           lfoRef.stop(); 
@@ -2183,13 +2566,12 @@
   };
 
   // Interactive Rotary Dial Dials Logic
-  const knobs = ['slide', 'vib', 'vol'];
+  const knobs = ['vol', 'track-vol'];
 
   function updateKnobUI(key, val) {
     const knobEl = document.getElementById('knob-' + key);
     if (!knobEl) return;
     const pointer = knobEl.querySelector('.knob-pointer');
-    const valDisplay = document.getElementById('val-' + key);
     
     const min = parseFloat(knobEl.getAttribute('data-min'));
     const max = parseFloat(knobEl.getAttribute('data-max'));
@@ -2198,22 +2580,27 @@
     const deg = -135 + pct * 270;
     pointer.style.transform = `rotate(${deg}deg)`;
     
-    valDisplay.textContent = key === 'vib' ? Math.round(val) : val.toFixed(2);
+    const valDisplay = document.getElementById('val-' + key);
+    if (valDisplay) {
+      valDisplay.textContent = key === 'vib' ? Math.round(val) : val.toFixed(2);
+    }
   }
 
   knobs.forEach(key => {
     const knobEl = document.getElementById('knob-' + key);
+    if (!knobEl) return;
     let startY = 0;
     let startVal = 0;
     let dragging = false;
     
-    updateKnobUI(key, knobValues[key]);
+    const initialVal = key === 'vol' ? knobValues.vol : knobValues.trackVol;
+    updateKnobUI(key, initialVal);
 
     knobEl.addEventListener('pointerdown', (e) => {
       ensureCtx();
       knobEl.setPointerCapture(e.pointerId);
       startY = e.clientY;
-      startVal = knobValues[key];
+      startVal = key === 'vol' ? knobValues.vol : knobValues.trackVol;
       dragging = true;
       e.preventDefault();
     });
@@ -2232,18 +2619,326 @@
       newVal = Math.round(newVal / step) * step;
       newVal = Math.max(min, Math.min(max, newVal));
       
-      knobValues[key] = newVal;
-      updateKnobUI(key, newVal);
-
-      if (key === 'vol' && masterGain) {
-        masterGain.gain.setTargetAtTime(newVal, audioCtx.currentTime, 0.01);
+      if (key === 'vol') {
+        knobValues.vol = newVal;
+        if (masterGain && !isSpeakerMuted) {
+          masterGain.gain.setTargetAtTime(newVal, audioCtx.currentTime, 0.01);
+        }
+      } else if (key === 'track-vol') {
+        knobValues.trackVol = newVal;
+        if (trackGainNode) {
+          trackGainNode.gain.setTargetAtTime(newVal, audioCtx.currentTime, 0.01);
+        }
       }
+      updateKnobUI(key, newVal);
     });
 
     knobEl.addEventListener('pointerup', () => { dragging = false; });
     knobEl.addEventListener('pointercancel', () => { dragging = false; });
   });
 
+  // Vertical Sliders Bindings
+  const vibSlider = document.getElementById('vibSlider');
+  vibSlider.oninput = () => {
+    knobValues.vib = parseFloat(vibSlider.value);
+  };
+
+  const filterSlider = document.getElementById('filterSlider');
+  filterSlider.oninput = () => {
+    masterFilterOffset = parseFloat(filterSlider.value);
+    activeVoices.forEach(t => {
+      const rhLocal = H / NUM_STRINGS;
+      const relativeY = t.y % rhLocal;
+      const normY = relativeY / rhLocal;
+      const baseCutoff = 800 + (1 - normY) * 4500;
+      t.voice.filter.frequency.setTargetAtTime(baseCutoff + masterFilterOffset, audioCtx.currentTime, 0.03);
+    });
+  };
+
+  // Whammy Bar interactive spring-back logic
+  const whammyTrack = document.getElementById('whammyTrack');
+  const whammyFill = document.getElementById('whammyFill');
+  const whammyThumb = document.getElementById('whammyThumb');
+  let whammyActive = false;
+
+  function handleWhammyDrag(clientY) {
+    const rect = whammyTrack.getBoundingClientRect();
+    let relativeY = (clientY - rect.top) / rect.height; // 0 at top, 1 at bottom
+    relativeY = Math.max(0, Math.min(1, relativeY));
+    
+    // Center is 0.5. Dragging up goes towards 0 (higher pitch bend), dragging down goes towards 1 (lower pitch bend)
+    const val = (0.5 - relativeY) * 2; // -1 at bottom, +1 at top
+    masterPitchBend = val * 5.0; // bend up/down by 5 semitones
+    
+    // Update UI
+    whammyThumb.style.top = `${relativeY * 100}%`;
+    if (val > 0) {
+      whammyFill.style.bottom = '50%';
+      whammyFill.style.height = `${val * 50}%`;
+    } else {
+      whammyFill.style.bottom = `${50 + val * 50}%`;
+      whammyFill.style.height = `${-val * 50}%`;
+    }
+    
+    // Update all active voices
+    activeVoices.forEach(t => {
+      const baseFreq = xyToFreq(t.x, t.y, !t.isFretless, t.stringIndex);
+      t.voice.glideTo(baseFreq * Math.pow(2, masterPitchBend / 12), 0.02);
+    });
+  }
+
+  whammyTrack.addEventListener('pointerdown', (e) => {
+    ensureCtx();
+    whammyTrack.setPointerCapture(e.pointerId);
+    whammyActive = true;
+    handleWhammyDrag(e.clientY);
+  });
+  whammyTrack.addEventListener('pointermove', (e) => {
+    if (!whammyActive) return;
+    handleWhammyDrag(e.clientY);
+  });
+  function releaseWhammy() {
+    if (!whammyActive) return;
+    whammyActive = false;
+    
+    // Animate whammy back to center
+    const startBend = masterPitchBend;
+    const duration = 120; // ms
+    const startTime = performance.now();
+    
+    function step(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+      
+      masterPitchBend = startBend * (1 - ease);
+      const relativeY = 0.5 + (masterPitchBend / 5.0) * -0.5;
+      
+      whammyThumb.style.top = `${relativeY * 100}%`;
+      whammyFill.style.height = '0%';
+      
+      activeVoices.forEach(t => {
+        const baseFreq = xyToFreq(t.x, t.y, !t.isFretless, t.stringIndex);
+        t.voice.glideTo(baseFreq * Math.pow(2, masterPitchBend / 12), 0.03);
+      });
+      
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        masterPitchBend = 0;
+        whammyThumb.style.top = '50%';
+        whammyFill.style.height = '0%';
+      }
+    }
+    requestAnimationFrame(step);
+  }
+  whammyTrack.addEventListener('pointerup', releaseWhammy);
+  whammyTrack.addEventListener('pointercancel', releaseWhammy);
+
+  // Piano / Guitar / Slide stack
+  const btnModePiano = document.getElementById('btnModePiano');
+  const btnModeGuitar = document.getElementById('btnModeGuitar');
+  const btnModeSlide = document.getElementById('btnModeSlide');
+  let currentSlideMode = 'guitar';
+
+  function setSlideMode(mode) {
+    currentSlideMode = mode;
+    btnModePiano.classList.toggle('active', mode === 'piano');
+    btnModeGuitar.classList.toggle('active', mode === 'guitar');
+    btnModeSlide.classList.toggle('active', mode === 'slide');
+    
+    if (mode === 'piano') {
+      knobValues.slide = 0.00;
+    } else if (mode === 'guitar') {
+      knobValues.slide = 0.06;
+    } else if (mode === 'slide') {
+      knobValues.slide = 0.22;
+    }
+  }
+  btnModePiano.onclick = () => setSlideMode('piano');
+  btnModeGuitar.onclick = () => setSlideMode('guitar');
+  btnModeSlide.onclick = () => setSlideMode('slide');
+
+  // 2nd Harmonic & Pinch Harmonic
+  let is2ndHarmonicActive = false;
+  let isPinchHarmonicActive = false;
+  const btn2ndHarmonic = document.getElementById('btn2ndHarmonic');
+  const btnPinchHarmonic = document.getElementById('btnPinchHarmonic');
+
+  btn2ndHarmonic.onclick = () => {
+    is2ndHarmonicActive = !is2ndHarmonicActive;
+    btn2ndHarmonic.classList.toggle('active', is2ndHarmonicActive);
+  };
+  btnPinchHarmonic.onclick = () => {
+    isPinchHarmonicActive = !isPinchHarmonicActive;
+    btnPinchHarmonic.classList.toggle('active', isPinchHarmonicActive);
+  };
+
+  // Backing Track / Tanpura Drone player
+  let tanpuraInterval = null;
+  let isPlayTrackActive = false;
+  let trackGainNode = null;
+
+  function initTrackGain() {
+    if (!trackGainNode && audioCtx) {
+      trackGainNode = audioCtx.createGain();
+      trackGainNode.gain.value = knobValues.trackVol;
+      trackGainNode.connect(audioCtx.destination);
+    }
+  }
+
+  function startTanpuraDrone() {
+    initTrackGain();
+    let step = 0;
+    const intervalMs = 1500;
+    
+    function pluckDroneString() {
+      if (!isPlayTrackActive || !audioCtx) return;
+      
+      const now = audioCtx.currentTime;
+      const baseSa = BASE_SA * Math.pow(2, currentOctaveShift);
+      
+      let droneFreq = baseSa;
+      if (step === 0) {
+        // Pa (Pancham)
+        droneFreq = baseSa * 1.5;
+      } else if (step === 1 || step === 2) {
+        // Upper Sa
+        droneFreq = baseSa * 2;
+      } else {
+        // Lower Sa
+        droneFreq = baseSa;
+      }
+      
+      const droneMaster = audioCtx.createGain();
+      droneMaster.gain.setValueAtTime(0, now);
+      droneMaster.connect(trackGainNode);
+      
+      const droneFilter = audioCtx.createBiquadFilter();
+      droneFilter.type = 'lowpass';
+      droneFilter.frequency.value = droneFreq * 4;
+      droneFilter.connect(droneMaster);
+      
+      const droneString = new AudioWorkletNode(audioCtx, 'waveguide-string-processor');
+      droneString.connect(droneFilter);
+      
+      droneString.parameters.get('damping').setValueAtTime(0.04, now);
+      droneString.parameters.get('feedback').setValueAtTime(0.994, now);
+      droneString.parameters.get('frequency').setValueAtTime(droneFreq, now);
+      
+      droneString.port.postMessage({
+        type: 'pluck',
+        strength: 0.18,
+        frequency: droneFreq,
+        continuous: false,
+        instType: 0
+      });
+      
+      droneMaster.gain.setTargetAtTime(0.24, now, 0.08);
+      
+      setTimeout(() => {
+        const releaseTime = audioCtx.currentTime;
+        try {
+          droneString.port.postMessage({ type: 'release' });
+          droneMaster.gain.cancelScheduledValues(releaseTime);
+          droneMaster.gain.setTargetAtTime(0, releaseTime, 1.2);
+          setTimeout(() => {
+            droneString.disconnect();
+            droneFilter.disconnect();
+            droneMaster.disconnect();
+          }, 2000);
+        } catch(e) {}
+      }, 3500);
+      
+      step = (step + 1) % 4;
+    }
+    
+    pluckDroneString();
+    tanpuraInterval = setInterval(pluckDroneString, intervalMs);
+  }
+
+  function stopTanpuraDrone() {
+    if (tanpuraInterval) {
+      clearInterval(tanpuraInterval);
+      tanpuraInterval = null;
+    }
+  }
+
+  const playTrackBtn = document.getElementById('playTrackBtn');
+  playTrackBtn.onclick = () => {
+    ensureCtx();
+    isPlayTrackActive = !isPlayTrackActive;
+    playTrackBtn.classList.toggle('active', isPlayTrackActive);
+    if (isPlayTrackActive) {
+      startTanpuraDrone();
+    } else {
+      stopTanpuraDrone();
+    }
+  };
+
+  // Octave transposition Auto toggle
+  const octAutoBtn = document.getElementById('octAutoBtn');
+  let isOctaveAuto = false;
+  octAutoBtn.onclick = () => {
+    isOctaveAuto = !isOctaveAuto;
+    octAutoBtn.classList.toggle('active', isOctaveAuto);
+  };
+
+  // Utility Toolbar listeners: ⋮ settings, 🔊 speaker, ? help
+  const menuBtn = document.getElementById('menuBtn');
+  const ragaModal = document.getElementById('ragaModal');
+  const closeRagaModalBtn = document.getElementById('closeRagaModalBtn');
+
+  menuBtn.onclick = () => {
+    ragaModal.classList.add('active');
+  };
+  closeRagaModalBtn.onclick = () => {
+    ragaModal.classList.remove('active');
+  };
+
+  document.querySelectorAll('.modal-raga-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.modal-raga-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      const ragaKey = btn.getAttribute('data-raga');
+      scaleSelect.value = ragaKey;
+      
+      if (audioCtx) buildSympatheticResonators();
+      drawInterface();
+      
+      ragaModal.classList.remove('active');
+    };
+  });
+
+  let isSpeakerMuted = false;
+  const speakerBtn = document.getElementById('speakerBtn');
+  speakerBtn.onclick = () => {
+    ensureCtx();
+    isSpeakerMuted = !isSpeakerMuted;
+    if (isSpeakerMuted) {
+      if (masterGain) masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+      speakerBtn.textContent = '🔇';
+      speakerBtn.title = 'ઓડિયો ચાલુ કરો';
+    } else {
+      if (masterGain) masterGain.gain.setValueAtTime(knobValues.vol, audioCtx.currentTime);
+      speakerBtn.textContent = '🔊';
+      speakerBtn.title = 'ઓડિયો બંધ કરો';
+    }
+  };
+
+  const helpBtn = document.getElementById('helpBtn');
+  const helpModal = document.getElementById('helpModal');
+  const closeHelpModalBtn = document.getElementById('closeHelpModalBtn');
+
+  helpBtn.onclick = () => {
+    helpModal.classList.add('active');
+  };
+  closeHelpModalBtn.onclick = () => {
+    helpModal.classList.remove('active');
+  };
+
+  // Pedals, Preset display and exit bindings
   function initPedals() {
     const ids = ['overdrive', 'chorus', 'delay', 'reverb'];
     ids.forEach(id => {
@@ -2294,6 +2989,7 @@
   const closeModalBtn = document.getElementById('closeModalBtn');
   const selectedPresetName = document.getElementById('selectedPresetName');
   const selectedPresetCategory = document.getElementById('selectedPresetCategory');
+  const presetIndexDisp = document.getElementById('presetIndexDisp');
 
   presetDisplayBtn.onclick = () => {
     presetModal.classList.add('active');
@@ -2303,7 +2999,7 @@
     presetModal.classList.remove('active');
   };
 
-  document.querySelectorAll('.modal-preset-btn').forEach(btn => {
+  document.querySelectorAll('.modal-preset-btn').forEach((btn, idx) => {
     btn.onclick = () => {
       document.querySelectorAll('.modal-preset-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -2314,6 +3010,9 @@
       
       selectedPresetName.textContent = name;
       selectedPresetCategory.textContent = cat;
+      if (presetIndexDisp) {
+        presetIndexDisp.textContent = `${idx + 1}/32`;
+      }
       
       presetModal.classList.remove('active');
     };
