@@ -2394,7 +2394,8 @@
       }
       this.vibratoLfo.start(now);
 
-      this.master.gain.setTargetAtTime(cfg.peakGain, now, cfg.attack);
+      // Scale peak gain by 0.42 to ensure plenty of headroom when playing polyphonically (multiple chords)
+      this.master.gain.setTargetAtTime(cfg.peakGain * 0.42, now, cfg.attack);
     }
 
     glideTo(freq, glideTime) {
