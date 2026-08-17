@@ -137,6 +137,32 @@
     letter-spacing: 0.5px;
   }
 
+  /* FX Toggle button matching premium layout */
+  .fx-toggle-btn {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #f3e6d0;
+    border: 1.5px solid #b8860b;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 6px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    transition: all 0.2s ease;
+  }
+  .fx-toggle-btn:hover {
+    border-color: #f4c542;
+    box-shadow: 0 0 8px rgba(244,197,66,0.3);
+  }
+  .fx-toggle-btn.active {
+    background: linear-gradient(135deg, #b8860b 0%, #8a5a0a 100%);
+    color: #080a0e;
+    border-color: #f4c542;
+  }
+
   /* Premium Virtual Rotary Knobs matching GeoShred console dial */
   .right-sliders {
     display: flex;
@@ -437,6 +463,35 @@
       bottom: 4px;
     }
   }
+
+  /* Mobile Landscape specific overrides to prevent instrument modal clipping */
+  @media (max-height: 500px) {
+    .modal-content {
+      max-height: 95vh !important;
+      width: 95vw !important;
+      max-width: 550px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      padding: 8px !important;
+    }
+    .modal-body {
+      max-height: calc(95vh - 45px) !important;
+      flex: 1 !important;
+      overflow-y: auto !important;
+    }
+    .preset-group-title {
+      margin-top: 4px !important;
+      margin-bottom: 2px !important;
+      font-size: 0.6rem !important;
+    }
+    .preset-grid {
+      gap: 3px !important;
+    }
+    .modal-preset-btn {
+      padding: 4px 1px !important;
+      font-size: 0.65rem !important;
+    }
+  }
 </style>
 </head>
 <body data-page="riyaaz-pad">
@@ -467,6 +522,9 @@
           <div class="preset-name" id="selectedPresetName">Sitar</div>
           <div class="preset-category" id="selectedPresetCategory">Naada Indian</div>
         </div>
+
+        <!-- FX Toggle Button to open/close vintage pedalboard -->
+        <button class="fx-toggle-btn" id="fxToggleBtn" title="Toggle FX Pedals">⚙️ FX</button>
 
         <!-- Floating Expression XY Pad exactly matching GeoShred Corner Pad -->
         <div class="xy-pad-container" id="xyPad">
@@ -504,8 +562,8 @@
         <canvas id="surface"></canvas>
       </div>
 
-      <!-- Effects Pedalboard -->
-      <div class="pedalboard">
+      <!-- Effects Pedalboard (Hidden by default to give maximum height to Fretboard) -->
+      <div class="pedalboard" style="display: none;">
         <!-- Overdrive Pedal -->
         <div class="pedal distortion-pedal active" id="pedal-overdrive">
           <div class="pedal-label">OVERDRIVE</div>
@@ -1531,6 +1589,27 @@
       }
     } catch(e) {}
     window.location.href = 'dashboard.html';
+  };
+
+  // FX Drawer Toggle button logic to hide/show pedalboard and maximize fretboard height
+  const fxToggleBtn = document.getElementById('fxToggleBtn');
+  fxToggleBtn.onclick = () => {
+    const pedalboard = document.querySelector('.pedalboard');
+    const isHidden = pedalboard.style.display === 'none';
+    
+    if (isHidden) {
+      pedalboard.style.display = 'flex';
+      fxToggleBtn.classList.add('active');
+    } else {
+      pedalboard.style.display = 'none';
+      fxToggleBtn.classList.remove('active');
+    }
+    
+    // Recalculate canvas coordinates and redraw interface instantly
+    setTimeout(() => {
+      resize();
+      drawInterface();
+    }, 50);
   };
 
   // Interactive Rotary Dial Dials Logic
