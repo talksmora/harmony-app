@@ -137,6 +137,37 @@
     letter-spacing: 0.5px;
   }
 
+  .octave-control {
+    display: flex;
+    align-items: center;
+    background: #101520;
+    border: 1.5px solid rgba(184,134,11,0.5);
+    border-radius: 6px;
+    padding: 2px 4px;
+    gap: 6px;
+  }
+  .oct-btn {
+    background: none;
+    border: none;
+    color: #fdd835;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    padding: 2px 6px;
+    transition: all 0.2s ease;
+  }
+  .oct-btn:hover {
+    color: #ffffff;
+    text-shadow: 0 0 4px #fdd835;
+  }
+  .oct-val {
+    color: #f3e6d0;
+    font-size: 0.75rem;
+    font-weight: 800;
+    min-width: 14px;
+    text-align: center;
+  }
+
   /* FX Toggle button matching premium layout */
   .fx-toggle-btn {
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -517,6 +548,12 @@
               <option value="malkauns">Malkauns / Hindolam (Pentatonic)</option>
             </select>
           </div>
+
+          <div class="octave-control">
+            <button class="oct-btn" id="octDown" title="Octave Down">◀</button>
+            <span class="oct-val" id="octVal">0</span>
+            <button class="oct-btn" id="octUp" title="Octave Up">▶</button>
+          </div>
         </div>
 
         <!-- Central Preset Display (Clickable) -->
@@ -800,10 +837,11 @@
   window.addEventListener('resize', resize);
   resize();
 
-  const NUM_STRINGS = 4;
+  const NUM_STRINGS = 6;
   const BASE_SA = 130.81; 
-  const ROW_SEMITONE_OFFSETS = [15, 10, 5, 0];
+  const ROW_SEMITONE_OFFSETS = [25, 20, 15, 10, 5, 0];
   const NUM_FRETS = 16; 
+  let currentOctaveShift = 0; // Octave range transposition state (-2 to +2)
 
   // Web Audio Context & Effects Chain
   let audioCtx = null;
@@ -1423,10 +1461,10 @@
       
       const octave = Math.floor(currentSemitones / 12);
       const snappedSemitones = octave * 12 + closestInterval;
-      freq = BASE_SA * Math.pow(2, snappedSemitones / 12);
+      freq = BASE_SA * Math.pow(2, currentOctaveShift) * Math.pow(2, snappedSemitones / 12);
     } else {
       const continuousSemitones = stringSemitones + rawFret;
-      freq = BASE_SA * Math.pow(2, continuousSemitones / 12);
+      freq = BASE_SA * Math.pow(2, currentOctaveShift) * Math.pow(2, continuousSemitones / 12);
     }
 
     if (isNaN(freq) || !isFinite(freq) || freq < 20) {
@@ -1651,6 +1689,27 @@
       }
     } catch(e) {}
     window.location.href = 'dashboard.html';
+  };
+
+  // Octave transposition control listeners
+  const octValSpan = document.getElementById('octVal');
+  const octDownBtn = document.getElementById('octDown');
+  const octUpBtn = document.getElementById('octUp');
+
+  octDownBtn.onclick = () => {
+    ensureCtx();
+    if (currentOctaveShift > -2) {
+      currentOctaveShift--;
+      octValSpan.textContent = (currentOctaveShift > 0 ? "+" : "") + currentOctaveShift;
+    }
+  };
+
+  octUpBtn.onclick = () => {
+    ensureCtx();
+    if (currentOctaveShift < 2) {
+      currentOctaveShift++;
+      octValSpan.textContent = (currentOctaveShift > 0 ? "+" : "") + currentOctaveShift;
+    }
   };
 
   // FX Drawer Toggle button logic to hide/show pedalboard and maximize fretboard height
