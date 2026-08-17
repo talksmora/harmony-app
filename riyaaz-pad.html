@@ -858,12 +858,25 @@
     .controls-panel {
       flex-wrap: nowrap !important;
       padding: 1px 3px !important;
-      gap: 3px !important;
+      gap: 6px !important;
       height: 52px !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .controls-panel::-webkit-scrollbar {
+      display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .controls-panel {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
     }
     .console-module {
       padding: 0 2px !important;
       gap: 1px !important;
+      flex-shrink: 0 !important;
     }
     .module-title {
       font-size: 0.4rem !important;
@@ -2527,25 +2540,56 @@
   }
 
   canvas.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
     canvas.setPointerCapture(e.pointerId);
     const rect = canvas.getBoundingClientRect();
     handleStart(e.pointerId, e.clientX - rect.left, e.clientY - rect.top);
   });
 
   canvas.addEventListener('pointermove', (e) => {
+    e.preventDefault();
     if (!activeVoices.has(e.pointerId)) return;
     const rect = canvas.getBoundingClientRect();
     handleMove(e.pointerId, e.clientX - rect.left, e.clientY - rect.top);
   });
 
-  canvas.addEventListener('pointerup', (e) => handleEnd(e.pointerId));
-  canvas.addEventListener('pointercancel', (e) => handleEnd(e.pointerId));
-  canvas.addEventListener('pointerleave', (e) => handleEnd(e.pointerId));
-  canvas.addEventListener('lostpointercapture', (e) => handleEnd(e.pointerId));
+  canvas.addEventListener('pointerup', (e) => {
+    e.preventDefault();
+    handleEnd(e.pointerId);
+  });
+  canvas.addEventListener('pointercancel', (e) => {
+    e.preventDefault();
+    handleEnd(e.pointerId);
+  });
+  canvas.addEventListener('pointerleave', (e) => {
+    e.preventDefault();
+    handleEnd(e.pointerId);
+  });
+  canvas.addEventListener('lostpointercapture', (e) => {
+    e.preventDefault();
+    handleEnd(e.pointerId);
+  });
 
   // Global window safety fallback listeners to prevent stuck notes when touches are released off-canvas
   window.addEventListener('pointerup', (e) => handleEnd(e.pointerId));
   window.addEventListener('pointercancel', (e) => handleEnd(e.pointerId));
+
+  // Bulletproof watchdog for Touch interfaces: clear all voices if user lifts all fingers from screen
+  window.addEventListener('touchend', (e) => {
+    if (e.touches.length === 0) {
+      activeVoices.forEach((t, id) => {
+        handleEnd(id);
+      });
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchcancel', (e) => {
+    if (e.touches.length === 0) {
+      activeVoices.forEach((t, id) => {
+        handleEnd(id);
+      });
+    }
+  }, { passive: true });
 
   scaleSelect.onchange = () => {
     if (audioCtx) buildSympatheticResonators();
@@ -3134,16 +3178,26 @@
   }
 
   try {
-    const saved = localStorage.getItem('riyaaz_console_config');
-    if (saved) {
-      const config = JSON.parse(saved);
-      for (const key in moduleKeys) {
-        const chk = document.getElementById(moduleKeys[key].chk);
-        if (chk && config[key] !== undefined) {
-          chk.checked = config[key];
-          if (moduleKeys[key].el) {
-            moduleKeys[key].el.classList.toggle('module-hidden', !config[key]);
-          }
+    let saved = localStorage.getItem('riyaaz_console_config');
+    if (!saved) {
+      const isMobile = window.innerWidth < 800;
+      const defaultConfig = {
+        octave: true,
+        expression: !isMobile,
+        sliders: !isMobile,
+        switches: true,
+        preset: true
+      };
+      localStorage.setItem('riyaaz_console_config', JSON.stringify(defaultConfig));
+      saved = JSON.stringify(defaultConfig);
+    }
+    const config = JSON.parse(saved);
+    for (const key in moduleKeys) {
+      const chk = document.getElementById(moduleKeys[key].chk);
+      if (chk && config[key] !== undefined) {
+        chk.checked = config[key];
+        if (moduleKeys[key].el) {
+          moduleKeys[key].el.classList.toggle('module-hidden', !config[key]);
         }
       }
     }
