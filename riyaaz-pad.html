@@ -197,6 +197,26 @@
     border-color: #f4c542;
   }
 
+  .preset-display-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .preset-nav-btn {
+    background: none;
+    border: none;
+    color: #00d2ff;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    padding: 4px 6px;
+    transition: all 0.2s ease;
+  }
+  .preset-nav-btn:hover {
+    color: #ffffff;
+    text-shadow: 0 0 6px #00d2ff;
+  }
+
   /* Diatonic/Chromatic scale-locking toggle button */
   .diatonic-btn {
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -562,7 +582,7 @@
       <div class="controls-panel">
         <div class="left-controls">
           <!-- Back/Exit Button to return to dashboard -->
-          <button class="exit-btn" id="exitPageBtn" title="Dashboard પર પાછા જાઓ">✕ Exit</button>
+          <button class="exit-btn" id="exitPageBtn" title="ડેશબોર્ડ પર પાછા જાઓ">✕ બહાર નીકળો</button>
           
           <div class="raga-selector">
             <select id="scaleSelect">
@@ -584,17 +604,21 @@
           </div>
         </div>
 
-        <!-- Central Preset Display (Clickable) -->
-        <div class="preset-display" id="presetDisplayBtn">
-          <div class="preset-name" id="selectedPresetName">Sitar</div>
-          <div class="preset-category" id="selectedPresetCategory">Naada Indian</div>
+        <!-- Central Preset Display Wrap with Next/Prev navigation (GeoShred style) -->
+        <div class="preset-display-wrap">
+          <button class="preset-nav-btn" id="prevPreset" title="અગાઉનું વાજિંત્ર">◀</button>
+          <div class="preset-display" id="presetDisplayBtn" title="વાજિંત્ર પસંદ કરો">
+            <div class="preset-name" id="selectedPresetName">Sitar</div>
+            <div class="preset-category" id="selectedPresetCategory">Naada Indian</div>
+          </div>
+          <button class="preset-nav-btn" id="nextPreset" title="આગળનું વાજિંત્ર">▶</button>
         </div>
 
         <!-- Diatonic Button Mode (Authentic GeoShred Scale Lock Toggle) -->
-        <button class="diatonic-btn active" id="diatonicToggleBtn" title="Toggle Scale-Restricted Diatonic Mode">Diatonic</button>
+        <button class="diatonic-btn active" id="diatonicToggleBtn" title="રાગ-લોક પદ્ધતિ ચાલુ/બંધ કરો">ડાયાટોનિક</button>
 
         <!-- FX Toggle Button to open/close vintage pedalboard -->
-        <button class="fx-toggle-btn" id="fxToggleBtn" title="Toggle FX Pedals">⚙️ FX</button>
+        <button class="fx-toggle-btn" id="fxToggleBtn" title="અવાજની ઇફેક્ટ પેનલ ખોલો">⚙️ ઇફેક્ટ</button>
 
         <!-- Floating Expression XY Pad exactly matching GeoShred Corner Pad -->
         <div class="xy-pad-container" id="xyPad">
@@ -604,21 +628,21 @@
         <!-- Interactive Rotary Dial Dials instead of sliders -->
         <div class="right-sliders">
           <div class="knob-item">
-            <label>Slide</label>
+            <label>સ્લાઇડ</label>
             <div class="knob" id="knob-slide" data-min="0.01" data-max="0.3" data-val="0.06" data-step="0.01">
               <div class="knob-pointer"></div>
             </div>
             <span class="knob-value" id="val-slide">0.06</span>
           </div>
           <div class="knob-item">
-            <label>Vib</label>
+            <label>કંપન</label>
             <div class="knob" id="knob-vib" data-min="0" data-max="15" data-val="8" data-step="1">
               <div class="knob-pointer"></div>
             </div>
             <span class="knob-value" id="val-vib">8</span>
           </div>
           <div class="knob-item">
-            <label>Vol</label>
+            <label>અવાજ</label>
             <div class="knob" id="knob-vol" data-min="0" data-max="1.8" data-val="1.2" data-step="0.05">
               <div class="knob-pointer"></div>
             </div>
@@ -636,25 +660,25 @@
       <div class="pedalboard" style="display: none;">
         <!-- Overdrive Pedal -->
         <div class="pedal distortion-pedal active" id="pedal-overdrive">
-          <div class="pedal-label">OVERDRIVE</div>
+          <div class="pedal-label">ઓવરડ્રાઇવ</div>
           <div class="pedal-led"></div>
           <button class="stomp-switch" id="switch-overdrive"></button>
         </div>
         <!-- Chorus Pedal -->
         <div class="pedal chorus-pedal" id="pedal-chorus">
-          <div class="pedal-label">CHORUS</div>
+          <div class="pedal-label">કોરસ</div>
           <div class="pedal-led"></div>
           <button class="stomp-switch" id="switch-chorus"></button>
         </div>
         <!-- Delay Pedal -->
         <div class="pedal delay-pedal active" id="pedal-delay">
-          <div class="pedal-label">DELAY</div>
+          <div class="pedal-label">ગુંજન (ડિલે)</div>
           <div class="pedal-led"></div>
           <button class="stomp-switch" id="switch-delay"></button>
         </div>
         <!-- Reverb Pedal -->
         <div class="pedal reverb-pedal active" id="pedal-reverb">
-          <div class="pedal-label">REVERB</div>
+          <div class="pedal-label">ગુંજ (રીવર્બ)</div>
           <div class="pedal-led"></div>
           <button class="stomp-switch" id="switch-reverb"></button>
         </div>
@@ -1836,6 +1860,33 @@
       octValSpan.textContent = (currentOctaveShift > 0 ? "+" : "") + currentOctaveShift;
     }
   };
+
+  // Preset Navigation cycle listeners (GeoShred style)
+  setTimeout(() => {
+    const presetButtons = Array.from(document.querySelectorAll('.modal-preset-btn'));
+    
+    document.getElementById('prevPreset').onclick = (e) => {
+      e.stopPropagation();
+      ensureCtx();
+      if (presetButtons.length === 0) return;
+      const currentIdx = presetButtons.findIndex(btn => btn.getAttribute('data-preset') === activePreset);
+      if (currentIdx !== -1) {
+        const prevIdx = (currentIdx - 1 + presetButtons.length) % presetButtons.length;
+        presetButtons[prevIdx].click();
+      }
+    };
+
+    document.getElementById('nextPreset').onclick = (e) => {
+      e.stopPropagation();
+      ensureCtx();
+      if (presetButtons.length === 0) return;
+      const currentIdx = presetButtons.findIndex(btn => btn.getAttribute('data-preset') === activePreset);
+      if (currentIdx !== -1) {
+        const nextIdx = (currentIdx + 1) % presetButtons.length;
+        presetButtons[nextIdx].click();
+      }
+    };
+  }, 1000);
 
   // Diatonic mode toggle listener
   const diatonicToggleBtn = document.getElementById('diatonicToggleBtn');
