@@ -1205,6 +1205,20 @@
             </div>
             <div class="play-mode-label">Play Mode: String</div>
           </div>
+
+          <div class="preset-display-panel raga-display-panel">
+            <div class="module-title">Active Raga Scale</div>
+            <div class="preset-digital-screen">
+              <button class="preset-nav-btn" id="prevRaga">◀</button>
+              <div class="preset-display" id="ragaDisplayBtn" title="રાગ પસંદ કરો">
+                <div class="preset-index" id="ragaIndexDisp">1/8</div>
+                <div class="preset-name" id="selectedRagaName" style="color: #00d2ff;">ભૈરવી</div>
+                <div class="preset-category" id="selectedRagaCategory">કોમળ રે, ગ, ધ, ની</div>
+              </div>
+              <button class="preset-nav-btn" id="nextRaga">▶</button>
+            </div>
+            <div class="play-mode-label">Scale Tuning: Custom</div>
+          </div>
         </div>
 
         <!-- Module 6: Far Right Utility Toolbar -->
@@ -3019,17 +3033,65 @@
     octAutoBtn.classList.toggle('active', isOctaveAuto);
   };
 
-  // Utility Toolbar listeners: 🎶 raga, ⚙️ customizer, 🔊 speaker, ? help
+  // Ragas List for cycling
+  const ragasList = [
+    { key: 'bhairavi', name: 'ભૈરવી', desc: 'કોમળ રે, ગ, ધ, ની' },
+    { key: 'bilawal', name: 'બિલાવલ', desc: 'મેજર - શુદ્ધ સૂર' },
+    { key: 'yaman', name: 'યમન', desc: 'તીવ્ર મધ્યમ' },
+    { key: 'bhairav', name: 'ભૈરવ', desc: 'કોમળ રે, ધ' },
+    { key: 'kafi', name: 'કાફી', desc: 'કોમળ ગ, ની' },
+    { key: 'asavari', name: 'આસાવરી', desc: 'કોમળ ગ, ધ, ની' },
+    { key: 'bhupali', name: 'ભૂપાલી', desc: '૫ સૂર (સા રે ગ પ ધ)' },
+    { key: 'malkauns', name: 'માલકૌંસ', desc: '૫ સૂર (સા ગ મ ધ ની)' }
+  ];
+  let currentRagaIdx = 0; // bhairavi by default
+
   const ragaBtn = document.getElementById('ragaBtn');
+  const ragaDisplayBtn = document.getElementById('ragaDisplayBtn');
   const customizerBtn = document.getElementById('customizerBtn');
   const ragaModal = document.getElementById('ragaModal');
   const customizerModal = document.getElementById('customizerModal');
   const closeRagaModalBtn = document.getElementById('closeRagaModalBtn');
   const closeCustomizerModalBtn = document.getElementById('closeCustomizerModalBtn');
 
-  ragaBtn.onclick = () => {
-    ragaModal.classList.add('active');
-  };
+  const selectedRagaName = document.getElementById('selectedRagaName');
+  const selectedRagaCategory = document.getElementById('selectedRagaCategory');
+  const ragaIndexDisp = document.getElementById('ragaIndexDisp');
+  const prevRagaBtn = document.getElementById('prevRaga');
+  const nextRagaBtn = document.getElementById('nextRaga');
+
+  function updateRagaDisplay(idx) {
+    currentRagaIdx = idx;
+    const raga = ragasList[idx];
+    scaleSelect.value = raga.key;
+    
+    // Update digital screen
+    if (selectedRagaName) selectedRagaName.textContent = raga.name;
+    if (selectedRagaCategory) selectedRagaCategory.textContent = raga.desc;
+    if (ragaIndexDisp) ragaIndexDisp.textContent = `${idx + 1}/8`;
+
+    // Update active class in modal list
+    document.querySelectorAll('.modal-raga-btn').forEach((btn) => {
+      const isMatch = btn.getAttribute('data-raga') === raga.key;
+      btn.classList.toggle('active', isMatch);
+    });
+
+    if (audioCtx) buildSympatheticResonators();
+    drawInterface();
+  }
+
+  if (ragaDisplayBtn) {
+    ragaDisplayBtn.onclick = () => {
+      ragaModal.classList.add('active');
+    };
+  }
+  
+  if (ragaBtn) {
+    ragaBtn.onclick = () => {
+      ragaModal.classList.add('active');
+    };
+  }
+
   closeRagaModalBtn.onclick = () => {
     ragaModal.classList.remove('active');
   };
@@ -3041,17 +3103,23 @@
     customizerModal.classList.remove('active');
   };
 
+  prevRagaBtn.onclick = () => {
+    let nextIdx = currentRagaIdx - 1;
+    if (nextIdx < 0) nextIdx = ragasList.length - 1;
+    updateRagaDisplay(nextIdx);
+  };
+  nextRagaBtn.onclick = () => {
+    let nextIdx = (currentRagaIdx + 1) % ragasList.length;
+    updateRagaDisplay(nextIdx);
+  };
+
   document.querySelectorAll('.modal-raga-btn').forEach(btn => {
     btn.onclick = () => {
-      document.querySelectorAll('.modal-raga-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      
       const ragaKey = btn.getAttribute('data-raga');
-      scaleSelect.value = ragaKey;
-      
-      if (audioCtx) buildSympatheticResonators();
-      drawInterface();
-      
+      const idx = ragasList.findIndex(r => r.key === ragaKey);
+      if (idx !== -1) {
+        updateRagaDisplay(idx);
+      }
       ragaModal.classList.remove('active');
     };
   });
