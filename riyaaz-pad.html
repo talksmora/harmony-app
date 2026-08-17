@@ -764,6 +764,17 @@
     return gujBase;
   }
 
+  const CHROMATIC_SWARS = ['Sa', 'Re_b', 'Re', 'Ga_b', 'Ga', 'Ma', 'Ma#', 'Pa', 'Dha_b', 'Dha', 'Ni_b', 'Ni'];
+
+  function getChromaticSwarName(semitones) {
+    const octave = Math.floor(semitones / 12);
+    const rel = ((semitones % 12) + 12) % 12;
+    const baseSwar = CHROMATIC_SWARS[rel];
+    if (octave > 0) return baseSwar + '^'.repeat(octave);
+    if (octave < 0) return baseSwar + '_'.repeat(-octave);
+    return baseSwar;
+  }
+
   function drawRoundRect(c, x, y, w, h, r, fill, stroke) {
     if (w < 2 * r) r = w / 2;
     if (h < 2 * r) r = h / 2;
@@ -1578,25 +1589,48 @@
         const relSemitones = ((totalSemitones % 12) + 12) % 12;
         const inScale = isSemitoneInScale(relSemitones, scale);
 
-        if (inScale) {
-          const swar = getSwarNameForSemitones(totalSemitones, scale);
-          const colors = getSwarColorInfo(swar);
+        let isRoot = false;
+        let showAsActive = false;
+        let swarStr = '';
 
-          ctx.fillStyle = colors.bg;
-          ctx.strokeStyle = colors.border;
+        if (isDiatonicMode) {
+          if (inScale) {
+            showAsActive = true;
+            swarStr = getSwarNameForSemitones(totalSemitones, scale);
+            if (swarStr.startsWith('Sa')) {
+              isRoot = true;
+            }
+          } else {
+            showAsActive = false;
+            swarStr = getChromaticSwarName(totalSemitones);
+          }
         } else {
-          ctx.fillStyle = '#0a0d14';
-          ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+          // Chromatic mode: everything is active and playable
+          showAsActive = true;
+          swarStr = getChromaticSwarName(totalSemitones);
+          if (swarStr.startsWith('Sa')) {
+            isRoot = true;
+          }
+        }
+
+        const gujSwar = getGujaratiSwarName(swarStr);
+
+        // Styling based on active state exactly matching the uploaded GeoShred screenshots
+        if (showAsActive) {
+          ctx.fillStyle = '#0b0f19'; // sleek dark slate background for active frets
+          ctx.strokeStyle = isRoot ? '#ff7b00' : '#00d2ff'; // orange border for Sa/Root, cyan/blue for other scale notes
+        } else {
+          ctx.fillStyle = '#06080c'; // completely dark background for inactive notes
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)'; // subtle borders
         }
 
         ctx.lineWidth = 1.5;
-        // Draw premium rounded fret boxes exactly matching GeoShred screenshot
         drawRoundRect(ctx, x + 2, y + 2, fretWidth - 4, rh - 4, 6, true, true);
 
-        // Draw concentric target rings in the center of each fret box to guide fingers
+        // Draw concentric target rings in the center of the fret box
         const cx = x + fretWidth / 2;
         const cy = y + rh / 2;
-        ctx.strokeStyle = inScale ? 'rgba(212,175,55,0.09)' : 'rgba(255,255,255,0.02)';
+        ctx.strokeStyle = showAsActive ? (isRoot ? 'rgba(255, 123, 0, 0.15)' : 'rgba(0, 210, 255, 0.15)') : 'rgba(255, 255, 255, 0.02)';
         ctx.lineWidth = 1.0;
         
         ctx.beginPath();
@@ -1607,17 +1641,11 @@
         ctx.arc(cx, cy, 12, 0, Math.PI * 2);
         ctx.stroke();
 
-        const showLabel = isDiatonicMode ? inScale : true;
-
-        if (showLabel) {
-          const swar = getSwarNameForSemitones(totalSemitones, scale);
-          const gujSwar = getGujaratiSwarName(swar);
-          const colors = getSwarColorInfo(swar);
-          ctx.fillStyle = colors.text;
-          ctx.font = 'bold 11px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(gujSwar, x + fretWidth / 2, y + 16);
-        }
+        // Render Swar Label (bright white for active, dim translucent gray for inactive)
+        ctx.fillStyle = showAsActive ? '#ffffff' : 'rgba(255, 255, 255, 0.22)';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(gujSwar, x + fretWidth / 2, y + 16);
       }
 
       ctx.strokeStyle = 'rgba(184, 134, 11, 0.4)';
