@@ -59,15 +59,15 @@
   }
   /* Top Bar Console matching premium GeoShred dashboard */
   .controls-panel {
-    background: linear-gradient(180deg, #18202c 0%, #0d121a 100%);
-    border: 1.5px solid rgba(184, 134, 11, 0.3);
+    background: linear-gradient(180deg, #242930 0%, #15181d 100%);
+    border: 2px solid #3c424a;
     border-radius: 10px;
     padding: 8px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 15px rgba(0,0,0,0.6);
   }
   .left-controls {
     display: flex;
@@ -75,9 +75,9 @@
     gap: 8px;
   }
   .exit-btn {
-    background: linear-gradient(135deg, #8b1e1e 0%, #520f0f 100%);
+    background: linear-gradient(135deg, #7c1a1a 0%, #4a0d0d 100%);
     color: #f3e6d0;
-    border: 1.5px solid #b8860b;
+    border: 1.5px solid #5a626a;
     border-radius: 6px;
     font-size: 0.8rem;
     font-weight: 800;
@@ -90,46 +90,47 @@
     transition: all 0.2s ease;
   }
   .exit-btn:hover {
-    background: linear-gradient(135deg, #a82a2a 0%, #6e1616 100%);
-    border-color: #f4c542;
-    box-shadow: 0 0 8px rgba(244,197,66,0.4);
+    background: linear-gradient(135deg, #962222 0%, #5e0f0f 100%);
+    border-color: #ff5555;
+    box-shadow: 0 0 8px rgba(255,85,85,0.4);
   }
   .raga-selector select {
-    background: #101520;
+    background: #0f1216;
     color: #f3e6d0;
-    border: 1.5px solid rgba(184,134,11,0.5);
-    padding: 5px 8px;
+    border: 1.5px solid #4b5563;
+    padding: 6px 10px;
     border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 700;
     outline: none;
     cursor: pointer;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
   }
-  /* Central Premium Preset Display */
+  /* Central Premium Preset Display styled like a digital display screen */
   .preset-display {
-    background: radial-gradient(circle, #2a1400 0%, #0c0400 100%);
-    border: 1.5px solid #d4af37;
+    background: #080a0e;
+    border: 2px solid #4b5563;
     border-radius: 6px;
     padding: 6px 14px;
     min-width: 110px;
     text-align: center;
-    box-shadow: 0 0 8px rgba(212,175,55,0.3);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
     cursor: pointer;
     transition: all 0.2s ease;
   }
   .preset-display:hover {
-    box-shadow: 0 0 12px rgba(212,175,55,0.5);
-    border-color: #fdd835;
+    border-color: #00d2ff;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 0 8px rgba(0,210,255,0.25);
   }
   .preset-name {
-    color: #fdd835;
+    color: #ff9f00; /* Amber/orange digital look */
     font-size: 0.82rem;
     font-weight: 800;
     letter-spacing: 0.5px;
-    text-shadow: 0 0 4px rgba(253,216,53,0.5);
+    text-shadow: 0 0 3px rgba(255,159,0,0.4);
   }
   .preset-category {
-    color: rgba(243,230,208,0.6);
+    color: rgba(243,230,208,0.5);
     font-size: 0.55rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -137,19 +138,21 @@
     letter-spacing: 0.5px;
   }
 
+  /* Octave Flipper container styled like GeoShred */
   .octave-control {
     display: flex;
     align-items: center;
-    background: #101520;
-    border: 1.5px solid rgba(184,134,11,0.5);
+    background: #0c0f12;
+    border: 1.5px solid #4b5563;
     border-radius: 6px;
-    padding: 2px 4px;
-    gap: 6px;
+    padding: 3px 6px;
+    gap: 8px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
   }
   .oct-btn {
     background: none;
     border: none;
-    color: #fdd835;
+    color: #00d2ff; /* Glowing blue triangular arrows */
     font-size: 0.75rem;
     font-weight: 800;
     cursor: pointer;
@@ -158,11 +161,11 @@
   }
   .oct-btn:hover {
     color: #ffffff;
-    text-shadow: 0 0 4px #fdd835;
+    text-shadow: 0 0 6px #00d2ff;
   }
   .oct-val {
-    color: #f3e6d0;
-    font-size: 0.75rem;
+    color: #ffffff;
+    font-size: 0.85rem;
     font-weight: 800;
     min-width: 14px;
     text-align: center;
@@ -980,27 +983,40 @@
 
   function drawXyPad(px, py, active) {
     xyCtx.clearRect(0, 0, xyW, xyH);
-    xyCtx.strokeStyle = 'rgba(212,175,55,0.2)';
+    
+    // Draw green concentric radar rings (matching GeoShred expression pad)
+    xyCtx.strokeStyle = 'rgba(46, 204, 113, 0.24)';
     xyCtx.lineWidth = 1;
+    const cx = xyW / 2;
+    const cy = xyH / 2;
+    
+    for (let r = 8; r <= 32; r += 8) {
+      xyCtx.beginPath();
+      xyCtx.arc(cx, cy, r, 0, Math.PI * 2);
+      xyCtx.stroke();
+    }
+
+    // Draw radar crosshairs
     xyCtx.beginPath();
-    xyCtx.moveTo(xyW / 2, 0); xyCtx.lineTo(xyW / 2, xyH);
-    xyCtx.moveTo(0, xyH / 2); xyCtx.lineTo(W, xyH / 2);
+    xyCtx.moveTo(cx, 0); xyCtx.lineTo(cx, xyH);
+    xyCtx.moveTo(0, cy); xyCtx.lineTo(xyW, cy);
     xyCtx.stroke();
 
     const dx = (px + 1) / 2 * xyW;
     const dy = (py + 1) / 2 * xyH;
 
     if (active) {
-      xyCtx.fillStyle = '#ff6600';
-      xyCtx.shadowColor = '#ff6600';
-      xyCtx.shadowBlur = 8;
+      // Glowing green active target indicator
+      xyCtx.fillStyle = '#2ecc71';
+      xyCtx.shadowColor = '#2ecc71';
+      xyCtx.shadowBlur = 10;
     } else {
-      xyCtx.fillStyle = '#b8860b';
+      xyCtx.fillStyle = 'rgba(46, 204, 113, 0.45)';
       xyCtx.shadowBlur = 0;
     }
 
     xyCtx.beginPath();
-    xyCtx.arc(dx, dy, 5, 0, Math.PI * 2);
+    xyCtx.arc(dx, dy, 5.5, 0, Math.PI * 2);
     xyCtx.fill();
     xyCtx.shadowBlur = 0;
   }
@@ -1589,24 +1605,19 @@
         const relSemitones = ((totalSemitones % 12) + 12) % 12;
         const inScale = isSemitoneInScale(relSemitones, scale);
 
-        let isRoot = false;
-        let showAsActive = false;
         let swarStr = '';
+        let isRoot = false;
 
         if (isDiatonicMode) {
           if (inScale) {
-            showAsActive = true;
             swarStr = getSwarNameForSemitones(totalSemitones, scale);
             if (swarStr.startsWith('Sa')) {
               isRoot = true;
             }
           } else {
-            showAsActive = false;
             swarStr = getChromaticSwarName(totalSemitones);
           }
         } else {
-          // Chromatic mode: everything is active and playable
-          showAsActive = true;
           swarStr = getChromaticSwarName(totalSemitones);
           if (swarStr.startsWith('Sa')) {
             isRoot = true;
@@ -1615,13 +1626,16 @@
 
         const gujSwar = getGujaratiSwarName(swarStr);
 
-        // Styling based on active state exactly matching the uploaded GeoShred screenshots
+        // Restore colorful block backgrounds for active notes
+        const showAsActive = isDiatonicMode ? inScale : true;
         if (showAsActive) {
-          ctx.fillStyle = '#0b0f19'; // sleek dark slate background for active frets
-          ctx.strokeStyle = isRoot ? '#ff7b00' : '#00d2ff'; // orange border for Sa/Root, cyan/blue for other scale notes
+          const baseSwarNameForColor = isDiatonicMode ? swarStr : getSwarNameForSemitones(totalSemitones, scale);
+          const colors = getSwarColorInfo(baseSwarNameForColor);
+          ctx.fillStyle = colors.bg;
+          ctx.strokeStyle = colors.border;
         } else {
-          ctx.fillStyle = '#06080c'; // completely dark background for inactive notes
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)'; // subtle borders
+          ctx.fillStyle = '#0a0d14';
+          ctx.strokeStyle = 'rgba(255,255,255,0.03)';
         }
 
         ctx.lineWidth = 1.5;
@@ -1630,7 +1644,7 @@
         // Draw concentric target rings in the center of the fret box
         const cx = x + fretWidth / 2;
         const cy = y + rh / 2;
-        ctx.strokeStyle = showAsActive ? (isRoot ? 'rgba(255, 123, 0, 0.15)' : 'rgba(0, 210, 255, 0.15)') : 'rgba(255, 255, 255, 0.02)';
+        ctx.strokeStyle = showAsActive ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.02)';
         ctx.lineWidth = 1.0;
         
         ctx.beginPath();
@@ -1642,7 +1656,13 @@
         ctx.stroke();
 
         // Render Swar Label (bright white for active, dim translucent gray for inactive)
-        ctx.fillStyle = showAsActive ? '#ffffff' : 'rgba(255, 255, 255, 0.22)';
+        if (showAsActive) {
+          const baseSwarNameForColor = isDiatonicMode ? swarStr : getSwarNameForSemitones(totalSemitones, scale);
+          const colors = getSwarColorInfo(baseSwarNameForColor);
+          ctx.fillStyle = colors.text;
+        } else {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+        }
         ctx.font = 'bold 11px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(gujSwar, x + fretWidth / 2, y + 16);
