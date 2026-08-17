@@ -1682,14 +1682,17 @@
       const stringY = H - (stringIdx + 1) * rhLocal + rhLocal / 2;
 
       // Draw elegant translucent orange string glow aura (without expensive and blurry shadowBlur)
-      ctx.strokeStyle = 'rgba(231, 76, 60, 0.48)';
-      ctx.lineWidth = 4.2;
+      ctx.strokeStyle = 'rgba(231, 76, 60, 0.52)';
+      ctx.lineWidth = 4.0;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
       ctx.beginPath();
       const waveLength = 180;
       const amplitude = 5 + Math.sin(Date.now() * 0.08) * 3;
       
-      for (let xOffset = -waveLength; xOffset <= waveLength; xOffset += 5) {
+      // Step by 1.5 instead of 5 for a high-resolution, silk-smooth continuous wave
+      for (let xOffset = -waveLength; xOffset <= waveLength; xOffset += 1.5) {
         const drawX = t.x + xOffset;
         if (drawX < 0 || drawX > W) continue;
         
@@ -1708,7 +1711,9 @@
       
       // Draw inner bright sharp core line
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.0;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
       ctx.stroke();
     });
   }
