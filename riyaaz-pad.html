@@ -633,9 +633,62 @@
       font-size: 0.65rem !important;
     }
   }
+
+  /* Portrait Lock Overlay */
+  .portrait-lock-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 15, 24, 0.98);
+    z-index: 999999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  /* If viewport is portrait on mobile/tablet devices, show the lock overlay */
+  @media (orientation: portrait) and (max-width: 1024px) {
+    .portrait-lock-overlay {
+      display: flex;
+    }
+  }
+  .rotate-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    animation: spinRotate 2.2s infinite ease-in-out;
+  }
+  @keyframes spinRotate {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(-90deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .lock-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #00d2ff;
+    margin-bottom: 8px;
+  }
+  .lock-desc {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 280px;
+    line-height: 1.4;
+  }
 </style>
 </head>
 <body data-page="riyaaz-pad">
+  <!-- Landscape Mode Lock Overlay -->
+  <div class="portrait-lock-overlay" id="portraitLock">
+    <div class="rotate-icon">🔄📱</div>
+    <div class="lock-title">સ્ક્રીન આડી કરો (Rotate Device)</div>
+    <div class="lock-desc">રિયાઝ પેડ વગાડવા માટે કૃપા કરીને તમારા ફોન કે ટેબલેટને આડું (Landscape Mode) ફેરવો.</div>
+  </div>
   <div id="appShellRoot"></div>
   <div id="pageBody" style="display:none;">
     <div class="pad-container">
@@ -1790,7 +1843,7 @@
     });
   }
 
-  // Request browser fullscreen mode automatically on first pointer down interaction
+  // Request browser fullscreen mode automatically on first pointer down interaction and lock screen to landscape
   async function enterBrowserFullscreen() {
     try {
       const doc = document.documentElement;
@@ -1799,8 +1852,17 @@
       } else if (doc.webkitRequestFullscreen && !document.webkitFullscreenElement) {
         await doc.webkitRequestFullscreen();
       }
+      
+      // Lock orientation to landscape mode once in fullscreen (Android Chrome/iOS Safari 16+)
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock('landscape').catch(err => {
+          console.warn("Screen orientation lock rejected:", err);
+        });
+      } else if (screen.lockOrientation) {
+        screen.lockOrientation('landscape');
+      }
     } catch (e) {
-      console.warn("Fullscreen request blocked or ignored by browser policy:", e);
+      console.warn("Fullscreen/Orientation lock blocked or ignored by browser policy:", e);
     }
   }
 
