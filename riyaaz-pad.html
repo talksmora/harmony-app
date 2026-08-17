@@ -375,13 +375,12 @@
     font-weight: 700;
   }
 
-  /* Right Utility Toolbar */
   .right-toolbar-module {
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 6px;
-    width: 58px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-rows: repeat(3, 1fr) !important;
+    gap: 6px !important;
+    width: 58px !important;
   }
   .toolbar-btn {
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
@@ -996,9 +995,10 @@
       font-size: 0.32rem !important;
     }
 
-    /* Utility Toolbar */
     .right-toolbar-module {
       width: 32px !important;
+      grid-template-columns: repeat(2, 1fr) !important;
+      grid-template-rows: repeat(3, 1fr) !important;
       gap: 2px !important;
     }
     .toolbar-btn {
@@ -1089,139 +1089,10 @@
     line-height: 1.4;
   }
 
-  /* Persistent Sidebar / Drawer Layout */
-  .pad-container-outer {
-    display: flex;
-    flex-direction: row;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    background: #080b10;
-  }
   .pad-container {
-    flex: 1;
-    height: 100% !important;
+    height: 100vh !important;
     display: flex;
     flex-direction: column;
-    min-width: 0; /* Enable flex-item shrinking */
-  }
-  .settings-sidebar {
-    width: 250px;
-    height: 100%;
-    background: #0d1117;
-    border-left: 2px solid #28303d;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    padding: 12px 10px;
-    gap: 14px;
-    overflow-y: auto;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 100;
-    flex-shrink: 0;
-  }
-  .sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    padding-bottom: 8px;
-    margin-bottom: 4px;
-  }
-  .sidebar-header h4 {
-    color: #ff9f00;
-    margin: 0;
-    font-size: 0.85rem;
-    font-weight: 800;
-  }
-  .sidebar-close-btn {
-    background: none;
-    border: none;
-    color: #94a3b8;
-    font-size: 1.1rem;
-    cursor: pointer;
-    display: none; /* Hidden on desktop, shown on mobile drawer */
-  }
-  .sidebar-close-btn:hover {
-    color: #ffffff;
-  }
-  .sidebar-section-title {
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: #c9a876;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
-  }
-  .sidebar-raga-list {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  .sidebar-raga-btn {
-    background: #161c24;
-    color: #f3e6d0;
-    border: 1px solid rgba(255,255,255,0.06);
-    padding: 7px 10px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .sidebar-raga-btn:hover {
-    border-color: #38bdf8;
-    background: #1c232e;
-  }
-  .sidebar-raga-btn.active {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-    color: #ffffff;
-    border-color: #38bdf8;
-    box-shadow: 0 0 6px rgba(56,189,248,0.4);
-  }
-  .sidebar-checkbox-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: rgba(0,0,0,0.35);
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.06);
-  }
-  .sidebar-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #f3e6d0;
-    font-size: 0.72rem;
-    font-weight: 600;
-    cursor: pointer;
-    user-select: none;
-  }
-  .sidebar-checkbox-label input {
-    width: 14px;
-    height: 14px;
-    accent-color: #38bdf8;
-    cursor: pointer;
-  }
-
-  @media (max-width: 880px) {
-    .settings-sidebar {
-      position: fixed;
-      right: 0;
-      top: 0;
-      transform: translateX(100%); /* Drawer style on mobile screen */
-      width: 230px;
-      box-shadow: -5px 0 20px rgba(0,0,0,0.6);
-      background: #0a0d14;
-    }
-    .settings-sidebar.active {
-      transform: translateX(0);
-    }
-    .sidebar-close-btn {
-      display: block;
-    }
   }
 </style>
 </head>
@@ -1234,8 +1105,7 @@
   </div>
   <div id="appShellRoot"></div>
   <div id="pageBody" style="display:none;">
-    <div class="pad-container-outer">
-      <div class="pad-container">
+    <div class="pad-container">
       
       <!-- Top Bar Console (Authentic GeoShred UI look) -->
       <div class="controls-panel">
@@ -1339,9 +1209,10 @@
 
         <!-- Module 6: Far Right Utility Toolbar -->
         <div class="console-module right-toolbar-module">
-          <button class="toolbar-btn" id="menuBtn" title="રાગ / સ્કેલ પસંદ કરો">⋮</button>
+          <button class="toolbar-btn" id="ragaBtn" title="રાગ પસંદ કરો">🎶</button>
+          <button class="toolbar-btn" id="customizerBtn" title="પેનલ સેટિંગ્સ">⚙️</button>
           <button class="toolbar-btn" id="speakerBtn" title="ઓડિયો ચાલુ/બંધ">🔊</button>
-          <button class="toolbar-btn" id="helpBtn" title="મદદ (Help)">?</button>
+          <button class="toolbar-btn" id="helpBtn" title="મદદ (Help)">❓</button>
           <button class="exit-btn" id="exitPageBtn" title="બહાર નીકળો">✕</button>
         </div>
       </div>
@@ -1379,45 +1250,55 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Persistent Sidebar / Slide-out Drawer Panel -->
-    <div class="settings-sidebar" id="settingsSidebar">
-      <div class="sidebar-header">
-        <h4>રાગ અને સેટિંગ્સ</h4>
-        <button class="sidebar-close-btn" id="sidebarCloseBtn">✕</button>
+  <!-- Raga/Scale Selection Modal (GeoShred style popup) -->
+  <div class="modal-overlay" id="ragaModal">
+    <div class="modal-content" style="max-width: 400px !important;">
+      <div class="modal-header">
+        <h3>રાગ / સ્કેલ પસંદ કરો</h3>
+        <button class="close-modal" id="closeRagaModalBtn">&times;</button>
       </div>
-      
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">રાગ / સ્કેલ પસંદ કરો</div>
-        <div class="sidebar-raga-list">
-          <button class="sidebar-raga-btn active" data-raga="bhairavi">ભૈરવી (કોમળ રે, ગ, ધ, ની)</button>
-          <button class="sidebar-raga-btn" data-raga="bilawal">બિલાવલ (મેજર - શુદ્ધ સૂર)</button>
-          <button class="sidebar-raga-btn" data-raga="yaman">યમન (તીવ્ર મધ્યમ)</button>
-          <button class="sidebar-raga-btn" data-raga="bhairav">ભૈરવ (કોમળ રે, ધ)</button>
-          <button class="sidebar-raga-btn" data-raga="kafi">કાફી (કોમળ ગ, ની)</button>
-          <button class="sidebar-raga-btn" data-raga="asavari">આસાવરી (કોમળ ગ, ધ, ની)</button>
-          <button class="sidebar-raga-btn" data-raga="bhupali">ભૂપાલી / મોહનમ (૫ સૂર)</button>
-          <button class="sidebar-raga-btn" data-raga="malkauns">માલકૌંસ / હિંડોલમ (૫ સૂર)</button>
+      <div class="modal-body" style="padding: 15px 12px;">
+        <div class="preset-group-title">भारतीय रागों और पश्चिमी स्केल्स</div>
+        <div class="preset-grid" style="grid-template-columns: 1fr !important; gap: 6px !important;">
+          <button class="modal-raga-btn active" data-raga="bhairavi">ભૈરવી (કોમળ રે, ગ, ધ, ની)</button>
+          <button class="modal-raga-btn" data-raga="bilawal">બિલાવલ (મેજર - શુદ્ધ સૂર)</button>
+          <button class="modal-raga-btn" data-raga="yaman">યમન (તીવ્ર મધ્યમ)</button>
+          <button class="modal-raga-btn" data-raga="bhairav">ભૈરવ (કોમળ રે, ધ)</button>
+          <button class="modal-raga-btn" data-raga="kafi">કાફી (કોમળ ગ, ની)</button>
+          <button class="modal-raga-btn" data-raga="asavari">આસાવરી (કોમળ ગ, ધ, ની)</button>
+          <button class="modal-raga-btn" data-raga="bhupali">ભૂપાલી / મોહનમ (૫ સૂર)</button>
+          <button class="modal-raga-btn" data-raga="malkauns">માલકૌંસ / હિંડોલમ (૫ સૂર)</button>
         </div>
       </div>
-      
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">કંટ્રોલ પેનલ સેટિંગ્સ</div>
-        <div class="sidebar-checkbox-list">
-          <label class="sidebar-checkbox-label">
-            <input type="checkbox" id="chk-octave" checked> Octave (સપ્તક કંટ્રોલ)
+    </div>
+  </div>
+
+  <!-- Control Customizer Modal (GeoShred style popup) -->
+  <div class="modal-overlay" id="customizerModal">
+    <div class="modal-content" style="max-width: 400px !important;">
+      <div class="modal-header">
+        <h3>નિયંત્રણ પૅનલ સેટિંગ્સ</h3>
+        <button class="close-modal" id="closeCustomizerModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px 15px;">
+        <div class="preset-group-title">કંટ્રોલ પેનલ કસ્ટમાઇઝર</div>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 10px; color: #f3e6d0; font-size: 0.85rem; padding: 12px; background: rgba(0,0,0,0.35); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); margin-top: 5px;">
+          <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chk-octave" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;"> Octave (સપ્તક કંટ્રોલ)
           </label>
-          <label class="sidebar-checkbox-label">
-            <input type="checkbox" id="chk-expression" checked> Expression (XY પેડ)
+          <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chk-expression" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;"> Expression (XY પેડ)
           </label>
-          <label class="sidebar-checkbox-label">
-            <input type="checkbox" id="chk-sliders" checked> Sliders (વ્હેમી, વાઇબ્રેટો)
+          <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chk-sliders" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;"> Sliders (વ્હેમી, વાઇબ્રેટો, ફિલ્ટર)
           </label>
-          <label class="sidebar-checkbox-label">
-            <input type="checkbox" id="chk-switches" checked> Switches (પ્લે મોડ)
+          <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chk-switches" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;"> Switches (પ્લે મોડ બટનો)
           </label>
-          <label class="sidebar-checkbox-label">
-            <input type="checkbox" id="chk-preset" checked> Presets (વોલ્યુમ)
+          <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chk-preset" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;"> Presets (વાજિંત્ર સ્ક્રીન અને વોલ્યુમ)
           </label>
         </div>
       </div>
@@ -3138,21 +3019,31 @@
     octAutoBtn.classList.toggle('active', isOctaveAuto);
   };
 
-  // Utility Toolbar listeners: ⋮ settings, 🔊 speaker, ? help
-  const menuBtn = document.getElementById('menuBtn');
-  const settingsSidebar = document.getElementById('settingsSidebar');
-  const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+  // Utility Toolbar listeners: 🎶 raga, ⚙️ customizer, 🔊 speaker, ? help
+  const ragaBtn = document.getElementById('ragaBtn');
+  const customizerBtn = document.getElementById('customizerBtn');
+  const ragaModal = document.getElementById('ragaModal');
+  const customizerModal = document.getElementById('customizerModal');
+  const closeRagaModalBtn = document.getElementById('closeRagaModalBtn');
+  const closeCustomizerModalBtn = document.getElementById('closeCustomizerModalBtn');
 
-  menuBtn.onclick = () => {
-    settingsSidebar.classList.toggle('active');
+  ragaBtn.onclick = () => {
+    ragaModal.classList.add('active');
   };
-  sidebarCloseBtn.onclick = () => {
-    settingsSidebar.classList.remove('active');
+  closeRagaModalBtn.onclick = () => {
+    ragaModal.classList.remove('active');
   };
 
-  document.querySelectorAll('.sidebar-raga-btn').forEach(btn => {
+  customizerBtn.onclick = () => {
+    customizerModal.classList.add('active');
+  };
+  closeCustomizerModalBtn.onclick = () => {
+    customizerModal.classList.remove('active');
+  };
+
+  document.querySelectorAll('.modal-raga-btn').forEach(btn => {
     btn.onclick = () => {
-      document.querySelectorAll('.sidebar-raga-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.modal-raga-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       
       const ragaKey = btn.getAttribute('data-raga');
@@ -3161,10 +3052,7 @@
       if (audioCtx) buildSympatheticResonators();
       drawInterface();
       
-      // On mobile screen, close drawer after selection for better flow
-      if (window.innerWidth < 880) {
-        settingsSidebar.classList.remove('active');
-      }
+      ragaModal.classList.remove('active');
     };
   });
 
