@@ -262,19 +262,13 @@
     cursor: pointer;
   }
 
-  /* Switches / Mode Grid */
   .switches-module {
     display: grid !important;
-    grid-template-rows: repeat(3, 1fr);
-    gap: 3px;
-    padding: 1px 2px !important;
-    width: 125px;
-  }
-  .switch-row {
-    display: flex;
-    gap: 3px;
-    width: 100%;
-    height: 100%;
+    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-rows: repeat(2, 1fr) !important;
+    gap: 4px !important;
+    padding: 2px !important;
+    width: 220px !important;
   }
   .switch-btn, .mode-stack-btn {
     flex: 1;
@@ -282,7 +276,7 @@
     border: 1px solid #475569;
     border-radius: 3px;
     color: #94a3b8;
-    font-size: 0.38rem;
+    font-size: 0.46rem;
     font-weight: 800;
     text-transform: uppercase;
     display: flex;
@@ -291,7 +285,7 @@
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(0,0,0,0.4);
     transition: all 0.15s ease;
-    padding: 0;
+    padding: 2px 4px;
     line-height: 1.1;
     text-align: center;
   }
@@ -301,10 +295,6 @@
     color: #ffffff;
     box-shadow: 0 0 5px rgba(56, 189, 248, 0.4);
     text-shadow: 0 0 2px rgba(255,255,255,0.6);
-  }
-  .empty-switch-slot {
-    flex: 1;
-    visibility: hidden;
   }
 
   /* Volume & Preset Display */
@@ -945,21 +935,22 @@
 
     /* Switches */
     .switches-module {
-      width: 95px !important;
-      gap: 1px !important;
-    }
-    .switch-row {
-      gap: 1px !important;
+      width: 140px !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      grid-template-rows: repeat(2, 1fr) !important;
+      gap: 1.5px !important;
+      padding: 1px !important;
     }
     .switch-btn, .mode-stack-btn {
-      font-size: 0.3rem !important;
+      font-size: 0.28rem !important;
       line-height: 1 !important;
+      padding: 1px !important;
     }
     .diatonic-btn {
-      font-size: 0.3rem !important;
+      font-size: 0.28rem !important;
     }
     .fx-toggle-btn {
-      font-size: 0.3rem !important;
+      font-size: 0.28rem !important;
     }
 
     /* Preset & Volume */
@@ -1163,21 +1154,15 @@
 
         <!-- Module 4: Mode Selector & FX Switches (Guitar FX & Modes) -->
         <div class="console-module switches-module">
-          <div class="switch-row">
-            <button class="switch-btn" id="btn2ndHarmonic">2nd Hrmnic</button>
-            <button class="mode-stack-btn" id="btnModePiano">Piano</button>
-            <button class="switch-btn" id="playTrackBtn">Play Track</button>
-          </div>
-          <div class="switch-row">
-            <button class="switch-btn" id="btnPinchHarmonic">Pinch Hrmnic On Release</button>
-            <button class="mode-stack-btn active" id="btnModeGuitar">Guitar</button>
-            <button class="diatonic-btn active" id="diatonicToggleBtn">Diatonic</button>
-          </div>
-          <div class="switch-row">
-            <div class="empty-switch-slot"></div>
-            <button class="mode-stack-btn" id="btnModeSlide">Slide</button>
-            <button class="fx-toggle-btn" id="fxToggleBtn">⚙️ ઇફેક્ટ</button>
-          </div>
+          <button class="switch-btn" id="btn2ndHarmonic">2nd Hrmnic</button>
+          <button class="mode-stack-btn" id="btnModePiano">Piano</button>
+          <button class="mode-stack-btn active" id="btnModeGuitar">Guitar</button>
+          <button class="switch-btn" id="playTrackBtn">Play Track</button>
+          
+          <button class="switch-btn" id="btnPinchHarmonic">Pinch Hrmnic</button>
+          <button class="mode-stack-btn" id="btnModeSlide">Slide</button>
+          <button class="diatonic-btn active" id="diatonicToggleBtn">Diatonic</button>
+          <button class="fx-toggle-btn" id="fxToggleBtn">⚙️ ઇફેક્ટ</button>
         </div>
 
         <!-- Module 5: Rotary Dials & Preset Displays (All Presets Play) -->
