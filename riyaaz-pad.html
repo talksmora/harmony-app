@@ -2666,7 +2666,17 @@
       const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.round(rawFret)));
       const totalSemitones = stringSemitones + nearestFret;
       const relSemitones = ((totalSemitones % 12) + 12) % 12;
+      
+      console.log("Raga Scale Validation:", {
+        raga: scaleKey,
+        nearestFret,
+        relSemitones,
+        inScale: scale.intervals.includes(relSemitones),
+        isDiatonicMode
+      });
+
       if (isDiatonicMode && !scale.intervals.includes(relSemitones)) {
+        console.log("Touch blocked (out-of-scale)");
         return; // Ignore/Silence out-of-scale touches
       }
     }
