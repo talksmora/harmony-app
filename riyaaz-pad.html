@@ -10,6 +10,25 @@
 <link rel="stylesheet" href="shared/theme.css">
 <link rel="stylesheet" href="shared/app-shell.css">
 <style>
+  /* Override App Shell sidebar & header layout to occupy 100% of the screen */
+  .sidebar, .topbar, .sidebar-overlay {
+    display: none !important;
+  }
+  .main-area {
+    margin-left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+  body[data-page="riyaaz-pad"] .page-content {
+    padding: 0 !important;
+    overflow: hidden !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+  }
+
   body {
     user-select: none;
     -webkit-user-select: none;
@@ -19,18 +38,6 @@
     margin: 0;
     padding: 0;
     font-family: system-ui, -apple-system, sans-serif;
-  }
-  .main-area {
-    height: 100vh !important;
-    overflow: hidden !important;
-  }
-  body[data-page="riyaaz-pad"] .page-content {
-    padding: 0 !important;
-    overflow: hidden !important;
-    height: calc(100vh - 62px) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    box-sizing: border-box !important;
   }
   #pageBody {
     height: 100% !important;
@@ -65,13 +72,33 @@
   .left-controls {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+  }
+  .exit-btn {
+    background: linear-gradient(135deg, #8b1e1e 0%, #520f0f 100%);
+    color: #f3e6d0;
+    border: 1.5px solid #b8860b;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    transition: all 0.2s ease;
+  }
+  .exit-btn:hover {
+    background: linear-gradient(135deg, #a82a2a 0%, #6e1616 100%);
+    border-color: #f4c542;
+    box-shadow: 0 0 8px rgba(244,197,66,0.4);
   }
   .raga-selector select {
     background: #101520;
     color: #f3e6d0;
     border: 1.5px solid rgba(184,134,11,0.5);
-    padding: 4px 8px;
+    padding: 5px 8px;
     border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 700;
@@ -217,7 +244,7 @@
     align-items: center;
     padding: 4px;
     box-sizing: border-box;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.6);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.68);
     border: 1px solid rgba(255,255,255,0.08);
   }
   .pedal-label {
@@ -370,6 +397,12 @@
     }
     .left-controls {
       order: 1;
+      width: 100%;
+      justify-content: space-between;
+    }
+    .exit-btn {
+      padding: 4px 8px;
+      font-size: 0.7rem;
     }
     .preset-display {
       order: 2;
@@ -414,6 +447,9 @@
       <!-- Top Bar Console -->
       <div class="controls-panel">
         <div class="left-controls">
+          <!-- Back/Exit Button to return to dashboard -->
+          <button class="exit-btn" id="exitPageBtn" title="Dashboard પર પાછા જાઓ">✕ Exit</button>
+          
           <div class="raga-selector">
             <select id="scaleSelect">
               <option value="bilawal">Bilawal (Major)</option>
@@ -880,7 +916,7 @@
             this.phase = 0;
             this.instType = 0;
             this.lastExcitationSample = 0;
-            this.strength = 0.35; // Stored strength variable to resolve Undefined NaN bugs
+            this.strength = 0.35;
             this.port.onmessage = (e) => {
               if (e.data.type === 'pluck') {
                 this.instType = e.data.instType !== undefined ? e.data.instType : 0;
@@ -953,7 +989,7 @@
                   const noise = (Math.random() * 2 - 1);
                   const hpNoise = noise - this.lastExcitationSample;
                   this.lastExcitationSample = noise;
-                  inputEnergy = hpNoise * this.strength * 0.7; // Corrected to this.strength
+                  inputEnergy = hpNoise * this.strength * 0.7;
                 } else {
                   inputEnergy = this.excitationBuffer[this.excitationIdx];
                 }
@@ -1381,7 +1417,22 @@
     });
   }
 
+  // Request browser fullscreen mode automatically on first pointer down interaction
+  async function enterBrowserFullscreen() {
+    try {
+      const doc = document.documentElement;
+      if (doc.requestFullscreen && !document.fullscreenElement) {
+        await doc.requestFullscreen();
+      } else if (doc.webkitRequestFullscreen && !document.webkitFullscreenElement) {
+        await doc.webkitRequestFullscreen();
+      }
+    } catch (e) {
+      console.warn("Fullscreen request blocked or ignored by browser policy:", e);
+    }
+  }
+
   async function handleStart(id, x, y) {
+    await enterBrowserFullscreen();
     await ensureCtx();
     const freq = xyToFreq(x, y, true);
     const voice = new SynthVoice(freq);
@@ -1467,6 +1518,19 @@
 
   scaleSelect.onchange = () => {
     if (audioCtx) buildSympatheticResonators();
+  };
+
+  // Exit/Close Page Logic
+  const exitPageBtn = document.getElementById('exitPageBtn');
+  exitPageBtn.onclick = async () => {
+    try {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        await document.webkitExitFullscreen();
+      }
+    } catch(e) {}
+    window.location.href = 'dashboard.html';
   };
 
   // Interactive Rotary Dial Dials Logic
