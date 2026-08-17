@@ -608,8 +608,8 @@
         <div class="preset-display-wrap">
           <button class="preset-nav-btn" id="prevPreset" title="અગાઉનું વાજિંત્ર">◀</button>
           <div class="preset-display" id="presetDisplayBtn" title="વાજિંત્ર પસંદ કરો">
-            <div class="preset-name" id="selectedPresetName">Sitar</div>
-            <div class="preset-category" id="selectedPresetCategory">Naada Indian</div>
+            <div class="preset-name" id="selectedPresetName">સિતાર</div>
+            <div class="preset-category" id="selectedPresetCategory">ભારતીય શાસ્ત્રીય</div>
           </div>
           <button class="preset-nav-btn" id="nextPreset" title="આગળનું વાજિંત્ર">▶</button>
         </div>
@@ -777,16 +777,22 @@
 
   function getGujaratiSwarName(engSwar) {
     const octavesUp = (engSwar.match(/\^/g) || []).length;
-    const octavesDown = (engSwar.match(/_/g) || []).length;
+    // Count trailing underscores representing lower octave (e.g. Sa_ has 1, Sa__ has 2)
+    const trailingUnderscores = (engSwar.match(/_+$/g) || [""])[0].length;
     
-    let base = engSwar.replace(/[\^_]/g, '').trim();
+    let base = engSwar.replace(/\^/g, '');
+    if (trailingUnderscores > 0) {
+      base = base.substring(0, base.length - trailingUnderscores);
+    }
+    base = base.trim();
+    
     let gujBase = SWAR_TRANSLATIONS[base] || base;
     
     if (octavesUp > 0) {
       gujBase += '̇'.repeat(octavesUp); // Bhatkhande upper saptak dot
     }
-    if (octavesDown > 0) {
-      gujBase += '̣'.repeat(octavesDown); // Bhatkhande lower saptak dot
+    if (trailingUnderscores > 0) {
+      gujBase += '̣'.repeat(trailingUnderscores); // Bhatkhande lower saptak dot
     }
     return gujBase;
   }
