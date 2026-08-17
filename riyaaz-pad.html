@@ -2701,7 +2701,7 @@
     }
   }
 
-  async function handleStart(id, x, y) {
+  async function handleStart(id, x, y, isTouch = false) {
     await enterBrowserFullscreen();
     await ensureCtx();
     
@@ -2743,7 +2743,8 @@
       wiggleY: 0, wiggleX: 0,
       isFretless: false,
       stringIndex: stringIndex, // Lock the touch permanently to this string row
-      lastMoveTime: Date.now()
+      lastMoveTime: Date.now(),
+      isTouch: isTouch
     });
   }
 
@@ -2858,14 +2859,30 @@
     if (e.pointerType === 'mouse') handleEnd(e.pointerId);
   });
 
+  function sweepOrphanedTouches(e) {
+    if (!e.touches) return;
+    const activeIds = new Set();
+    for (let i = 0; i < e.touches.length; i++) {
+      activeIds.add(e.touches[i].identifier);
+    }
+    activeVoices.forEach((t, id) => {
+      if (t.isTouch) {
+        if (!activeIds.has(id) && !activeIds.has(Number(id)) && !activeIds.has(String(id))) {
+          handleEnd(id);
+        }
+      }
+    });
+  }
+
   // 2. Dedicated Native Touch Event Listeners (Highly reliable on mobile browsers/Safari/Chrome)
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Prevent double tapping zoom and scrolling
     const rect = canvas.getBoundingClientRect();
     for (let i = 0; i < e.changedTouches.length; i++) {
       const t = e.changedTouches[i];
-      handleStart(t.identifier, t.clientX - rect.left, t.clientY - rect.top);
+      handleStart(t.identifier, t.clientX - rect.left, t.clientY - rect.top, true);
     }
+    sweepOrphanedTouches(e);
   }, { passive: false });
 
   canvas.addEventListener('touchmove', (e) => {
@@ -2875,6 +2892,7 @@
       const t = e.changedTouches[i];
       handleMove(t.identifier, t.clientX - rect.left, t.clientY - rect.top);
     }
+    sweepOrphanedTouches(e);
   }, { passive: false });
 
   canvas.addEventListener('touchend', (e) => {
@@ -2883,6 +2901,7 @@
       const t = e.changedTouches[i];
       handleEnd(t.identifier);
     }
+    sweepOrphanedTouches(e);
   }, { passive: false });
 
   canvas.addEventListener('touchcancel', (e) => {
@@ -2891,6 +2910,7 @@
       const t = e.changedTouches[i];
       handleEnd(t.identifier);
     }
+    sweepOrphanedTouches(e);
   }, { passive: false });
 
   // Bulletproof watchdog for Touch interfaces: clear all voices if user lifts all fingers, 
