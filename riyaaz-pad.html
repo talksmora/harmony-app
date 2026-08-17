@@ -993,12 +993,12 @@
             };
           }
           triggerPluck(strength, freq, continuous) {
-            this.strength = strength;
+            this.strength = (typeof strength === 'number' && !isNaN(strength) && isFinite(strength)) ? strength : 0.35;
             const periodSamples = Math.floor(sampleRate / freq);
             this.excitationLength = Math.max(10, Math.min(periodSamples, 800));
             this.excitationBuffer = new Float32Array(this.excitationLength);
             for (let i = 0; i < this.excitationLength; i++) {
-              this.excitationBuffer[i] = (Math.random() * 2 - 1) * strength * Math.pow(1 - i / this.excitationLength, 1.8);
+              this.excitationBuffer[i] = (Math.random() * 2 - 1) * this.strength * Math.pow(1 - i / this.excitationLength, 1.8);
             }
             this.writeIdx = 0;
             this.buffer.fill(0);
@@ -1039,8 +1039,16 @@
               const nextIdx = (baseIdx + 1) % this.bufferSize;
               const sampleA = this.buffer[baseIdx];
               const sampleB = this.buffer[nextIdx];
-              const interpolatedSample = sampleA + frac * (sampleB - sampleA);
+              
+              let interpolatedSample = sampleA + frac * (sampleB - sampleA);
+              if (isNaN(interpolatedSample) || !isFinite(interpolatedSample)) {
+                interpolatedSample = 0.0;
+              }
+
               let filteredSample = (1 - damping) * interpolatedSample + damping * this.lastOutput;
+              if (isNaN(filteredSample) || !isFinite(filteredSample)) {
+                filteredSample = 0.0;
+              }
               this.lastOutput = filteredSample;
               
               if (this.instType === 1) {
@@ -1082,6 +1090,9 @@
               }
 
               let nextWriteVal = inputEnergy + filteredSample * feedback;
+              if (isNaN(nextWriteVal) || !isFinite(nextWriteVal)) {
+                nextWriteVal = 0.0;
+              }
               
               if (nextWriteVal > 1.15) nextWriteVal = 1.15;
               else if (nextWriteVal < -1.15) nextWriteVal = -1.15;
