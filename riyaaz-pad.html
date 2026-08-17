@@ -2452,7 +2452,7 @@
 
     if (isDiatonicMode) {
       // Diatonic Mode: Constrain playing grid strictly to notes belonging to selected scale/raga
-      const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.round(rawFret)));
+      const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.floor(rawFret)));
       const currentSemitones = stringSemitones + nearestFret;
       
       const relSemitones = ((currentSemitones % 12) + 12) % 12;
@@ -2473,7 +2473,7 @@
     } else {
       // Chromatic/Fretless Mode: Pure continuous scale with no locked frequencies (snaps only on initial tap if chosen)
       if (isSnap) {
-        const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.round(rawFret)));
+        const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.floor(rawFret)));
         const snappedSemitones = stringSemitones + nearestFret;
         freq = BASE_SA * Math.pow(2, currentOctaveShift) * Math.pow(2, snappedSemitones / 12);
       } else {
@@ -2663,7 +2663,7 @@
     const fretWidth = W / NUM_FRETS;
     if (fretWidth > 0) {
       const rawFret = x / fretWidth;
-      const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.round(rawFret)));
+      const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.floor(rawFret)));
       const totalSemitones = stringSemitones + nearestFret;
       const relSemitones = ((totalSemitones % 12) + 12) % 12;
       
