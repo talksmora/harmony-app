@@ -2364,6 +2364,8 @@
       this.isReleasing = false;
       this.freq = freq;
 
+      updateMasterVolume();
+
       const now = audioCtx.currentTime;
       const cfg = INSTRUMENT_PRESETS[activePreset] || INSTRUMENT_PRESETS['sitar'];
 
@@ -2431,6 +2433,8 @@
       const cfg = INSTRUMENT_PRESETS[activePreset] || INSTRUMENT_PRESETS['sitar'];
       this.isReleasing = true;
 
+      updateMasterVolume();
+
       this.stringNode.port.postMessage({ type: 'release' });
       this.stringNode.parameters.get('feedback').setTargetAtTime(0.85, now, cfg.release / 3);
 
@@ -2485,6 +2489,32 @@
       }
     }
     return voicePool[0];
+  }
+
+  function updateMasterVolume() {
+    if (!masterGain) return;
+    const now = audioCtx.currentTime;
+    if (isSpeakerMuted) {
+      masterGain.gain.setTargetAtTime(0, now, 0.01);
+      return;
+    }
+    
+    // Count active touch/playing voices
+    let activeCount = 0;
+    for (let i = 0; i < voicePool.length; i++) {
+      if (voicePool[i].activeId !== null && !voicePool[i].isReleasing) {
+        activeCount++;
+      }
+    }
+
+    // Polyphonic scaling: scale master volume down as active voices increase
+    let scale = 1.0;
+    if (activeCount === 2) scale = 0.72;
+    else if (activeCount === 3) scale = 0.55;
+    else if (activeCount >= 4) scale = 0.42;
+
+    const targetVol = knobValues.vol * scale;
+    masterGain.gain.setTargetAtTime(targetVol, now, 0.06);
   }
 
   function getSwarNameForSemitones(semitones, scale) {
@@ -2839,6 +2869,7 @@
     if (!t) return;
     t.voice.release();
     activeVoices.delete(id);
+    updateMasterVolume();
   }
 
   // 1. Mouse/Pointer Event Listeners (Strictly filtered for Mouse only to prevent touch conflicts)
@@ -3150,7 +3181,7 @@
       if (key === 'vol') {
         knobValues.vol = newVal;
         if (masterGain && !isSpeakerMuted) {
-          masterGain.gain.setTargetAtTime(newVal, audioCtx.currentTime, 0.01);
+          updateMasterVolume();
         }
       } else if (key === 'track-vol') {
         knobValues.trackVol = newVal;
@@ -3574,7 +3605,7 @@
       speakerBtn.textContent = '🔇';
       speakerBtn.title = 'ઓડિયો ચાલુ કરો';
     } else {
-      if (masterGain) masterGain.gain.setValueAtTime(knobValues.vol, audioCtx.currentTime);
+      if (masterGain) updateMasterVolume();
       speakerBtn.textContent = '🔊';
       speakerBtn.title = 'ઓડિયો બંધ કરો';
     }
