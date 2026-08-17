@@ -776,25 +776,13 @@
   };
 
   function getGujaratiSwarName(engSwar) {
-    const octavesUp = (engSwar.match(/\^/g) || []).length;
-    // Count trailing underscores representing lower octave (e.g. Sa_ has 1, Sa__ has 2)
     const trailingUnderscores = (engSwar.match(/_+$/g) || [""])[0].length;
-    
     let base = engSwar.replace(/\^/g, '');
     if (trailingUnderscores > 0) {
       base = base.substring(0, base.length - trailingUnderscores);
     }
     base = base.trim();
-    
-    let gujBase = SWAR_TRANSLATIONS[base] || base;
-    
-    if (octavesUp > 0) {
-      gujBase += '̇'.repeat(octavesUp); // Bhatkhande upper saptak dot
-    }
-    if (trailingUnderscores > 0) {
-      gujBase += '̣'.repeat(trailingUnderscores); // Bhatkhande lower saptak dot
-    }
-    return gujBase;
+    return SWAR_TRANSLATIONS[base] || base;
   }
 
   const CHROMATIC_SWARS = ['Sa', 'Re_b', 'Re', 'Ga_b', 'Ga', 'Ma', 'Ma#', 'Pa', 'Dha_b', 'Dha', 'Ni_b', 'Ni'];
@@ -1695,7 +1683,27 @@
         }
         ctx.font = 'bold 11px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(gujSwar, x + fretWidth / 2, y + 16);
+        
+        const cyCenter = y + rh / 2;
+        // Draw main Gujarati swar text centered vertically
+        ctx.fillText(gujSwar, x + fretWidth / 2, cyCenter + 4);
+
+        // Vectorise the Bhatkhande saptak dots to guarantee 100% cross-platform display without font square box bugs
+        const octavesUp = (swarStr.match(/\^/g) || []).length;
+        const octavesDown = (swarStr.match(/_+$/g) || [""])[0].length;
+
+        if (octavesUp > 0) {
+          ctx.beginPath();
+          ctx.arc(x + fretWidth / 2, cyCenter - 9, 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = showAsActive ? ctx.fillStyle : 'rgba(255, 255, 255, 0.22)';
+          ctx.fill();
+        }
+        if (octavesDown > 0) {
+          ctx.beginPath();
+          ctx.arc(x + fretWidth / 2, cyCenter + 13, 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = showAsActive ? ctx.fillStyle : 'rgba(255, 255, 255, 0.22)';
+          ctx.fill();
+        }
       }
 
       ctx.strokeStyle = 'rgba(184, 134, 11, 0.4)';
