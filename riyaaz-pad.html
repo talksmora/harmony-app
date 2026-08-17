@@ -2771,7 +2771,9 @@
     activeVoices.delete(id);
   }
 
+  // 1. Mouse/Pointer Event Listeners (Strictly filtered for Mouse only to prevent touch conflicts)
   canvas.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse') return;
     e.preventDefault();
     canvas.setPointerCapture(e.pointerId);
     const rect = canvas.getBoundingClientRect();
@@ -2779,6 +2781,7 @@
   });
 
   canvas.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
     e.preventDefault();
     if (!activeVoices.has(e.pointerId)) return;
     const rect = canvas.getBoundingClientRect();
@@ -2786,31 +2789,82 @@
   });
 
   canvas.addEventListener('pointerup', (e) => {
+    if (e.pointerType !== 'mouse') return;
     e.preventDefault();
     handleEnd(e.pointerId);
   });
   canvas.addEventListener('pointercancel', (e) => {
+    if (e.pointerType !== 'mouse') return;
     e.preventDefault();
     handleEnd(e.pointerId);
   });
   canvas.addEventListener('pointerleave', (e) => {
+    if (e.pointerType !== 'mouse') return;
     e.preventDefault();
     handleEnd(e.pointerId);
   });
   canvas.addEventListener('lostpointercapture', (e) => {
+    if (e.pointerType !== 'mouse') return;
     e.preventDefault();
     handleEnd(e.pointerId);
   });
 
-  // Global window safety fallback listeners to prevent stuck notes when touches are released off-canvas
-  window.addEventListener('pointerup', (e) => handleEnd(e.pointerId));
-  window.addEventListener('pointercancel', (e) => handleEnd(e.pointerId));
+  // Global window safety fallback for Mouse Pointer Events
+  window.addEventListener('pointerup', (e) => {
+    if (e.pointerType === 'mouse') handleEnd(e.pointerId);
+  });
+  window.addEventListener('pointercancel', (e) => {
+    if (e.pointerType === 'mouse') handleEnd(e.pointerId);
+  });
 
-  // Bulletproof watchdog for Touch interfaces: clear all voices if user lifts all fingers from screen
+  // 2. Dedicated Native Touch Event Listeners (Highly reliable on mobile browsers/Safari/Chrome)
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Prevent double tapping zoom and scrolling
+    const rect = canvas.getBoundingClientRect();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const t = e.changedTouches[i];
+      handleStart(t.identifier, t.clientX - rect.left, t.clientY - rect.top);
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const t = e.changedTouches[i];
+      handleMove(t.identifier, t.clientX - rect.left, t.clientY - rect.top);
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const t = e.changedTouches[i];
+      handleEnd(t.identifier);
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const t = e.changedTouches[i];
+      handleEnd(t.identifier);
+    }
+  }, { passive: false });
+
+  // Bulletproof watchdog for Touch interfaces: clear all voices if user lifts all fingers, 
+  // or if a touch ID active in our app is no longer present in the browser's touch list.
   window.addEventListener('touchend', (e) => {
     if (e.touches.length === 0) {
       activeVoices.forEach((t, id) => {
         handleEnd(id);
+      });
+    } else {
+      const activeIds = new Set(Array.from(e.touches).map(t => t.identifier));
+      activeVoices.forEach((t, id) => {
+        if (typeof id === 'number' && !activeIds.has(id)) {
+          handleEnd(id);
+        }
       });
     }
   }, { passive: true });
@@ -2819,6 +2873,13 @@
     if (e.touches.length === 0) {
       activeVoices.forEach((t, id) => {
         handleEnd(id);
+      });
+    } else {
+      const activeIds = new Set(Array.from(e.touches).map(t => t.identifier));
+      activeVoices.forEach((t, id) => {
+        if (typeof id === 'number' && !activeIds.has(id)) {
+          handleEnd(id);
+        }
       });
     }
   }, { passive: true });
