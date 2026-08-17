@@ -2514,7 +2514,12 @@
     else if (activeCount >= 4) scale = 0.42;
 
     const targetVol = knobValues.vol * scale;
-    masterGain.gain.setTargetAtTime(targetVol, now, 0.06);
+    // Duck FAST when a new note pushes volume down (prevents the attack-transient
+    // clipping/"speaker fatvu" crackle), but ease back up SLOWLY when a note is
+    // released, so the volume recovery doesn't pump/breathe audibly.
+    const currentVol = masterGain.gain.value;
+    const timeConstant = targetVol < currentVol ? 0.008 : 0.06;
+    masterGain.gain.setTargetAtTime(targetVol, now, timeConstant);
   }
 
   function getSwarNameForSemitones(semitones, scale) {
@@ -2801,7 +2806,8 @@
         isFretless: false,
         stringIndex: stringIndex, // Lock the touch permanently to this string row
         lastMoveTime: Date.now(),
-        isTouch: isTouch
+        isTouch: isTouch,
+        lastQuantizedFreq: freq // used by Piano mode to detect when the finger enters a new note-cell
       });
     }
   }
@@ -2817,22 +2823,34 @@
       t.isFretless = true;
     }
 
-    let targetFreq;
-    let glideTime = knobValues.slide;
-
-    if (dx < 35) {
-      // 1. Micro-wiggle vibrato mode: zero delay (glideTime = 0) to instantly match physical finger wiggles
-      const baseFreq = xyToFreq(x, y, false, t.stringIndex);
-      targetFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
-      glideTime = 0.0; 
+    if (currentSlideMode === 'piano') {
+      // Piano mode: NO continuous glide/pitch-bleed. The sounding note stays locked
+      // to its quantized cell until the finger actually enters a different note-cell,
+      // at which point that new note is (re)triggered — like sliding a finger across
+      // physical piano keys, not a fretless slide.
+      const quantizedFreq = xyToFreq(x, y, true, t.stringIndex);
+      if (Math.abs(quantizedFreq - t.lastQuantizedFreq) > 0.5) {
+        t.voice.trigger(id, quantizedFreq);
+        t.lastQuantizedFreq = quantizedFreq;
+      }
     } else {
-      // 2. Normal slide mode
-      const baseFreq = xyToFreq(x, y, false, t.stringIndex);
-      targetFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
-      glideTime = knobValues.slide;
-    }
+      let targetFreq;
+      let glideTime = knobValues.slide;
 
-    t.voice.glideTo(targetFreq, glideTime);
+      if (dx < 35) {
+        // 1. Micro-wiggle vibrato mode: zero delay (glideTime = 0) to instantly match physical finger wiggles
+        const baseFreq = xyToFreq(x, y, false, t.stringIndex);
+        targetFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
+        glideTime = 0.0; 
+      } else {
+        // 2. Normal slide mode
+        const baseFreq = xyToFreq(x, y, false, t.stringIndex);
+        targetFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
+        glideTime = knobValues.slide;
+      }
+
+      t.voice.glideTo(targetFreq, glideTime);
+    }
 
     // 3. Y-Axis Expression: sliding finger vertically inside the string row changes the timbre
     const rhLocal = H / NUM_STRINGS;
@@ -3815,7 +3833,14 @@
   }
   loop();
 
-  initAppShell({ title: pageTitle });
+  // Guarded — if shared/app-shell.js didn't load (e.g. a single-file preview
+  // that doesn't serve the sibling "shared/" folder), the core instrument
+  // above still works fully; only the sidebar/topbar shell is skipped.
+  if (typeof initAppShell === 'function') {
+    initAppShell({ title: pageTitle });
+  } else {
+    console.warn('initAppShell() not available — shared/app-shell.js did not load (sidebar shell skipped, core instrument still works).');
+  }
 })();
 </script>
 </body>
