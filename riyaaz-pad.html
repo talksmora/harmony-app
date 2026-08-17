@@ -1849,7 +1849,8 @@
   };
 
   const activeVoices = new Map();
-  const releasingVoices = new Set(); // Global set to prevent premature Garbage Collection of releasing voices
+  const POOL_SIZE = 12;
+  let voicePool = [];
 
   // Floating Expression XY Pad logic
   const xyPad = document.getElementById('xyPad');
@@ -2169,6 +2170,7 @@
 
     buildEffectsChain();
     buildSympatheticResonators();
+    initVoicePool();
   }
 
   function buildEffectsChain() {
@@ -2323,37 +2325,59 @@
   }
 
   class SynthVoice {
-    constructor(freq) {
-      if (isNaN(freq) || !isFinite(freq) || freq < 20) {
-        freq = 220; 
-      }
+    constructor(index) {
+      this.index = index;
+      this.activeId = null;
+      this.isReleasing = false;
+      this.freq = 220;
 
       const now = audioCtx.currentTime;
-      const cfg = INSTRUMENT_PRESETS[activePreset] || INSTRUMENT_PRESETS['sitar'];
 
       this.master = audioCtx.createGain();
       this.master.gain.setValueAtTime(0, now);
       outputChain(this.master);
 
       this.filter = audioCtx.createBiquadFilter();
-      this.filter.type = cfg.filterType;
-      
-      const initialFreq = freq * Math.pow(2, masterPitchBend / 12);
-      this.filter.frequency.value = Math.min(cfg.filterMaxFreq, initialFreq * cfg.filterMult) + masterFilterOffset;
-      
-      if (cfg.filterQ) this.filter.Q.value = cfg.filterQ;
+      this.filter.type = 'lowpass';
       this.filter.connect(this.master);
 
       // Main String Node
       this.stringNode = new AudioWorkletNode(audioCtx, 'waveguide-string-processor');
       this.stringNode.connect(this.filter);
 
+      // Second String Node (always created, but we pluck it only if 2nd harmonic is active!)
+      this.secondStringNode = new AudioWorkletNode(audioCtx, 'waveguide-string-processor');
+      this.secondStringNode.connect(this.filter);
+
+      this.vibratoLfo = audioCtx.createOscillator();
+      this.vibratoLfo.frequency.value = 5.8;
+      this.vibratoGain = audioCtx.createGain();
+      this.vibratoGain.gain.value = 0;
+
+      this.vibratoLfo.connect(this.vibratoGain).connect(this.stringNode.parameters.get('frequency'));
+      this.vibratoLfo.connect(this.vibratoGain).connect(this.secondStringNode.parameters.get('frequency'));
+      this.vibratoLfo.start(now);
+    }
+
+    trigger(id, freq) {
+      this.activeId = id;
+      this.isReleasing = false;
+      this.freq = freq;
+
+      const now = audioCtx.currentTime;
+      const cfg = INSTRUMENT_PRESETS[activePreset] || INSTRUMENT_PRESETS['sitar'];
+
+      // Configure filter
+      this.filter.type = cfg.filterType;
+      const initialFreq = freq * Math.pow(2, masterPitchBend / 12);
+      this.filter.frequency.setValueAtTime(Math.min(cfg.filterMaxFreq, initialFreq * cfg.filterMult) + masterFilterOffset, now);
+      if (cfg.filterQ) this.filter.Q.setValueAtTime(cfg.filterQ, now);
+
+      // Configure string parameters
       this.stringNode.parameters.get('damping').setValueAtTime(cfg.damping, now);
       this.stringNode.parameters.get('feedback').setValueAtTime(cfg.feedback, now);
-      
+
       const bentFreq = freq * Math.pow(2, masterPitchBend / 12);
-      
-      // Pinch Harmonic: starts 2 octaves higher and ramps down to the base frequency in 150ms
       let startingFreq = bentFreq;
       if (isPinchHarmonicActive) {
         startingFreq = bentFreq * 4;
@@ -2372,44 +2396,32 @@
         instType: instType
       });
 
-      // Optional 2nd Harmonic String Node
-      this.secondStringNode = null;
+      // Pluck second string node if 2nd harmonic is active
       if (is2ndHarmonicActive) {
-        this.secondStringNode = new AudioWorkletNode(audioCtx, 'waveguide-string-processor');
-        this.secondStringNode.connect(this.filter);
         this.secondStringNode.parameters.get('damping').setValueAtTime(cfg.damping, now);
         this.secondStringNode.parameters.get('feedback').setValueAtTime(cfg.feedback, now);
         this.secondStringNode.parameters.get('frequency').setValueAtTime(bentFreq * 2, now);
-        
         this.secondStringNode.port.postMessage({
           type: 'pluck',
-          strength: 0.15, // slightly quieter overlay
+          strength: 0.15,
           frequency: freq * 2,
           continuous: !!cfg.continuous,
           instType: instType
         });
       }
 
-      this.vibratoLfo = audioCtx.createOscillator();
-      this.vibratoLfo.frequency.value = 5.8;
-      this.vibratoGain = audioCtx.createGain();
-      this.vibratoGain.gain.value = 0;
-
-      this.vibratoLfo.connect(this.vibratoGain).connect(this.stringNode.parameters.get('frequency'));
-      if (this.secondStringNode) {
-        this.vibratoLfo.connect(this.vibratoGain).connect(this.secondStringNode.parameters.get('frequency'));
-      }
-      this.vibratoLfo.start(now);
-
-      // Scale peak gain by 0.42 to ensure plenty of headroom when playing polyphonically (multiple chords)
-      this.master.gain.setTargetAtTime(cfg.peakGain * 0.42, now, cfg.attack);
+      // Master gain envelope
+      this.master.gain.cancelScheduledValues(now);
+      this.master.gain.setValueAtTime(0, now);
+      this.master.gain.linearRampToValueAtTime(cfg.peakGain * 0.42, now + cfg.attack);
     }
 
     glideTo(freq, glideTime) {
       if (isNaN(freq) || !isFinite(freq) || freq < 20) return;
       const now = audioCtx.currentTime;
+      this.freq = freq;
       this.stringNode.parameters.get('frequency').setTargetAtTime(freq, now, glideTime);
-      if (this.secondStringNode) {
+      if (is2ndHarmonicActive) {
         this.secondStringNode.parameters.get('frequency').setTargetAtTime(freq * 2, now, glideTime);
       }
     }
@@ -2417,10 +2429,11 @@
     release() {
       const now = audioCtx.currentTime;
       const cfg = INSTRUMENT_PRESETS[activePreset] || INSTRUMENT_PRESETS['sitar'];
-      
+      this.isReleasing = true;
+
       this.stringNode.port.postMessage({ type: 'release' });
       this.stringNode.parameters.get('feedback').setTargetAtTime(0.85, now, cfg.release / 3);
-      
+
       if (this.secondStringNode) {
         this.secondStringNode.port.postMessage({ type: 'release' });
         this.secondStringNode.parameters.get('feedback').setTargetAtTime(0.85, now, cfg.release / 3);
@@ -2430,28 +2443,48 @@
       this.master.gain.setValueAtTime(this.master.gain.value, now);
       this.master.gain.setTargetAtTime(0, now, cfg.release / 4);
 
-      // Keep strong reference to prevent Garbage Collection during release phase
-      releasingVoices.add(this);
-
-      const nodeRef = this.stringNode;
-      const secondNodeRef = this.secondStringNode;
-      const lfoRef = this.vibratoLfo;
-      const masterRef = this.master;
-      const filterRef = this.filter;
-      const voiceRef = this;
-
+      // Make the voice idle after the release duration
+      const myTouchId = this.activeId;
       setTimeout(() => {
-        try {
-          nodeRef.disconnect();
-          if (secondNodeRef) secondNodeRef.disconnect();
-          filterRef.disconnect();
-          masterRef.disconnect();
-          lfoRef.stop(); 
-          lfoRef.disconnect();
-        } catch(e) {}
-        releasingVoices.delete(voiceRef);
-      }, (cfg.release + 0.8) * 1000);
+        if (this.activeId === myTouchId && this.isReleasing) {
+          this.activeId = null;
+          this.isReleasing = false;
+        }
+      }, (cfg.release + 0.2) * 1000);
     }
+  }
+
+  function initVoicePool() {
+    voicePool = [];
+    for (let i = 0; i < POOL_SIZE; i++) {
+      voicePool.push(new SynthVoice(i));
+    }
+  }
+
+  function getVoice(id, freq) {
+    if (!audioCtx) return null;
+    
+    // 1. If this touch ID already has an active voice, return it
+    for (let i = 0; i < voicePool.length; i++) {
+      if (voicePool[i].activeId === id) {
+        return voicePool[i];
+      }
+    }
+
+    // 2. Find an idle voice
+    for (let i = 0; i < voicePool.length; i++) {
+      if (voicePool[i].activeId === null) {
+        return voicePool[i];
+      }
+    }
+
+    // 3. If no idle voice, steal the oldest active voice
+    for (let i = 0; i < voicePool.length; i++) {
+      if (voicePool[i].isReleasing) {
+        return voicePool[i];
+      }
+    }
+    return voicePool[0];
   }
 
   function getSwarNameForSemitones(semitones, scale) {
@@ -2705,14 +2738,6 @@
     await enterBrowserFullscreen();
     await ensureCtx();
     
-    // Voice Stealing: Limit maximum concurrent active voices to 10 to prevent browser audio context exhaustion
-    if (activeVoices.size >= 10) {
-      const oldestId = activeVoices.keys().next().value;
-      if (oldestId !== undefined) {
-        handleEnd(oldestId);
-      }
-    }
-
     // Resolve and lock the string index at touch start
     const rh = H / NUM_STRINGS;
     let stringIndex = Math.floor((H - y) / rh);
@@ -2736,16 +2761,19 @@
     }
 
     const freq = xyToFreq(x, y, true, stringIndex);
-    const voice = new SynthVoice(freq);
-    activeVoices.set(id, {
-      startX: x, startY: y,
-      x, y, voice, lastY: y, lastX: x,
-      wiggleY: 0, wiggleX: 0,
-      isFretless: false,
-      stringIndex: stringIndex, // Lock the touch permanently to this string row
-      lastMoveTime: Date.now(),
-      isTouch: isTouch
-    });
+    const voice = getVoice(id, freq);
+    if (voice) {
+      voice.trigger(id, freq);
+      activeVoices.set(id, {
+        startX: x, startY: y,
+        x, y, voice, lastY: y, lastX: x,
+        wiggleY: 0, wiggleX: 0,
+        isFretless: false,
+        stringIndex: stringIndex, // Lock the touch permanently to this string row
+        lastMoveTime: Date.now(),
+        isTouch: isTouch
+      });
+    }
   }
 
   function handleMove(id, x, y) {
