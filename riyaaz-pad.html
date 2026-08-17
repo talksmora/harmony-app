@@ -444,6 +444,11 @@
     box-shadow: 0 0 8px rgba(56,189,248,0.4);
   }
 
+  /* Console module helper to hide deselected views */
+  .console-module.module-hidden {
+    display: none !important;
+  }
+
   .preset-nav-btn {
     background: none;
     border: none;
@@ -1331,6 +1336,23 @@
           <button class="modal-raga-btn" data-raga="asavari">આસાવરી (કોમળ ગ, ધ, ની)</button>
           <button class="modal-raga-btn" data-raga="bhupali">ભૂપાલી / મોહનમ (૫ સૂર)</button>
           <button class="modal-raga-btn" data-raga="malkauns">માલકૌંસ / હિંડોલમ (૫ સૂર)</button>
+        <div class="preset-group-title" style="margin-top: 15px;">કંટ્રોલ પેનલ સેટિંગ્સ (Console Customizer)</div>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 8px; color: #f3e6d0; font-size: 0.82rem; padding: 6px; background: rgba(0,0,0,0.3); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); margin-top: 5px;">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chk-octave" checked style="width: 15px; height: 15px; accent-color: #38bdf8; cursor: pointer;"> Octave (સપ્તક કંટ્રોલ)
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chk-expression" checked style="width: 15px; height: 15px; accent-color: #38bdf8; cursor: pointer;"> Expression (XY પેડ)
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chk-sliders" checked style="width: 15px; height: 15px; accent-color: #38bdf8; cursor: pointer;"> Sliders (વ્હેમી, વાઇબ્રેટો, ફિલ્ટર)
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chk-switches" checked style="width: 15px; height: 15px; accent-color: #38bdf8; cursor: pointer;"> Switches (પ્લે મોડ અને ઇફેક્ટ્સ)
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chk-preset" checked style="width: 15px; height: 15px; accent-color: #38bdf8; cursor: pointer;"> Presets (વાજિંત્ર સ્ક્રીન અને વોલ્યુમ)
+          </label>
         </div>
       </div>
     </div>
@@ -3076,6 +3098,56 @@
       presetModal.classList.remove('active');
     };
   });
+
+  // Console Customizer Logic
+  const moduleKeys = {
+    octave: { chk: 'chk-octave', el: document.querySelector('.octave-module') },
+    expression: { chk: 'chk-expression', el: document.querySelector('.expression-module') },
+    sliders: { chk: 'chk-sliders', el: document.querySelector('.sliders-module') },
+    switches: { chk: 'chk-switches', el: document.querySelector('.switches-module') },
+    preset: { chk: 'chk-preset', el: document.querySelector('.volume-preset-module') }
+  };
+
+  function updateModuleVisibilities() {
+    const config = {};
+    for (const key in moduleKeys) {
+      const chk = document.getElementById(moduleKeys[key].chk);
+      if (!chk) continue;
+      const isChecked = chk.checked;
+      config[key] = isChecked;
+      if (moduleKeys[key].el) {
+        moduleKeys[key].el.classList.toggle('module-hidden', !isChecked);
+      }
+    }
+    localStorage.setItem('riyaaz_console_config', JSON.stringify(config));
+    setTimeout(() => {
+      resize();
+      drawInterface();
+    }, 60);
+  }
+
+  for (const key in moduleKeys) {
+    const chk = document.getElementById(moduleKeys[key].chk);
+    if (chk) {
+      chk.onchange = updateModuleVisibilities;
+    }
+  }
+
+  try {
+    const saved = localStorage.getItem('riyaaz_console_config');
+    if (saved) {
+      const config = JSON.parse(saved);
+      for (const key in moduleKeys) {
+        const chk = document.getElementById(moduleKeys[key].chk);
+        if (chk && config[key] !== undefined) {
+          chk.checked = config[key];
+          if (moduleKeys[key].el) {
+            moduleKeys[key].el.classList.toggle('module-hidden', !config[key]);
+          }
+        }
+      }
+    }
+  } catch(e) {}
 
   initPedals();
 
