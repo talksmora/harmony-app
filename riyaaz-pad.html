@@ -493,11 +493,72 @@
     border-color: #f4c542;
   }
 
-  /* Responsive layout overrides to completely prevent clipping on mobile devices */
-  @media (max-width: 600px) {
+  /* Intermediate desktop/tablet scaling to prevent controls cutoff on screens under 1150px */
+  @media (max-width: 1150px) {
     .controls-panel {
-      padding: 4px 6px;
       gap: 4px;
+      padding: 4px 8px;
+    }
+    .exit-btn {
+      padding: 4px 6px;
+      font-size: 0.7rem;
+    }
+    .raga-selector select {
+      padding: 4px 6px;
+      font-size: 0.7rem;
+    }
+    .octave-control {
+      padding: 2px 4px;
+      gap: 4px;
+    }
+    .preset-display-wrap {
+      gap: 3px;
+    }
+    .preset-display {
+      padding: 4px 8px;
+      min-width: 80px;
+    }
+    .preset-name {
+      font-size: 0.75rem;
+    }
+    .preset-category {
+      font-size: 0.5rem;
+    }
+    .diatonic-btn {
+      padding: 4px 8px;
+      font-size: 0.7rem;
+    }
+    .fx-toggle-btn {
+      padding: 4px 8px;
+      font-size: 0.7rem;
+    }
+    .xy-pad-container {
+      width: 130px !important;
+      height: 65px !important;
+    }
+    .right-sliders {
+      gap: 6px;
+    }
+    .knob-item {
+      width: 32px;
+    }
+    .knob {
+      width: 24px;
+      height: 24px;
+    }
+    .knob-item label {
+      font-size: 0.5rem;
+    }
+    .knob-value {
+      font-size: 0.5rem;
+    }
+  }
+
+  /* Responsive layout overrides to completely prevent clipping on mobile and small tablets */
+  @media (max-width: 880px) {
+    .controls-panel {
+      padding: 6px 8px;
+      gap: 6px;
       flex-wrap: wrap; 
       justify-content: center;
     }
