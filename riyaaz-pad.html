@@ -1319,17 +1319,12 @@
 
   async function ensureCtx() {
     if (audioCtx) {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (audioCtx.state === 'suspended' || audioCtx.state === 'interrupted') {
+        audioCtx.resume().catch(e => console.warn("Failed to resume AudioContext:", e));
+      }
       return;
     }
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Auto-resume safeguard: attempt recovery if OS suspends the context
-    audioCtx.onstatechange = () => {
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(e => console.warn("Failed to auto-resume AudioContext:", e));
-      }
-    };
 
     if (!workletModuleLoaded) {
       const code = `
@@ -2065,6 +2060,11 @@
   canvas.addEventListener('pointerup', (e) => handleEnd(e.pointerId));
   canvas.addEventListener('pointercancel', (e) => handleEnd(e.pointerId));
   canvas.addEventListener('pointerleave', (e) => handleEnd(e.pointerId));
+  canvas.addEventListener('lostpointercapture', (e) => handleEnd(e.pointerId));
+
+  // Global window safety fallback listeners to prevent stuck notes when touches are released off-canvas
+  window.addEventListener('pointerup', (e) => handleEnd(e.pointerId));
+  window.addEventListener('pointercancel', (e) => handleEnd(e.pointerId));
 
   scaleSelect.onchange = () => {
     if (audioCtx) buildSympatheticResonators();
