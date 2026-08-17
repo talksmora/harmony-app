@@ -2612,26 +2612,31 @@
         } else {
           ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
         }
-        ctx.font = 'bold 11px sans-serif';
+        const fontSize = Math.max(11, Math.min(24, Math.floor(rh * 0.35)));
+        ctx.font = `bold ${fontSize}px sans-serif`;
         ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         
         const cyCenter = y + rh / 2;
         // Draw main Gujarati swar text centered vertically
-        ctx.fillText(gujSwar, x + fretWidth / 2, cyCenter + 4);
+        ctx.fillText(gujSwar, x + fretWidth / 2, cyCenter);
 
         // Vectorise the Bhatkhande saptak dots to guarantee 100% cross-platform display without font square box bugs
         const octavesUp = (swarStr.match(/\^/g) || []).length;
         const octavesDown = (swarStr.match(/_+$/g) || [""])[0].length;
 
+        const dotOffsetUp = Math.max(9, Math.floor(fontSize * 0.72));
+        const dotOffsetDown = Math.max(13, Math.floor(fontSize * 0.76));
+
         if (octavesUp > 0) {
           ctx.beginPath();
-          ctx.arc(x + fretWidth / 2, cyCenter - 9, 1.5, 0, Math.PI * 2);
+          ctx.arc(x + fretWidth / 2, cyCenter - dotOffsetUp, 1.8, 0, Math.PI * 2);
           ctx.fillStyle = showAsActive ? ctx.fillStyle : 'rgba(255, 255, 255, 0.22)';
           ctx.fill();
         }
         if (octavesDown > 0) {
           ctx.beginPath();
-          ctx.arc(x + fretWidth / 2, cyCenter + 13, 1.5, 0, Math.PI * 2);
+          ctx.arc(x + fretWidth / 2, cyCenter + dotOffsetDown, 1.8, 0, Math.PI * 2);
           ctx.fillStyle = showAsActive ? ctx.fillStyle : 'rgba(255, 255, 255, 0.22)';
           ctx.fill();
         }
