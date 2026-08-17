@@ -293,7 +293,7 @@
     border: 2px solid #b8860b;
     border-radius: 12px;
     width: 90%;
-    max-width: 460px;
+    max-width: 480px;
     padding: 12px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.7);
   }
@@ -320,11 +320,12 @@
     cursor: pointer;
   }
   .modal-body {
-    max-height: 300px;
+    max-height: 420px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    padding-right: 4px;
   }
   .preset-group-title {
     color: #b8860b;
@@ -334,11 +335,13 @@
     letter-spacing: 0.8px;
     border-left: 2px solid #b8860b;
     padding-left: 6px;
+    margin-top: 8px;
+    margin-bottom: 4px;
   }
   .preset-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
+    gap: 5px;
   }
   .modal-preset-btn {
     background: #1a2232;
@@ -425,7 +428,7 @@
 
         <!-- Central Preset Display (Clickable) -->
         <div class="preset-display" id="presetDisplayBtn">
-          <div class="preset-name" id="selectedPresetName">Sitar Lead</div>
+          <div class="preset-name" id="selectedPresetName">Sitar</div>
           <div class="preset-category" id="selectedPresetCategory">Naada Indian</div>
         </div>
 
@@ -495,7 +498,7 @@
     </div>
   </div>
 
-  <!-- Preset Selection Modal -->
+  <!-- Preset Selection Modal with Complete GeoShred Suite -->
   <div class="modal-overlay" id="presetModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -511,17 +514,29 @@
           <button class="modal-preset-btn" data-preset="steel_guitar" data-cat="Core Guitar">Steel String</button>
         </div>
 
-        <div class="preset-group-title">GeoSWAM Family (Western)</div>
+        <div class="preset-group-title">GeoSWAM Strings (Western Bowed)</div>
         <div class="preset-grid">
           <button class="modal-preset-btn" data-preset="swam_violin" data-cat="GeoSWAM Strings">GeoViolin</button>
+          <button class="modal-preset-btn" data-preset="swam_viola" data-cat="GeoSWAM Strings">GeoViola</button>
           <button class="modal-preset-btn" data-preset="swam_cello" data-cat="GeoSWAM Strings">GeoCello</button>
+          <button class="modal-preset-btn" data-preset="swam_doublebass" data-cat="GeoSWAM Strings">GeoDoubleBass</button>
+        </div>
+
+        <div class="preset-group-title">GeoSWAM Winds & Brass</div>
+        <div class="preset-grid">
           <button class="modal-preset-btn" data-preset="swam_flute" data-cat="GeoSWAM Winds">GeoFlute</button>
           <button class="modal-preset-btn" data-preset="swam_clarinet" data-cat="GeoSWAM Winds">GeoClarinet</button>
           <button class="modal-preset-btn" data-preset="swam_oboe" data-cat="GeoSWAM Winds">GeoOboe</button>
+          <button class="modal-preset-btn" data-preset="swam_bassoon" data-cat="GeoSWAM Winds">GeoBassoon</button>
           <button class="modal-preset-btn" data-preset="swam_trumpet" data-cat="GeoSWAM Brass">GeoTrumpet</button>
+          <button class="modal-preset-btn" data-preset="swam_trombone" data-cat="GeoSWAM Brass">GeoTrombone</button>
+          <button class="modal-preset-btn" data-preset="swam_frenchhorn" data-cat="GeoSWAM Brass">French Horn</button>
+          <button class="modal-preset-btn" data-preset="swam_tuba" data-cat="GeoSWAM Brass">GeoTuba</button>
+          <button class="modal-preset-btn" data-preset="swam_tenorsax" data-cat="GeoSWAM Woodwinds">Tenor Sax</button>
+          <button class="modal-preset-btn" data-preset="swam_altosax" data-cat="GeoSWAM Woodwinds">Alto Sax</button>
         </div>
 
-        <div class="preset-group-title">Naada Family (Indian & Chinese)</div>
+        <div class="preset-group-title">Naada Family (Indian Classical)</div>
         <div class="preset-grid">
           <button class="modal-preset-btn active" data-preset="sitar" data-cat="Naada Indian">Sitar</button>
           <button class="modal-preset-btn" data-preset="sarod" data-cat="Naada Indian">Sarod</button>
@@ -529,9 +544,19 @@
           <button class="modal-preset-btn" data-preset="veena" data-cat="Naada Indian">Veena</button>
           <button class="modal-preset-btn" data-preset="bansuri" data-cat="Naada Indian">Bansuri Flute</button>
           <button class="modal-preset-btn" data-preset="shehnai" data-cat="Naada Indian">Shehnai</button>
+        </div>
+
+        <div class="preset-group-title">Naada Family (Chinese Classical)</div>
+        <div class="preset-grid">
           <button class="modal-preset-btn" data-preset="erhu" data-cat="Naada Chinese">Erhu</button>
           <button class="modal-preset-btn" data-preset="pipa" data-cat="Naada Chinese">Pipa</button>
           <button class="modal-preset-btn" data-preset="dizi" data-cat="Naada Chinese">Dizi Flute</button>
+          <button class="modal-preset-btn" data-preset="guzheng" data-cat="Naada Chinese">Guzheng</button>
+          <button class="modal-preset-btn" data-preset="guqin" data-cat="Naada Chinese">Guqin</button>
+          <button class="modal-preset-btn" data-preset="bawu" data-cat="Naada Chinese">Bawu Reed</button>
+          <button class="modal-preset-btn" data-preset="hulusi" data-cat="Naada Chinese">Hulusi</button>
+          <button class="modal-preset-btn" data-preset="sheng" data-cat="Naada Chinese">Sheng Organ</button>
+          <button class="modal-preset-btn" data-preset="suona" data-cat="Naada Chinese">Suona Horn</button>
         </div>
 
       </div>
@@ -575,6 +600,30 @@
   };
 
   const INSTRUMENT_PRESETS = {
+    // Guitars
+    lead_guitar: { damping: 0.12, feedback: 0.994, filterType: 'lowpass', filterMult: 5.5, filterMaxFreq: 7000, filterQ: 2.0, attack: 0.003, peakGain: 1.0, release: 1.4, continuous: false },
+    nylon_guitar: { damping: 0.16, feedback: 0.982, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 4500, filterQ: 1.5, attack: 0.005, peakGain: 0.95, release: 0.8, continuous: false },
+    steel_guitar: { damping: 0.11, feedback: 0.988, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 5000, filterQ: 2.0, attack: 0.004, peakGain: 0.98, release: 0.95, continuous: false },
+    
+    // GeoSWAM Strings (Bowed)
+    swam_violin: { damping: 0.28, feedback: 0.992, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 6000, filterQ: 1.5, attack: 0.12, peakGain: 0.84, release: 0.35, continuous: true },
+    swam_viola: { damping: 0.30, feedback: 0.993, filterType: 'lowpass', filterMult: 4.2, filterMaxFreq: 5000, filterQ: 1.4, attack: 0.14, peakGain: 0.86, release: 0.38, continuous: true },
+    swam_cello: { damping: 0.32, feedback: 0.994, filterType: 'lowpass', filterMult: 3.5, filterMaxFreq: 3000, filterQ: 1.2, attack: 0.15, peakGain: 0.88, release: 0.4, continuous: true },
+    swam_doublebass: { damping: 0.36, feedback: 0.995, filterType: 'lowpass', filterMult: 2.2, filterMaxFreq: 1800, filterQ: 1.0, attack: 0.20, peakGain: 0.90, release: 0.45, continuous: true },
+    
+    // GeoSWAM Woodwinds & Brass (Wind/Flute)
+    swam_flute: { damping: 0.45, feedback: 0.965, filterType: 'lowpass', filterMult: 1.6, filterMaxFreq: 3800, filterQ: 0.8, attack: 0.08, peakGain: 0.90, release: 0.2, continuous: true },
+    swam_clarinet: { damping: 0.35, feedback: 0.975, filterType: 'lowpass', filterMult: 2.0, filterMaxFreq: 4200, filterQ: 1.2, attack: 0.07, peakGain: 0.90, release: 0.25, continuous: true },
+    swam_oboe: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 2.5, filterMaxFreq: 4800, filterQ: 2.0, attack: 0.06, peakGain: 0.88, release: 0.28, continuous: true },
+    swam_bassoon: { damping: 0.38, feedback: 0.982, filterType: 'lowpass', filterMult: 1.8, filterMaxFreq: 2500, filterQ: 1.5, attack: 0.10, peakGain: 0.86, release: 0.3, continuous: true },
+    swam_trumpet: { damping: 0.28, feedback: 0.985, filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.08, peakGain: 0.92, release: 0.3, continuous: true },
+    swam_trombone: { damping: 0.30, feedback: 0.986, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 4000, filterQ: 2.2, attack: 0.09, peakGain: 0.90, release: 0.32, continuous: true },
+    swam_frenchhorn: { damping: 0.34, feedback: 0.988, filterType: 'lowpass', filterMult: 3.2, filterMaxFreq: 3500, filterQ: 1.8, attack: 0.11, peakGain: 0.88, release: 0.35, continuous: true },
+    swam_tuba: { damping: 0.40, feedback: 0.99, filterType: 'lowpass', filterMult: 2.0, filterMaxFreq: 1500, filterQ: 1.5, attack: 0.15, peakGain: 0.85, release: 0.4, continuous: true },
+    swam_tenorsax: { damping: 0.26, feedback: 0.984, filterType: 'lowpass', filterMult: 4.8, filterMaxFreq: 5500, filterQ: 2.4, attack: 0.07, peakGain: 0.94, release: 0.26, continuous: true },
+    swam_altosax: { damping: 0.25, feedback: 0.983, filterType: 'lowpass', filterMult: 5.2, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.06, peakGain: 0.94, release: 0.24, continuous: true },
+    
+    // Naada Indian
     sitar: { damping: 0.14, feedback: 0.99, filterType: 'bandpass', filterMult: 3.5, filterMaxFreq: 6000, filterQ: 4.5, attack: 0.005, peakGain: 0.95, release: 1.2, continuous: false },
     sarod: { damping: 0.16, feedback: 0.985, filterType: 'lowpass', filterMult: 3.0, filterMaxFreq: 5000, filterQ: 2.5, attack: 0.006, peakGain: 0.98, release: 0.85, continuous: false },
     sarangi: { damping: 0.26, feedback: 0.992, filterType: 'bandpass', filterMult: 2.2, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.12, peakGain: 0.88, release: 0.45, continuous: true },
@@ -582,44 +631,27 @@
     bansuri: { damping: 0.42, feedback: 0.97, filterType: 'lowpass', filterMult: 1.6, filterMaxFreq: 4000, filterQ: 0.8, attack: 0.1, peakGain: 0.95, release: 0.25, continuous: true },
     shehnai: { damping: 0.3, feedback: 0.985, filterType: 'bandpass', filterMult: 5.5, filterMaxFreq: 6500, filterQ: 4.0, attack: 0.05, peakGain: 0.90, release: 0.3, continuous: true },
     
-    lead_guitar: { damping: 0.12, feedback: 0.994, filterType: 'lowpass', filterMult: 5.5, filterMaxFreq: 7000, filterQ: 2.0, attack: 0.003, peakGain: 1.0, release: 1.4, continuous: false },
-    nylon_guitar: { damping: 0.16, feedback: 0.982, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 4500, filterQ: 1.5, attack: 0.005, peakGain: 0.95, release: 0.8, continuous: false },
-    steel_guitar: { damping: 0.11, feedback: 0.988, filterType: 'lowpass', filterMult: 4.5, filterMaxFreq: 5000, filterQ: 2.0, attack: 0.004, peakGain: 0.98, release: 0.95, continuous: false },
-    
-    swam_violin: { damping: 0.28, feedback: 0.992, filterType: 'lowpass', filterMult: 5.0, filterMaxFreq: 6000, filterQ: 1.5, attack: 0.12, peakGain: 0.84, release: 0.35, continuous: true },
-    swam_cello: { damping: 0.32, feedback: 0.994, filterType: 'lowpass', filterMult: 4.0, filterMaxFreq: 3000, filterQ: 1.2, attack: 0.15, peakGain: 0.88, release: 0.4, continuous: true },
-    swam_flute: { damping: 0.45, feedback: 0.965, filterType: 'lowpass', filterMult: 1.6, filterMaxFreq: 3800, filterQ: 0.8, attack: 0.08, peakGain: 0.90, release: 0.2, continuous: true },
-    swam_clarinet: { damping: 0.35, feedback: 0.975, filterType: 'lowpass', filterMult: 2.0, filterMaxFreq: 4200, filterQ: 1.2, attack: 0.07, peakGain: 0.90, release: 0.25, continuous: true },
-    swam_oboe: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 2.5, filterMaxFreq: 4800, filterQ: 2.0, attack: 0.06, peakGain: 0.88, release: 0.28, continuous: true },
-    swam_trumpet: { damping: 0.28, feedback: 0.985, filterType: 'lowpass', filterMult: 6.0, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.08, peakGain: 0.92, release: 0.3, continuous: true },
-    
+    // Naada Chinese
     erhu: { damping: 0.24, feedback: 0.99, filterType: 'bandpass', filterMult: 2.8, filterMaxFreq: 5500, filterQ: 3.5, attack: 0.1, peakGain: 0.88, release: 0.4, continuous: true },
     pipa: { damping: 0.13, feedback: 0.98, filterType: 'lowpass', filterMult: 3.5, filterMaxFreq: 5000, filterQ: 3.0, attack: 0.004, peakGain: 0.95, release: 0.6, continuous: false },
-    dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 1.7, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.92, release: 0.22, continuous: true }
+    dizi: { damping: 0.4, feedback: 0.97, filterType: 'lowpass', filterMult: 1.7, filterMaxFreq: 4500, filterQ: 1.0, attack: 0.07, peakGain: 0.92, release: 0.22, continuous: true },
+    guzheng: { damping: 0.11, feedback: 0.99, filterType: 'lowpass', filterMult: 4.2, filterMaxFreq: 6000, filterQ: 2.5, attack: 0.004, peakGain: 0.96, release: 1.3, continuous: false },
+    guqin: { damping: 0.22, feedback: 0.978, filterType: 'lowpass', filterMult: 2.2, filterMaxFreq: 3000, filterQ: 1.5, attack: 0.012, peakGain: 0.90, release: 0.9, continuous: false },
+    bawu: { damping: 0.40, feedback: 0.972, filterType: 'lowpass', filterMult: 1.5, filterMaxFreq: 3800, filterQ: 0.9, attack: 0.09, peakGain: 0.92, release: 0.25, continuous: true },
+    hulusi: { damping: 0.38, feedback: 0.974, filterType: 'lowpass', filterMult: 1.8, filterMaxFreq: 4000, filterQ: 1.1, attack: 0.08, peakGain: 0.91, release: 0.26, continuous: true },
+    sheng: { damping: 0.32, feedback: 0.98, filterType: 'lowpass', filterMult: 2.5, filterMaxFreq: 4800, filterQ: 1.6, attack: 0.06, peakGain: 0.94, release: 0.3, continuous: true },
+    suona: { damping: 0.18, feedback: 0.985, filterType: 'bandpass', filterMult: 5.2, filterMaxFreq: 6500, filterQ: 4.2, attack: 0.04, peakGain: 0.92, release: 0.32, continuous: true }
   };
 
   const INSTRUMENT_TYPES = {
-    sitar: 1,
-    sarod: 4,
-    sarangi: 2,
-    veena: 4,
-    bansuri: 3,
-    shehnai: 3,
-    
-    lead_guitar: 0,
-    nylon_guitar: 0,
-    steel_guitar: 0,
-    
-    swam_violin: 2,
-    swam_cello: 2,
-    swam_flute: 3,
-    swam_clarinet: 3,
-    swam_oboe: 3,
-    swam_trumpet: 3,
-    
-    erhu: 2,
-    pipa: 4,
-    dizi: 3
+    // 0: Plucked/Guitar, 1: Buzzing/Sitar, 2: Bowed/Violin, 3: Blown/Flute, 4: Sharp Metallic/Sarod
+    lead_guitar: 0, nylon_guitar: 0, steel_guitar: 0,
+    swam_violin: 2, swam_viola: 2, swam_cello: 2, swam_doublebass: 2,
+    swam_flute: 3, swam_clarinet: 3, swam_oboe: 3, swam_bassoon: 3,
+    swam_trumpet: 3, swam_trombone: 3, swam_frenchhorn: 3, swam_tuba: 3,
+    swam_tenorsax: 3, swam_altosax: 3,
+    sitar: 1, sarod: 4, sarangi: 2, veena: 4, bansuri: 3, shehnai: 3,
+    erhu: 2, pipa: 4, dizi: 3, guzheng: 4, guqin: 0, bawu: 3, hulusi: 3, sheng: 3, suona: 1
   };
 
   const SWAR_COLORS = {
@@ -848,6 +880,7 @@
             this.phase = 0;
             this.instType = 0;
             this.lastExcitationSample = 0;
+            this.strength = 0.35; // Stored strength variable to resolve Undefined NaN bugs
             this.port.onmessage = (e) => {
               if (e.data.type === 'pluck') {
                 this.instType = e.data.instType !== undefined ? e.data.instType : 0;
@@ -858,6 +891,7 @@
             };
           }
           triggerPluck(strength, freq, continuous) {
+            this.strength = strength;
             const periodSamples = Math.floor(sampleRate / freq);
             this.excitationLength = Math.max(10, Math.min(periodSamples, 800));
             this.excitationBuffer = new Float32Array(this.excitationLength);
@@ -882,7 +916,6 @@
             for (let i = 0; i < len; i++) {
               let f = freqParam.length > 1 ? freqParam[i] : freqParam[0];
               
-              // Safe clamp frequency inside AudioWorklet to prevent NaN on infinite delay ratio
               if (isNaN(f) || !isFinite(f) || f < 20 || f > 20000) {
                 f = 220; 
               }
@@ -920,7 +953,7 @@
                   const noise = (Math.random() * 2 - 1);
                   const hpNoise = noise - this.lastExcitationSample;
                   this.lastExcitationSample = noise;
-                  inputEnergy = hpNoise * strength * 0.7;
+                  inputEnergy = hpNoise * this.strength * 0.7; // Corrected to this.strength
                 } else {
                   inputEnergy = this.excitationBuffer[this.excitationIdx];
                 }
@@ -1006,7 +1039,7 @@
     dryWetNodes.chorus.dry = chorusDry;
     dryWetNodes.chorus.wet = chorusWet;
 
-    // 3. Delay/Echo 
+    // 3. Delay/Echo
     echoDelayNode = audioCtx.createDelay();
     echoDelayNode.delayTime.value = 0.35;
     echoFeedbackNode = audioCtx.createGain();
@@ -1039,7 +1072,7 @@
     dryWetNodes.reverb.dry = reverbDry;
     dryWetNodes.reverb.wet = reverbWet;
 
-    // 5. Studio dynamics compressor to boost output volume safely and prevent clipping
+    // 5. Studio dynamics compressor
     const compressor = audioCtx.createDynamicsCompressor();
     compressor.threshold.setValueAtTime(-14, audioCtx.currentTime);
     compressor.knee.setValueAtTime(12, audioCtx.currentTime);
@@ -1125,7 +1158,7 @@
       }
 
       const now = audioCtx.currentTime;
-      const cfg = INSTRUMENT_PRESETS[activePreset];
+      const cfg = INSTRUMENT_PRESETS[activePreset] || INSTRUMENT_PRESETS['sitar'];
 
       this.master = audioCtx.createGain();
       this.master.gain.setValueAtTime(0, now);
@@ -1177,7 +1210,7 @@
 
     release() {
       const now = audioCtx.currentTime;
-      const cfg = INSTRUMENT_PRESETS[activePreset];
+      const cfg = INSTRUMENT_PRESETS[activePreset] || INSTRUMENT_PRESETS['sitar'];
       
       this.stringNode.port.postMessage({ type: 'release' });
 
