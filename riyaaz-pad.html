@@ -1962,7 +1962,7 @@
 
     if (!workletModuleLoaded) {
       const code = `
-        class WaveguideStringProcessor extends AudioWorkletProcessor {
+         class WaveguideStringProcessor extends AudioWorkletProcessor {
           static get parameterDescriptors() {
             return [
               { name: 'frequency', defaultValue: 440, min: 20, max: 20000 },
@@ -1985,6 +1985,14 @@
             this.instType = 0;
             this.lastExcitationSample = 0;
             this.strength = 0.35;
+
+            // Pre-allocate a 4096-element noise table to optimize CPU usage inside the process loop
+            this.noiseTable = new Float32Array(4096);
+            for (let i = 0; i < 4096; i++) {
+              this.noiseTable[i] = Math.random() * 2 - 1;
+            }
+            this.noiseIdx = 0;
+
             this.port.onmessage = (e) => {
               if (e.data.type === 'pluck') {
                 this.instType = e.data.instType !== undefined ? e.data.instType : 0;
@@ -2004,6 +2012,7 @@
             }
             this.excitationBuffer = new Float32Array(this.excitationLength);
             for (let i = 0; i < this.excitationLength; i++) {
+              // Excitation plucks only run once per tap, so Math.random is fine here
               this.excitationBuffer[i] = (Math.random() * 2 - 1) * this.strength * Math.pow(1 - i / this.excitationLength, 1.8);
             }
             this.writeIdx = 0;
@@ -2067,7 +2076,8 @@
               let inputEnergy = 0;
               if (this.excited && this.excitationBuffer && this.excitationIdx < this.excitationLength) {
                 if (this.instType === 4) {
-                  const noise = (Math.random() * 2 - 1);
+                  const noise = this.noiseTable[this.noiseIdx];
+                  this.noiseIdx = (this.noiseIdx + 1) & 4095;
                   const hpNoise = noise - this.lastExcitationSample;
                   this.lastExcitationSample = noise;
                   inputEnergy = hpNoise * this.strength * 0.7;
@@ -2082,15 +2092,18 @@
                 if (this.instType === 2) {
                   this.phase = (this.phase + (f / sr)) % 1;
                   const bowForce = (this.phase < 0.2) ? (this.phase / 0.2) : ((1 - this.phase) / 0.8 * -1);
-                  const scrape = (Math.random() * 2 - 1) * 0.12;
+                  const scrape = this.noiseTable[this.noiseIdx] * 0.12;
+                  this.noiseIdx = (this.noiseIdx + 1) & 4095;
                   inputEnergy = (bowForce + scrape) * 0.08;
                 } else if (this.instType === 3) {
                   this.phase = (this.phase + (f / sr)) % 1;
                   const sineJet = Math.sin(this.phase * Math.PI * 2);
-                  const breath = (Math.random() * 2 - 1) * 0.15;
+                  const breath = this.noiseTable[this.noiseIdx] * 0.15;
+                  this.noiseIdx = (this.noiseIdx + 1) & 4095;
                   inputEnergy = (sineJet + breath) * 0.06;
                 } else {
-                  const noise = (Math.random() * 2 - 1);
+                  const noise = this.noiseTable[this.noiseIdx];
+                  this.noiseIdx = (this.noiseIdx + 1) & 4095;
                   this.noiseFilterState = 0.85 * this.noiseFilterState + 0.15 * noise;
                   inputEnergy = this.noiseFilterState * 0.055;
                 }
@@ -2809,6 +2822,27 @@
       });
     }
   }, { passive: true });
+
+  // Clear all voices when tab/window loses focus, gets hidden, or page is navigated away to prevent stuck notes
+  window.addEventListener('blur', () => {
+    activeVoices.forEach((t, id) => {
+      handleEnd(id);
+    });
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      activeVoices.forEach((t, id) => {
+        handleEnd(id);
+      });
+    }
+  });
+
+  window.addEventListener('pagehide', () => {
+    activeVoices.forEach((t, id) => {
+      handleEnd(id);
+    });
+  });
 
   scaleSelect.onchange = () => {
     if (audioCtx) buildSympatheticResonators();
