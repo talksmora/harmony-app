@@ -2656,6 +2656,21 @@
     stringIndex = Math.max(0, Math.min(NUM_STRINGS - 1, stringIndex));
     if (isNaN(stringIndex)) stringIndex = 0;
 
+    // Check if the tapped key is in the active Raga scale
+    const scaleKey = scaleSelect.value;
+    const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
+    const stringSemitones = ROW_SEMITONE_OFFSETS[stringIndex];
+    const fretWidth = W / NUM_FRETS;
+    if (fretWidth > 0) {
+      const rawFret = x / fretWidth;
+      const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.round(rawFret)));
+      const totalSemitones = stringSemitones + nearestFret;
+      const relSemitones = ((totalSemitones % 12) + 12) % 12;
+      if (isDiatonicMode && !scale.intervals.includes(relSemitones)) {
+        return; // Ignore/Silence out-of-scale touches
+      }
+    }
+
     const freq = xyToFreq(x, y, true, stringIndex);
     const voice = new SynthVoice(freq);
     activeVoices.set(id, {
