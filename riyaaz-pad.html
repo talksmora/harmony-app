@@ -1211,7 +1211,7 @@
             <div class="preset-digital-screen">
               <button class="preset-nav-btn" id="prevRaga">◀</button>
               <div class="preset-display" id="ragaDisplayBtn" title="રાગ પસંદ કરો">
-                <div class="preset-index" id="ragaIndexDisp">1/8</div>
+                <div class="preset-index" id="ragaIndexDisp">1/40</div>
                 <div class="preset-name" id="selectedRagaName" style="color: #00d2ff;">ભૈરવી</div>
                 <div class="preset-category" id="selectedRagaCategory">કોમળ રે, ગ, ધ, ની</div>
               </div>
@@ -1268,23 +1268,103 @@
 
   <!-- Raga/Scale Selection Modal (GeoShred style popup) -->
   <div class="modal-overlay" id="ragaModal">
-    <div class="modal-content" style="max-width: 400px !important;">
+    <div class="modal-content" style="max-width: 460px !important;">
       <div class="modal-header">
         <h3>રાગ / સ્કેલ પસંદ કરો</h3>
         <button class="close-modal" id="closeRagaModalBtn">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 15px 12px;">
-        <div class="preset-group-title">भारतीय रागों और पश्चिमी स्केल्स</div>
-        <div class="preset-grid" style="grid-template-columns: 1fr !important; gap: 6px !important;">
-          <button class="modal-raga-btn active" data-raga="bhairavi">ભૈરવી (કોમળ રે, ગ, ધ, ની)</button>
-          <button class="modal-raga-btn" data-raga="bilawal">બિલાવલ (મેજર - શુદ્ધ સૂર)</button>
-          <button class="modal-raga-btn" data-raga="yaman">યમન (તીવ્ર મધ્યમ)</button>
-          <button class="modal-raga-btn" data-raga="bhairav">ભૈરવ (કોમળ રે, ધ)</button>
-          <button class="modal-raga-btn" data-raga="kafi">કાફી (કોમળ ગ, ની)</button>
-          <button class="modal-raga-btn" data-raga="asavari">આસાવરી (કોમળ ગ, ધ, ની)</button>
-          <button class="modal-raga-btn" data-raga="bhupali">ભૂપાલી / મોહનમ (૫ સૂર)</button>
-          <button class="modal-raga-btn" data-raga="malkauns">માલકૌંસ / હિંડોલમ (૫ સૂર)</button>
+      <div class="modal-body" style="padding: 15px 12px; max-height: calc(85vh - 65px) !important; overflow-y: auto !important;">
+        
+        <div class="preset-group-title">૧. બિલાવલ થાટ (Bilawal Thaat)</div>
+        <div class="preset-grid" style="grid-template-columns: repeat(2, 1fr) !important; gap: 5px !important; margin-bottom: 12px;">
+          <button class="modal-raga-btn" data-raga="bilawal">બિલાવલ</button>
+          <button class="modal-raga-btn" data-raga="alhaiya_bilawal">અલહૈયા બિલાવલ</button>
+          <button class="modal-raga-btn" data-raga="shuddha_bilawal">શુદ્ધ બિલાવલ</button>
+          <button class="modal-raga-btn" data-raga="devgiri_bilawal">દેવગિરી બિલાવલ</button>
+          <button class="modal-raga-btn" data-raga="hansadhwani">હંસધ્વનિ</button>
+          <button class="modal-raga-btn" data-raga="durga">દુર્ગા</button>
+          <button class="modal-raga-btn" data-raga="deshkar">દેશકાર</button>
+          <button class="modal-raga-btn" data-raga="shankara">શંકારા</button>
+          <button class="modal-raga-btn" data-raga="bihag">બિહાગ</button>
+          <button class="modal-raga-btn" data-raga="pahadi">પહાડી</button>
         </div>
+
+        <div class="preset-group-title">૨. કલ્યાણ થાટ (Kalyan Thaat)</div>
+        <div class="preset-grid" style="grid-template-columns: repeat(2, 1fr) !important; gap: 5px !important; margin-bottom: 12px;">
+          <button class="modal-raga-btn" data-raga="yaman">યમન</button>
+          <button class="modal-raga-btn" data-raga="yaman_kalyan">યમન કલ્યાણ</button>
+          <button class="modal-raga-btn" data-raga="bhupali">ભૂપાલી</button>
+          <button class="modal-raga-btn" data-raga="shuddha_kalyan">શુદ્ધ કલ્યાણ</button>
+          <button class="modal-raga-btn" data-raga="maru_bihag">મારુ બિહાગ</button>
+          <button class="modal-raga-btn" data-raga="hindol">હિંદોલ</button>
+        </div>
+
+        <div class="preset-group-title">૩. ખમાજ થાટ (Khamaj Thaat)</div>
+        <div class="preset-grid" style="grid-template-columns: repeat(2, 1fr) !important; gap: 5px !important; margin-bottom: 12px;">
+          <button class="modal-raga-btn" data-raga="khamaj">ખમાજ</button>
+          <button class="modal-raga-btn" data-raga="desh">દેશ</button>
+          <button class="modal-raga-btn" data-raga="tilak_kamod">તિલક કામોદ</button>
+          <button class="modal-raga-btn" data-raga="jhinjhoti">ઝિંઝોટી</button>
+          <button class="modal-raga-btn" data-raga="tilang">તિલંગ</button>
+        </div>
+
+        <div class="preset-group-title">૪. કાફી થાટ (Kafi Thaat)</div>
+        <div class="preset-grid" style="grid-template-columns: repeat(2, 1fr) !important; gap: 5px !important; margin-bottom: 12px;">
+          <button class="modal-raga-btn" data-raga="kafi">કાફી</button>
+          <button class="modal-raga-btn" data-raga="bhimpalasi">ભીમપલાસી</button>
+          <button class="modal-raga-btn" data-raga="bageshree">બાગેશ્રી</button>
+          <button class="modal-raga-btn" data-raga="peelu">પીલૂ</button>
+          <button class="modal-raga-btn" data-raga="brindabani_sarang">બ્રિંદાવની સારંગ</button>
+        </div>
+
+        <div class="preset-group-title">૫. આસાવરી થાટ (Asavari Thaat)</div>
+        <div class="preset-grid" style="grid-template-columns: repeat(2, 1fr) !important; gap: 5px !important; margin-bottom: 12px;">
+          <button class="modal-raga-btn" data-raga="asavari">આસાવરી</button>
+          <button class="modal-raga-btn" data-raga="jaunpuri">જોનપુરી</button>
+          <button class="modal-raga-btn" data-raga="darbari_kanada">દરબારી કાનડા</button>
+          <button class="modal-raga-btn" data-raga="desi">દેશી</button>
+        </div>
+
+        <div class="preset-group-title">૬. ભૈરવ થાટ (Bhairav Thaat)</div>
+        <div class="preset-grid" style="grid-template-columns: repeat(2, 1fr) !important; gap: 5px !important; margin-bottom: 12px;">
+          <button class="modal-raga-btn" data-raga="bhairav">ભૈરવ</button>
+          <button class="modal-raga-btn" data-raga="ahir_bhairav">અહીર ભૈરવ</button>
+          <button class="modal-raga-btn" data-raga="kalingada">કાલિંગડા</button>
+          <button class="modal-raga-btn" data-raga="ramkali">રામકલી</button>
+          <button class="modal-raga-btn" data-raga="bairagi_bhairav">બૈરાગી ભૈરવ</button>
+        </div>
+
+        <div class="preset-group-title">૭. ભૈરવી થાટ (Bhairavi Thaat)</div>
+        <div class="preset-grid" style="grid-template-columns: repeat(2, 1fr) !important; gap: 5px !important; margin-bottom: 12px;">
+          <button class="modal-raga-btn active" data-raga="bhairavi">ભૈરવી</button>
+          <button class="modal-raga-btn" data-raga="malkauns">માલકૌંસ</button>
+          <button class="modal-raga-btn" data-raga="bilaskhani_todi">બિલાસખાની તોડી</button>
+          <button class="modal-raga-btn" data-raga="bhupal_todi">ભૂપાલ તોડી</button>
+        </div>
+
+        <div class="preset-group-title">૮. તોડી થાટ (Todi Thaat)</div>
+        <div class="preset-grid" style="grid-template-columns: repeat(2, 1fr) !important; gap: 5px !important; margin-bottom: 12px;">
+          <button class="modal-raga-btn" data-raga="miyan_ki_todi">મિયાં કી તોડી</button>
+          <button class="modal-raga-btn" data-raga="gujari_todi">ગુજરી તોડી</button>
+          <button class="modal-raga-btn" data-raga="multani">મુલ્તાની</button>
+        </div>
+
+        <div class="preset-group-title">૯. પૂર્વી થાટ (Purvi Thaat)</div>
+        <div class="preset-grid" style="grid-template-columns: repeat(2, 1fr) !important; gap: 5px !important; margin-bottom: 12px;">
+          <button class="modal-raga-btn" data-raga="purvi">પૂર્વી</button>
+          <button class="modal-raga-btn" data-raga="puriya_dhanashree">પુરીયા ધનાશ્રી</button>
+          <button class="modal-raga-btn" data-raga="basant">બસંત</button>
+          <button class="modal-raga-btn" data-raga="lalit">લલિત</button>
+        </div>
+
+        <div class="preset-group-title">૧૦. મારવા થાટ (Marwa Thaat)</div>
+        <div class="preset-grid" style="grid-template-columns: repeat(2, 1fr) !important; gap: 5px !important; margin-bottom: 12px;">
+          <button class="modal-raga-btn" data-raga="marwa">મારવા</button>
+          <button class="modal-raga-btn" data-raga="puriya">પુરીયા</button>
+          <button class="modal-raga-btn" data-raga="sohni">સોહની</button>
+          <button class="modal-raga-btn" data-raga="bibhas">બિભાસ</button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1385,14 +1465,66 @@
   </div>
 
   <select id="scaleSelect" style="display: none;">
-    <option value="bilawal">બિલાવલ (મેજર)</option>
-    <option value="yaman">યમન (કલ્યાણ)</option>
-    <option value="bhairav">ભૈરવ</option>
-    <option value="bhairavi" selected>ભૈરવી</option>
+    <!-- 1. Bilawal -->
+    <option value="bilawal">બિલાવલ</option>
+    <option value="alhaiya_bilawal">અલહૈયા બિલાવલ</option>
+    <option value="shuddha_bilawal">શુદ્ધ બિલાવલ</option>
+    <option value="devgiri_bilawal">દેવગિરી બિલાવલ</option>
+    <option value="hansadhwani">હંસધ્વનિ</option>
+    <option value="durga">દુર્ગા</option>
+    <option value="deshkar">દેશકાર</option>
+    <option value="shankara">શંકારા</option>
+    <option value="bihag">બિહાગ</option>
+    <option value="pahadi">પહાડી</option>
+    <!-- 2. Kalyan -->
+    <option value="yaman">યમન</option>
+    <option value="yaman_kalyan">યમન કલ્યાણ</option>
+    <option value="bhupali">ભૂપાલી</option>
+    <option value="shuddha_kalyan">શુદ્ધ કલ્યાણ</option>
+    <option value="maru_bihag">મારુ બિહાગ</option>
+    <option value="hindol">હિંદોલ</option>
+    <!-- 3. Khamaj -->
+    <option value="khamaj">ખમાજ</option>
+    <option value="desh">દેશ</option>
+    <option value="tilak_kamod">તિલક કામોદ</option>
+    <option value="jhinjhoti">ઝિંઝોટી</option>
+    <option value="tilang">તિલંગ</option>
+    <!-- 4. Kafi -->
     <option value="kafi">કાફી</option>
+    <option value="bhimpalasi">ભીમપલાસી</option>
+    <option value="bageshree">બાગેશ્રી</option>
+    <option value="peelu">પીલૂ</option>
+    <option value="brindabani_sarang">બ્રિંદાવની સારંગ</option>
+    <!-- 5. Asavari -->
     <option value="asavari">આસાવરી</option>
-    <option value="bhupali">ભૂપાલી / મોહનમ (૫ સૂર)</option>
-    <option value="malkauns">માલકૌંસ / હિંડોલમ (૫ સૂર)</option>
+    <option value="jaunpuri">જોનપુરી</option>
+    <option value="darbari_kanada">દરબારી કાનડા</option>
+    <option value="desi">દેશી</option>
+    <!-- 6. Bhairav -->
+    <option value="bhairav">ભૈરવ</option>
+    <option value="ahir_bhairav">અહીર ભૈરવ</option>
+    <option value="kalingada">કાલિંગડા</option>
+    <option value="ramkali">રામકલી</option>
+    <option value="bairagi_bhairav">બૈરાગી ભૈરવ</option>
+    <!-- 7. Bhairavi -->
+    <option value="bhairavi" selected>ભૈરવી</option>
+    <option value="malkauns">માલકૌંસ</option>
+    <option value="bilaskhani_todi">બિલાસખાની તોડી</option>
+    <option value="bhupal_todi">ભૂપાલ તોડી</option>
+    <!-- 8. Todi -->
+    <option value="miyan_ki_todi">મિયાં કી તોડી</option>
+    <option value="gujari_todi">ગુજરી તોડી</option>
+    <option value="multani">મુલ્તાની</option>
+    <!-- 9. Purvi -->
+    <option value="purvi">પૂર્વી</option>
+    <option value="puriya_dhanashree">પુરીયા ધનાશ્રી</option>
+    <option value="basant">બસંત</option>
+    <option value="lalit">લલિત</option>
+    <!-- 10. Marwa -->
+    <option value="marwa">મારવા</option>
+    <option value="puriya">પુરીયા</option>
+    <option value="sohni">સોહની</option>
+    <option value="bibhas">બિભાસ</option>
   </select>
 
   <!-- Help Modal Overlay -->
@@ -1481,38 +1613,75 @@
   }
 
   const SCALE_DATA = {
-    bilawal: {
-      swars: ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni', 'Sa^'],
-      intervals: [0, 2, 4, 5, 7, 9, 11, 12]
-    },
-    yaman: {
-      swars: ['Sa', 'Re', 'Ga', 'Ma#', 'Pa', 'Dha', 'Ni', 'Sa^'],
-      intervals: [0, 2, 4, 6, 7, 9, 11, 12]
-    },
-    bhairav: {
-      swars: ['Sa', 'Re_b', 'Ga', 'Ma', 'Pa', 'Dha_b', 'Ni', 'Sa^'],
-      intervals: [0, 1, 4, 5, 7, 8, 11, 12]
-    },
-    bhairavi: {
-      swars: ['Sa', 'Re_b', 'Ga_b', 'Ma', 'Pa', 'Dha_b', 'Ni_b', 'Sa^'],
-      intervals: [0, 1, 3, 5, 7, 8, 10, 12]
-    },
-    kafi: {
-      swars: ['Sa', 'Re', 'Ga_b', 'Ma', 'Pa', 'Dha', 'Ni_b', 'Sa^'],
-      intervals: [0, 2, 3, 5, 7, 9, 10, 12]
-    },
-    asavari: {
-      swars: ['Sa', 'Re', 'Ga_b', 'Ma', 'Pa', 'Dha_b', 'Ni_b', 'Sa^'],
-      intervals: [0, 2, 3, 5, 7, 8, 10, 12]
-    },
-    bhupali: {
-      swars: ['Sa', 'Re', 'Ga', 'Pa', 'Dha', 'Sa^'],
-      intervals: [0, 2, 4, 7, 9, 12]
-    },
-    malkauns: {
-      swars: ['Sa', 'Ga_b', 'Ma', 'Dha_b', 'Ni_b', 'Sa^'],
-      intervals: [0, 3, 5, 8, 10, 12]
-    }
+    // 1. Bilawal Thaat
+    bilawal: { swars: ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni', 'Sa^'], intervals: [0, 2, 4, 5, 7, 9, 11, 12] },
+    alhaiya_bilawal: { swars: ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni', 'Sa^'], intervals: [0, 2, 4, 5, 7, 9, 11, 12] },
+    shuddha_bilawal: { swars: ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni', 'Sa^'], intervals: [0, 2, 4, 5, 7, 9, 11, 12] },
+    devgiri_bilawal: { swars: ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni', 'Sa^'], intervals: [0, 2, 4, 5, 7, 9, 11, 12] },
+    hansadhwani: { swars: ['Sa', 'Re', 'Ga', 'Pa', 'Ni', 'Sa^'], intervals: [0, 2, 4, 7, 11, 12] },
+    durga: { swars: ['Sa', 'Re', 'Ma', 'Pa', 'Dha', 'Sa^'], intervals: [0, 2, 5, 7, 9, 12] },
+    deshkar: { swars: ['Sa', 'Re', 'Ga', 'Pa', 'Dha', 'Sa^'], intervals: [0, 2, 4, 7, 9, 12] },
+    shankara: { swars: ['Sa', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni', 'Sa^'], intervals: [0, 4, 5, 7, 9, 11, 12] },
+    bihag: { swars: ['Sa', 'Re', 'Ga', 'Ma', 'Ma#', 'Pa', 'Ni', 'Sa^'], intervals: [0, 2, 4, 5, 6, 7, 11, 12] },
+    pahadi: { swars: ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni', 'Sa^'], intervals: [0, 2, 4, 5, 7, 9, 11, 12] },
+
+    // 2. Kalyan Thaat
+    yaman: { swars: ['Sa', 'Re', 'Ga', 'Ma#', 'Pa', 'Dha', 'Ni', 'Sa^'], intervals: [0, 2, 4, 6, 7, 9, 11, 12] },
+    yaman_kalyan: { swars: ['Sa', 'Re', 'Ga', 'Ma', 'Ma#', 'Pa', 'Dha', 'Ni', 'Sa^'], intervals: [0, 2, 4, 5, 6, 7, 9, 11, 12] },
+    bhupali: { swars: ['Sa', 'Re', 'Ga', 'Pa', 'Dha', 'Sa^'], intervals: [0, 2, 4, 7, 9, 12] },
+    shuddha_kalyan: { swars: ['Sa', 'Re', 'Ga', 'Ma#', 'Pa', 'Dha', 'Ni', 'Sa^'], intervals: [0, 2, 4, 6, 7, 9, 11, 12] },
+    maru_bihag: { swars: ['Sa', 'Re', 'Ga', 'Ma', 'Ma#', 'Pa', 'Ni', 'Sa^'], intervals: [0, 2, 4, 5, 6, 7, 11, 12] },
+    hindol: { swars: ['Sa', 'Ga', 'Ma#', 'Dha', 'Ni', 'Sa^'], intervals: [0, 4, 6, 9, 11, 12] },
+
+    // 3. Khamaj Thaat
+    khamaj: { swars: ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni_b', 'Sa^'], intervals: [0, 2, 4, 5, 7, 9, 10, 12] },
+    desh: { swars: ['Sa', 'Re', 'Ma', 'Pa', 'Dha', 'Ni_b', 'Ni', 'Sa^'], intervals: [0, 2, 5, 7, 9, 10, 11, 12] },
+    tilak_kamod: { swars: ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni', 'Sa^'], intervals: [0, 2, 4, 5, 7, 9, 11, 12] },
+    jhinjhoti: { swars: ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni_b', 'Sa^'], intervals: [0, 2, 4, 5, 7, 9, 10, 12] },
+    tilang: { swars: ['Sa', 'Ga', 'Ma', 'Pa', 'Ni_b', 'Sa^'], intervals: [0, 4, 5, 7, 10, 12] },
+
+    // 4. Kafi Thaat
+    kafi: { swars: ['Sa', 'Re', 'Ga_b', 'Ma', 'Pa', 'Dha', 'Ni_b', 'Sa^'], intervals: [0, 2, 3, 5, 7, 9, 10, 12] },
+    bhimpalasi: { swars: ['Sa', 'Ga_b', 'Ma', 'Pa', 'Ni_b', 'Sa^'], intervals: [0, 3, 5, 7, 10, 12] },
+    bageshree: { swars: ['Sa', 'Re', 'Ga_b', 'Ma', 'Dha', 'Ni_b', 'Sa^'], intervals: [0, 2, 3, 5, 9, 10, 12] },
+    peelu: { swars: ['Sa', 'Re', 'Ga_b', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni_b', 'Sa^'], intervals: [0, 2, 3, 4, 5, 7, 9, 10, 12] },
+    brindabani_sarang: { swars: ['Sa', 'Re', 'Ma', 'Pa', 'Ni_b', 'Sa^'], intervals: [0, 2, 5, 7, 10, 12] },
+
+    // 5. Asavari Thaat
+    asavari: { swars: ['Sa', 'Re', 'Ga_b', 'Ma', 'Pa', 'Dha_b', 'Ni_b', 'Sa^'], intervals: [0, 2, 3, 5, 7, 8, 10, 12] },
+    jaunpuri: { swars: ['Sa', 'Re', 'Ga_b', 'Ma', 'Pa', 'Dha_b', 'Ni_b', 'Sa^'], intervals: [0, 2, 3, 5, 7, 8, 10, 12] },
+    darbari_kanada: { swars: ['Sa', 'Re', 'Ga_b', 'Ma', 'Pa', 'Dha_b', 'Ni_b', 'Sa^'], intervals: [0, 2, 3, 5, 7, 8, 10, 12] },
+    desi: { swars: ['Sa', 'Re', 'Ga_b', 'Ma', 'Pa', 'Dha_b', 'Ni_b', 'Sa^'], intervals: [0, 2, 3, 5, 7, 8, 10, 12] },
+
+    // 6. Bhairav Thaat
+    bhairav: { swars: ['Sa', 'Re_b', 'Ga', 'Ma', 'Pa', 'Dha_b', 'Ni', 'Sa^'], intervals: [0, 1, 4, 5, 7, 8, 11, 12] },
+    ahir_bhairav: { swars: ['Sa', 'Re_b', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni_b', 'Sa^'], intervals: [0, 1, 4, 5, 7, 9, 10, 12] },
+    kalingada: { swars: ['Sa', 'Re_b', 'Ga', 'Ma', 'Pa', 'Dha_b', 'Ni', 'Sa^'], intervals: [0, 1, 4, 5, 7, 8, 11, 12] },
+    ramkali: { swars: ['Sa', 'Re_b', 'Ga', 'Ma', 'Ma#', 'Pa', 'Dha_b', 'Ni', 'Sa^'], intervals: [0, 1, 4, 5, 6, 7, 8, 11, 12] },
+    bairagi_bhairav: { swars: ['Sa', 'Re_b', 'Ma', 'Pa', 'Ni_b', 'Sa^'], intervals: [0, 1, 5, 7, 10, 12] },
+
+    // 7. Bhairavi Thaat
+    bhairavi: { swars: ['Sa', 'Re_b', 'Ga_b', 'Ma', 'Pa', 'Dha_b', 'Ni_b', 'Sa^'], intervals: [0, 1, 3, 5, 7, 8, 10, 12] },
+    malkauns: { swars: ['Sa', 'Ga_b', 'Ma', 'Dha_b', 'Ni_b', 'Sa^'], intervals: [0, 3, 5, 8, 10, 12] },
+    bilaskhani_todi: { swars: ['Sa', 'Re_b', 'Ga_b', 'Ma', 'Pa', 'Dha_b', 'Ni_b', 'Sa^'], intervals: [0, 1, 3, 5, 7, 8, 10, 12] },
+    bhupal_todi: { swars: ['Sa', 'Re_b', 'Ga_b', 'Pa', 'Dha_b', 'Sa^'], intervals: [0, 1, 3, 7, 8, 12] },
+
+    // 8. Todi Thaat
+    miyan_ki_todi: { swars: ['Sa', 'Re_b', 'Ga_b', 'Ma#', 'Pa', 'Dha_b', 'Ni', 'Sa^'], intervals: [0, 1, 3, 6, 7, 8, 11, 12] },
+    gujari_todi: { swars: ['Sa', 'Re_b', 'Ga_b', 'Ma#', 'Dha_b', 'Ni', 'Sa^'], intervals: [0, 1, 3, 6, 8, 11, 12] },
+    multani: { swars: ['Sa', 'Re_b', 'Ga_b', 'Ma#', 'Pa', 'Dha_b', 'Ni', 'Sa^'], intervals: [0, 1, 3, 6, 7, 8, 11, 12] },
+
+    // 9. Purvi Thaat
+    purvi: { swars: ['Sa', 'Re_b', 'Ga', 'Ma#', 'Pa', 'Dha_b', 'Ni', 'Sa^'], intervals: [0, 1, 4, 6, 7, 8, 11, 12] },
+    puriya_dhanashree: { swars: ['Sa', 'Re_b', 'Ga', 'Ma#', 'Pa', 'Dha_b', 'Ni', 'Sa^'], intervals: [0, 1, 4, 6, 7, 8, 11, 12] },
+    basant: { swars: ['Sa', 'Re_b', 'Ga', 'Ma#', 'Pa', 'Dha_b', 'Ni', 'Sa^'], intervals: [0, 1, 4, 6, 7, 8, 11, 12] },
+    lalit: { swars: ['Sa', 'Re_b', 'Ga', 'Ma', 'Ma#', 'Dha', 'Ni', 'Sa^'], intervals: [0, 1, 4, 5, 6, 9, 11, 12] },
+
+    // 10. Marwa Thaat
+    marwa: { swars: ['Sa', 'Re_b', 'Ga', 'Ma#', 'Dha', 'Ni', 'Sa^'], intervals: [0, 1, 4, 6, 9, 11, 12] },
+    puriya: { swars: ['Sa', 'Re_b', 'Ga', 'Ma#', 'Dha', 'Ni', 'Sa^'], intervals: [0, 1, 4, 6, 9, 11, 12] },
+    sohni: { swars: ['Sa', 'Re_b', 'Ga', 'Ma#', 'Dha', 'Ni', 'Sa^'], intervals: [0, 1, 4, 6, 9, 11, 12] },
+    bibhas: { swars: ['Sa', 'Re_b', 'Ga', 'Pa', 'Dha_b', 'Sa^'], intervals: [0, 1, 4, 7, 8, 12] }
   };
 
   const INSTRUMENT_PRESETS = {
@@ -3035,14 +3204,75 @@
 
   // Ragas List for cycling
   const ragasList = [
-    { key: 'bhairavi', name: 'ભૈરવી', desc: 'કોમળ રે, ગ, ધ, ની' },
-    { key: 'bilawal', name: 'બિલાવલ', desc: 'મેજર - શુદ્ધ સૂર' },
+    // 1. Bilawal Thaat
+    { key: 'bilawal', name: 'બિલાવલ', desc: 'બધા શુદ્ધ સ્વર' },
+    { key: 'alhaiya_bilawal', name: 'અલહૈયા બિલાવલ', desc: 'શુદ્ધ સ્વર (તીવ્ર ની અવરોહ)' },
+    { key: 'shuddha_bilawal', name: 'શુદ્ધ બિલાવલ', desc: 'બધા સ્વર શુદ્ધ' },
+    { key: 'devgiri_bilawal', name: 'દેવગિરી બિલાવલ', desc: 'શુદ્ધ સ્વર (વક્ર ચલન)' },
+    { key: 'hansadhwani', name: 'હંસધ્વનિ', desc: '૫ સ્વર (રે, ગ, પ, નિ)' },
+    { key: 'durga', name: 'દુર્ગા', desc: '૫ સ્વર (રે, મ, પ, ધ)' },
+    { key: 'deshkar', name: 'દેશકાર', desc: '૫ સ્વર (રે, ગ, પ, ધ)' },
+    { key: 'shankara', name: 'શંકારા', desc: '૬ સ્વર (ગ, મ, પ, ધ, નિ)' },
+    { key: 'bihag', name: 'બિહાગ', desc: '૭ સ્વર (બંને મધ્યમ)' },
+    { key: 'pahadi', name: 'પહાડી', desc: '૭ સ્વર (મીઠી પહાડી ધૂન)' },
+
+    // 2. Kalyan Thaat
     { key: 'yaman', name: 'યમન', desc: 'તીવ્ર મધ્યમ' },
+    { key: 'yaman_kalyan', name: 'યમન કલ્યાણ', desc: 'બંને મધ્યમ' },
+    { key: 'bhupali', name: 'ભૂપાલી', desc: '૫ સ્વર (સા રે ગ પ ધ)' },
+    { key: 'shuddha_kalyan', name: 'શુદ્ધ કલ્યાણ', desc: 'તીવ્ર મધ્યમ (શાડવ-સંપૂર્ણ)' },
+    { key: 'maru_bihag', name: 'મારુ બિહાગ', desc: 'તીવ્ર મધ્યમ (બિહાગ સમાન)' },
+    { key: 'hindol', name: 'હિંદોલ', desc: '૫ સ્વર (સા ગ મં ધ નિ)' },
+
+    // 3. Khamaj Thaat
+    { key: 'khamaj', name: 'ખમાજ', desc: 'કોમળ નિષાદ' },
+    { key: 'desh', name: 'દેશ', desc: 'બંને નિષાદ' },
+    { key: 'tilak_kamod', name: 'તિલક કામોદ', desc: 'શુદ્ધ સ્વર (ખમાજ આશ્રિત)' },
+    { key: 'jhinjhoti', name: 'ઝિંઝોટી', desc: 'કોમળ નિષાદ (શાડવ-સંપૂર્ણ)' },
+    { key: 'tilang', name: 'તિલંગ', desc: '૫ સ્વર (કોમળ નિષાદ)' },
+
+    // 4. Kafi Thaat
+    { key: 'kafi', name: 'કાફી', desc: 'કોમળ ગ, નિ' },
+    { key: 'bhimpalasi', name: 'ભીમપલાસી', desc: 'કોમળ ગ, નિ (ઔડવ-સંપૂર્ણ)' },
+    { key: 'bageshree', name: 'બાગેશ્રી', desc: 'કોમળ ગ, નિ (skip રે, પ)' },
+    { key: 'peelu', name: 'પીલૂ', desc: 'કોમળ ગ, નિ (મિશ્ર સ્વર)' },
+    { key: 'brindabani_sarang', name: 'બ્રિંદાવની સારંગ', desc: '૫ સ્વર (બંને નિષાદ)' },
+
+    // 5. Asavari Thaat
+    { key: 'asavari', name: 'આસાવરી', desc: 'કોમળ ગ, ધ, નિ' },
+    { key: 'jaunpuri', name: 'જોનપુરી', desc: 'કોમળ ગ, ધ, નિ (skip ગા)' },
+    { key: 'darbari_kanada', name: 'દરબારી કાનડા', desc: 'કોમળ ગ, ધ, નિ (ગંભીર)' },
+    { key: 'desi', name: 'દેશી', desc: 'કોમળ ગ, ધ, નિ (વક્ર ચલન)' },
+
+    // 6. Bhairav Thaat
     { key: 'bhairav', name: 'ભૈરવ', desc: 'કોમળ રે, ધ' },
-    { key: 'kafi', name: 'કાફી', desc: 'કોમળ ગ, ની' },
-    { key: 'asavari', name: 'આસાવરી', desc: 'કોમળ ગ, ધ, ની' },
-    { key: 'bhupali', name: 'ભૂપાલી', desc: '૫ સૂર (સા રે ગ પ ધ)' },
-    { key: 'malkauns', name: 'માલકૌંસ', desc: '૫ સૂર (સા ગ મ ધ ની)' }
+    { key: 'ahir_bhairav', name: 'અહીર ભૈરવ', desc: 'કોમળ રે અને નિષાદ' },
+    { key: 'kalingada', name: 'કાલિંગડા', desc: 'કોમળ રે, ધ (ચંચળ પ્રકૃતિ)' },
+    { key: 'ramkali', name: 'રામકલી', desc: 'કોમળ રે, ધ (બંને મધ્યમ)' },
+    { key: 'bairagi_bhairav', name: 'બૈરાગી ભૈરવ', desc: '૫ સ્વર (કોમળ રે, નિ)' },
+
+    // 7. Bhairavi Thaat
+    { key: 'bhairavi', name: 'ભૈરવી', desc: 'કોમળ રે, ગ, ધ, નિ' },
+    { key: 'malkauns', name: 'માલકૌંસ', desc: '૫ સ્વર (કોમળ ગ, ધ, નિ)' },
+    { key: 'bilaskhani_todi', name: 'બિલાસખાની તોડી', desc: 'કોમળ રે, ગ, ધ, નિ' },
+    { key: 'bhupal_todi', name: 'ભૂપાલ તોડી', desc: '૫ સ્વર (કોમળ રે, ગ, ધ)' },
+
+    // 8. Todi Thaat
+    { key: 'miyan_ki_todi', name: 'મિયાં કી તોડી', desc: 'કોમળ રે, ગ, ધ (તીવ્ર મ)' },
+    { key: 'gujari_todi', name: 'ગુજરી તોડી', desc: '૬ સ્વર (પંચમ વર્જ્ય)' },
+    { key: 'multani', name: 'મુલ્તાની', desc: 'કોમળ રે, ગ, ધ (તીવ્ર મ)' },
+
+    // 9. Purvi Thaat
+    { key: 'purvi', name: 'પૂર્વી', desc: 'કોમળ રે, ધ (તીવ્ર મ)' },
+    { key: 'puriya_dhanashree', name: 'પુરીયા ધનાશ્રી', desc: 'કોમળ રે, ધ (તીવ્ર મ)' },
+    { key: 'basant', name: 'બસંત', desc: 'કોમળ રે, ધ (તીવ્ર મ)' },
+    { key: 'lalit', name: 'લલિત', desc: '૭ સ્વર (બંને મધ્યમ, no પ)' },
+
+    // 10. Marwa Thaat
+    { key: 'marwa', name: 'મારવા', desc: 'કોમળ રે, તીવ્ર મ (no પ)' },
+    { key: 'puriya', name: 'પુરીયા', desc: '૬ સ્વર (કોમળ રે, તીવ્ર મ)' },
+    { key: 'sohni', name: 'સોહની', desc: '૬ સ્વર (તાર સપ્તક પ્રધાન)' },
+    { key: 'bibhas', name: 'બિભાસ', desc: '૫ સ્વર (કોમળ રે, ધ)' }
   ];
   let currentRagaIdx = 0; // bhairavi by default
 
@@ -3068,7 +3298,7 @@
     // Update digital screen
     if (selectedRagaName) selectedRagaName.textContent = raga.name;
     if (selectedRagaCategory) selectedRagaCategory.textContent = raga.desc;
-    if (ragaIndexDisp) ragaIndexDisp.textContent = `${idx + 1}/8`;
+    if (ragaIndexDisp) ragaIndexDisp.textContent = `${idx + 1}/40`;
 
     // Update active class in modal list
     document.querySelectorAll('.modal-raga-btn').forEach((btn) => {
