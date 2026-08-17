@@ -1832,6 +1832,7 @@
   let echoDelayNode = null;
   let echoFeedbackNode = null;
   let reverbNode = null;
+  let compressorNode = null;
   let resonanceFilters = [];
 
   const dryWetNodes = {
@@ -2245,8 +2246,9 @@
     compressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
     compressor.release.setValueAtTime(0.07, audioCtx.currentTime);
 
-    reverbOut.connect(compressor);
-    compressor.connect(audioCtx.destination);
+    compressorNode = compressor;
+    reverbOut.connect(compressorNode);
+    compressorNode.connect(audioCtx.destination);
 
     updatePedalBypass('overdrive');
     updatePedalBypass('chorus');
@@ -2284,8 +2286,10 @@
   function buildSympatheticResonators() {
     resonanceFilters.forEach(res => {
       try { res.filter.disconnect(); } catch(e) {}
+      try { res.gain.disconnect(); } catch(e) {}
     });
     resonanceFilters = [];
+    if (!audioCtx) return;
     const scaleKey = scaleSelect.value;
     const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
 
@@ -2303,7 +2307,13 @@
         const gain = audioCtx.createGain();
         gain.gain.value = 0.08; 
 
-        filter.connect(gain).connect(audioCtx.destination);
+        // Route: masterGain -> filter -> gain -> compressorNode
+        if (masterGain && compressorNode) {
+          masterGain.connect(filter);
+          filter.connect(gain).connect(compressorNode);
+        } else {
+          filter.connect(gain).connect(audioCtx.destination);
+        }
         resonanceFilters.push({ filter, gain });
       });
     });
@@ -2311,9 +2321,6 @@
 
   function outputChain(node) {
     node.connect(masterGain);
-    resonanceFilters.forEach(res => {
-      node.connect(res.filter);
-    });
   }
 
   class SynthVoice {
