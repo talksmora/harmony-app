@@ -194,6 +194,31 @@
     border-color: #f4c542;
   }
 
+  /* Diatonic/Chromatic scale-locking toggle button */
+  .diatonic-btn {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #fdd835;
+    border: 1.5px solid #1e293b;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 6px 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    transition: all 0.2s ease;
+  }
+  .diatonic-btn:hover {
+    border-color: #f4c542;
+    box-shadow: 0 0 8px rgba(244,197,66,0.3);
+  }
+  .diatonic-btn.active {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border-color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56,189,248,0.4);
+    text-shadow: 0 0 3px rgba(255,255,255,0.6);
+  }
+
   /* Premium Virtual Rotary Knobs matching GeoShred console dial */
   .right-sliders {
     display: flex;
@@ -530,7 +555,7 @@
   <div id="pageBody" style="display:none;">
     <div class="pad-container">
       
-      <!-- Top Bar Console -->
+      <!-- Top Bar Console (Authentic GeoShred UI look) -->
       <div class="controls-panel">
         <div class="left-controls">
           <!-- Back/Exit Button to return to dashboard -->
@@ -561,6 +586,9 @@
           <div class="preset-name" id="selectedPresetName">Sitar</div>
           <div class="preset-category" id="selectedPresetCategory">Naada Indian</div>
         </div>
+
+        <!-- Diatonic Button Mode (Authentic GeoShred Scale Lock Toggle) -->
+        <button class="diatonic-btn active" id="diatonicToggleBtn" title="Toggle Scale-Restricted Diatonic Mode">Diatonic</button>
 
         <!-- FX Toggle Button to open/close vintage pedalboard -->
         <button class="fx-toggle-btn" id="fxToggleBtn" title="Toggle FX Pedals">⚙️ FX</button>
@@ -1470,6 +1498,8 @@
     return baseSwar;
   }
 
+  let isDiatonicMode = true; // State of scale locking (Diatonic vs. Chromatic/Fretless)
+
   function xyToFreq(x, y, isSnap) {
     if (!W || !H) return 220;
     const rh = H / NUM_STRINGS;
@@ -1485,10 +1515,11 @@
     const rawFret = x / fretWidth;
 
     let freq = 220;
-    if (isSnap) {
-      const scaleKey = scaleSelect.value;
-      const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
-      
+    const scaleKey = scaleSelect.value;
+    const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
+
+    if (isDiatonicMode) {
+      // Diatonic Mode: Constrain playing grid strictly to notes belonging to selected scale/raga
       const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.round(rawFret)));
       const currentSemitones = stringSemitones + nearestFret;
       
@@ -1508,8 +1539,15 @@
       const snappedSemitones = octave * 12 + closestInterval;
       freq = BASE_SA * Math.pow(2, currentOctaveShift) * Math.pow(2, snappedSemitones / 12);
     } else {
-      const continuousSemitones = stringSemitones + rawFret;
-      freq = BASE_SA * Math.pow(2, currentOctaveShift) * Math.pow(2, continuousSemitones / 12);
+      // Chromatic/Fretless Mode: Pure continuous scale with no locked frequencies (snaps only on initial tap if chosen)
+      if (isSnap) {
+        const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.round(rawFret)));
+        const snappedSemitones = stringSemitones + nearestFret;
+        freq = BASE_SA * Math.pow(2, currentOctaveShift) * Math.pow(2, snappedSemitones / 12);
+      } else {
+        const continuousSemitones = stringSemitones + rawFret;
+        freq = BASE_SA * Math.pow(2, currentOctaveShift) * Math.pow(2, continuousSemitones / 12);
+      }
     }
 
     if (isNaN(freq) || !isFinite(freq) || freq < 20) {
@@ -1569,7 +1607,9 @@
         ctx.arc(cx, cy, 12, 0, Math.PI * 2);
         ctx.stroke();
 
-        if (inScale) {
+        const showLabel = isDiatonicMode ? inScale : true;
+
+        if (showLabel) {
           const swar = getSwarNameForSemitones(totalSemitones, scale);
           const gujSwar = getGujaratiSwarName(swar);
           const colors = getSwarColorInfo(swar);
@@ -1770,6 +1810,19 @@
       currentOctaveShift++;
       octValSpan.textContent = (currentOctaveShift > 0 ? "+" : "") + currentOctaveShift;
     }
+  };
+
+  // Diatonic mode toggle listener
+  const diatonicToggleBtn = document.getElementById('diatonicToggleBtn');
+  diatonicToggleBtn.onclick = () => {
+    ensureCtx();
+    isDiatonicMode = !isDiatonicMode;
+    if (isDiatonicMode) {
+      diatonicToggleBtn.classList.add('active');
+    } else {
+      diatonicToggleBtn.classList.remove('active');
+    }
+    drawInterface();
   };
 
   // FX Drawer Toggle button logic to hide/show pedalboard and maximize fretboard height
