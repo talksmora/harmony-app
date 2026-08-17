@@ -1681,35 +1681,38 @@
       const stringIdx = Math.floor((H - t.y) / rhLocal);
       const stringY = H - (stringIdx + 1) * rhLocal + rhLocal / 2;
 
-      // Draw elegant translucent orange string glow aura (without expensive and blurry shadowBlur)
-      ctx.strokeStyle = 'rgba(231, 76, 60, 0.52)';
+      const waveLength = 180;
+      const amplitude = 5 + Math.sin(Date.now() * 0.08) * 3;
+
+      // Helper function to build the wave path cleanly
+      const buildPath = () => {
+        ctx.beginPath();
+        for (let xOffset = -waveLength; xOffset <= waveLength; xOffset += 1.0) {
+          const drawX = t.x + xOffset;
+          if (drawX < 0 || drawX > W) continue;
+          
+          const env = Math.exp(-Math.pow(xOffset / (waveLength * 0.5), 2));
+          const sineVal = Math.sin((xOffset / 15) - (Date.now() * 0.05));
+          const drawY = stringY + sineVal * amplitude * env;
+          
+          if (xOffset === -waveLength) {
+            ctx.moveTo(drawX, drawY);
+          } else {
+            ctx.lineTo(drawX, drawY);
+          }
+        }
+      };
+
+      // 1. Draw outer glowing translucent aura path
+      buildPath();
+      ctx.strokeStyle = 'rgba(231, 76, 60, 0.45)';
       ctx.lineWidth = 4.0;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-
-      ctx.beginPath();
-      const waveLength = 180;
-      const amplitude = 5 + Math.sin(Date.now() * 0.08) * 3;
-      
-      // Step by 1.5 instead of 5 for a high-resolution, silk-smooth continuous wave
-      for (let xOffset = -waveLength; xOffset <= waveLength; xOffset += 1.5) {
-        const drawX = t.x + xOffset;
-        if (drawX < 0 || drawX > W) continue;
-        
-        // Gaussian envelope to fade wave amplitude away from finger position
-        const env = Math.exp(-Math.pow(xOffset / (waveLength * 0.5), 2));
-        const sineVal = Math.sin((xOffset / 15) - (Date.now() * 0.05));
-        const drawY = stringY + sineVal * amplitude * env;
-        
-        if (xOffset === -waveLength) {
-          ctx.moveTo(drawX, drawY);
-        } else {
-          ctx.lineTo(drawX, drawY);
-        }
-      }
       ctx.stroke();
       
-      // Draw inner bright sharp core line
+      // 2. Draw inner bright sharp core line path (rebuilt to prevent overlap aliasing)
+      buildPath();
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1.0;
       ctx.lineCap = 'round';
