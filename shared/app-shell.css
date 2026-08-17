@@ -99,7 +99,7 @@
 }
 .sidebar-overlay.open { display: block; }
 
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-height: 580px) {
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); }
   .main-area { margin-left: 0 !important; }
@@ -134,7 +134,7 @@
   cursor: pointer;
   color: var(--text);
 }
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-height: 580px) {
   .hamburger-btn { display: block; }
 }
 .topbar-title {
