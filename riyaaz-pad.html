@@ -1478,7 +1478,7 @@
           ctx.fillStyle = colors.text;
           ctx.font = 'bold 11px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(swar, x + fretWidth / 2, y + rh / 2 + 4);
+          ctx.fillText(swar, x + fretWidth / 2, y + 16);
         }
       }
 
@@ -1495,11 +1495,9 @@
       const stringIdx = Math.floor((H - t.y) / rhLocal);
       const stringY = H - (stringIdx + 1) * rhLocal + rhLocal / 2;
 
-      // Draw neon string aura
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = '#e74c3c';
-      ctx.strokeStyle = 'rgba(231, 76, 60, 0.85)';
-      ctx.lineWidth = 3.5;
+      // Draw elegant translucent orange string glow aura (without expensive and blurry shadowBlur)
+      ctx.strokeStyle = 'rgba(231, 76, 60, 0.48)';
+      ctx.lineWidth = 4.2;
 
       ctx.beginPath();
       const waveLength = 180;
@@ -1522,14 +1520,10 @@
       }
       ctx.stroke();
       
-      // Draw inner bright core line
-      ctx.shadowBlur = 4;
-      ctx.shadowColor = '#ffffff';
+      // Draw inner bright sharp core line
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.2;
       ctx.stroke();
-      
-      ctx.shadowBlur = 0; // Reset shadow properties
     });
   }
 
