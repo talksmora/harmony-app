@@ -57,7 +57,7 @@
     box-sizing: border-box;
     background: #080b10;
   }
-  /* Top Bar Console matching premium GeoShred dashboard */
+  /* Top Bar Console — Harmony Music premium touch-instrument dashboard */
   .controls-panel {
     background: linear-gradient(180deg, #242930 0%, #15181d 100%);
     border: 2px solid #3c424a;
@@ -102,8 +102,8 @@
     gap: 6px;
   }
   .cyan-nav-btn {
-    background: #0284c7;
-    border: 1px solid #38bdf8;
+    background: #b8860b;
+    border: 1px solid #f4c542;
     color: #ffffff;
     font-size: 0.72rem;
     width: 24px;
@@ -112,16 +112,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 5px rgba(2, 132, 199, 0.4);
+    box-shadow: 0 0 5px rgba(184, 134, 11, 0.4);
     cursor: pointer;
   }
   .cyan-nav-btn:hover {
-    background: #0369a1;
+    background: #8a5a0a;
   }
   .digital-num-display {
     background: #080a0f;
     border: 1px solid #334155;
-    color: #38bdf8;
+    color: #f4c542;
     font-family: monospace;
     font-weight: bold;
     font-size: 0.95rem;
@@ -130,7 +130,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    text-shadow: 0 0 4px rgba(56, 189, 248, 0.6);
+    text-shadow: 0 0 4px rgba(244, 197, 66, 0.6);
     border-radius: 4px;
   }
   .auto-toggle-btn {
@@ -147,9 +147,9 @@
     transition: all 0.15s ease;
   }
   .auto-toggle-btn.active {
-    background: #0284c7;
+    background: #b8860b;
     color: #ffffff;
-    border-color: #38bdf8;
+    border-color: #f4c542;
     box-shadow: 0 0 5px rgba(56, 189, 248, 0.5);
   }
 
@@ -290,8 +290,8 @@
     text-align: center;
   }
   .switch-btn.active, .mode-stack-btn.active {
-    background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
-    border-color: #38bdf8;
+    background: linear-gradient(180deg, #b8860b 0%, #8a5a0a 100%);
+    border-color: #f4c542;
     color: #ffffff;
     box-shadow: 0 0 5px rgba(56, 189, 248, 0.4);
     text-shadow: 0 0 2px rgba(255,255,255,0.6);
@@ -356,7 +356,7 @@
   }
   .preset-index {
     font-size: 0.52rem;
-    color: #38bdf8;
+    color: #f4c542;
     font-family: monospace;
     font-weight: bold;
   }
@@ -387,7 +387,7 @@
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
     border: 1px solid #475569;
     border-radius: 4px;
-    color: #38bdf8;
+    color: #f4c542;
     font-size: 0.85rem;
     font-weight: 800;
     display: flex;
@@ -401,7 +401,7 @@
     height: 26px !important;
   }
   .toolbar-btn:hover {
-    border-color: #38bdf8;
+    border-color: #f4c542;
     box-shadow: 0 0 5px rgba(56, 189, 248, 0.3);
   }
   .right-toolbar-module .exit-btn {
@@ -432,9 +432,9 @@
     box-shadow: 0 0 5px rgba(0,210,255,0.2);
   }
   .modal-raga-btn.active {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    background: linear-gradient(135deg, #b8860b 0%, #8a5a0a 100%);
     color: #ffffff;
-    border-color: #38bdf8;
+    border-color: #f4c542;
     box-shadow: 0 0 8px rgba(56,189,248,0.4);
   }
 
@@ -476,14 +476,14 @@
     box-shadow: 0 0 8px rgba(244,197,66,0.3);
   }
   .diatonic-btn.active {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    background: linear-gradient(135deg, #b8860b 0%, #8a5a0a 100%);
     color: #ffffff;
-    border-color: #38bdf8;
+    border-color: #f4c542;
     box-shadow: 0 0 10px rgba(56,189,248,0.4);
     text-shadow: 0 0 3px rgba(255,255,255,0.6);
   }
 
-  /* Premium Virtual Rotary Knobs matching GeoShred console dial */
+  /* Premium Virtual Rotary Knobs — original console dial design */
   .right-sliders {
     display: flex;
     align-items: center;
@@ -851,9 +851,9 @@
   @media (orientation: landscape) and (max-height: 500px) {
     .controls-panel {
       flex-wrap: nowrap !important;
-      padding: 1px 3px !important;
+      padding: 2px 3px 3px 3px !important;
       gap: 6px !important;
-      height: 52px !important;
+      height: 58px !important;
       overflow-x: auto !important;
       overflow-y: hidden !important;
       -webkit-overflow-scrolling: touch;
@@ -1109,10 +1109,10 @@
   <div id="pageBody" style="display:none;">
     <div class="pad-container">
       
-      <!-- Top Bar Console (Authentic GeoShred UI look) -->
+      <!-- Top Bar Console -->
       <div class="controls-panel">
         
-        <!-- Module 1: Octave Controls (GeoShred Style) -->
+        <!-- Module 1: Octave Controls -->
         <div class="console-module octave-module">
           <div class="module-title">Octave</div>
           <div class="octave-control-row">
@@ -1123,7 +1123,7 @@
           <button class="auto-toggle-btn" id="octAutoBtn">Auto</button>
         </div>
 
-        <!-- Module 2: Expression XY Pad (GeoShred style with labels) -->
+        <!-- Module 2: Expression XY Pad -->
         <div class="console-module expression-module">
           <div class="module-title">Expression</div>
           <div class="pad-wrapper-outer">
@@ -1267,7 +1267,7 @@
     </div>
   </div>
 
-  <!-- Raga/Scale Selection Modal (GeoShred style popup) -->
+  <!-- Raga/Scale Selection Modal -->
   <div class="modal-overlay" id="ragaModal">
     <div class="modal-content" style="max-width: 460px !important;">
       <div class="modal-header">
@@ -1370,7 +1370,7 @@
     </div>
   </div>
 
-  <!-- Control Customizer Modal (GeoShred style popup) -->
+  <!-- Control Customizer Modal -->
   <div class="modal-overlay" id="customizerModal">
     <div class="modal-content" style="max-width: 400px !important;">
       <div class="modal-header">
@@ -1381,19 +1381,19 @@
         <div class="preset-group-title">કંટ્રોલ પેનલ કસ્ટમાઇઝર</div>
         <div style="display: grid; grid-template-columns: 1fr; gap: 10px; color: #f3e6d0; font-size: 0.85rem; padding: 12px; background: rgba(0,0,0,0.35); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); margin-top: 5px;">
           <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
-            <input type="checkbox" id="chk-octave" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;"> Octave (સપ્તક કંટ્રોલ)
+            <input type="checkbox" id="chk-octave" checked style="width: 16px; height: 16px; accent-color: #f4c542; cursor: pointer;"> Octave (સપ્તક કંટ્રોલ)
           </label>
           <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
-            <input type="checkbox" id="chk-expression" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;"> Expression (XY પેડ)
+            <input type="checkbox" id="chk-expression" checked style="width: 16px; height: 16px; accent-color: #f4c542; cursor: pointer;"> Expression (XY પેડ)
           </label>
           <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
-            <input type="checkbox" id="chk-sliders" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;"> Sliders (વ્હેમી, વાઇબ્રેટો, ફિલ્ટર)
+            <input type="checkbox" id="chk-sliders" checked style="width: 16px; height: 16px; accent-color: #f4c542; cursor: pointer;"> Sliders (વ્હેમી, વાઇબ્રેટો, ફિલ્ટર)
           </label>
           <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
-            <input type="checkbox" id="chk-switches" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;"> Switches (પ્લે મોડ બટનો)
+            <input type="checkbox" id="chk-switches" checked style="width: 16px; height: 16px; accent-color: #f4c542; cursor: pointer;"> Switches (પ્લે મોડ બટનો)
           </label>
           <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
-            <input type="checkbox" id="chk-preset" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;"> Presets (વાજિંત્ર સ્ક્રીન અને વોલ્યુમ)
+            <input type="checkbox" id="chk-preset" checked style="width: 16px; height: 16px; accent-color: #f4c542; cursor: pointer;"> Presets (વાજિંત્ર સ્ક્રીન અને વોલ્યુમ)
           </label>
         </div>
 
@@ -1418,7 +1418,7 @@
     </div>
   </div>
 
-  <!-- Preset Selection Modal with Complete GeoShred Suite -->
+  <!-- Preset Selection Modal -->
   <div class="modal-overlay" id="presetModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1573,7 +1573,6 @@
   </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="shared/utils.js"></script>
 <script src="shared/supabase-client.js"></script>
 <script src="shared/app-shell.js"></script>
 <script>
@@ -1832,7 +1831,6 @@
   let echoDelayNode = null;
   let echoFeedbackNode = null;
   let reverbNode = null;
-  let compressorNode = null;
   let resonanceFilters = [];
 
   const dryWetNodes = {
@@ -1876,7 +1874,7 @@
   function drawXyPad(px, py, active) {
     xyCtx.clearRect(0, 0, xyW, xyH);
     
-    // Draw green concentric radar rings (matching GeoShred expression pad)
+    // Draw green concentric radar rings (expression-pad visual feedback)
     xyCtx.strokeStyle = 'rgba(46, 204, 113, 0.24)';
     xyCtx.lineWidth = 1;
     const cx = xyW / 2;
@@ -2246,9 +2244,8 @@
     compressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
     compressor.release.setValueAtTime(0.07, audioCtx.currentTime);
 
-    compressorNode = compressor;
-    reverbOut.connect(compressorNode);
-    compressorNode.connect(audioCtx.destination);
+    reverbOut.connect(compressor);
+    compressor.connect(audioCtx.destination);
 
     updatePedalBypass('overdrive');
     updatePedalBypass('chorus');
@@ -2286,10 +2283,8 @@
   function buildSympatheticResonators() {
     resonanceFilters.forEach(res => {
       try { res.filter.disconnect(); } catch(e) {}
-      try { res.gain.disconnect(); } catch(e) {}
     });
     resonanceFilters = [];
-    if (!audioCtx) return;
     const scaleKey = scaleSelect.value;
     const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
 
@@ -2307,13 +2302,7 @@
         const gain = audioCtx.createGain();
         gain.gain.value = 0.08; 
 
-        // Route: masterGain -> filter -> gain -> compressorNode
-        if (masterGain && compressorNode) {
-          masterGain.connect(filter);
-          filter.connect(gain).connect(compressorNode);
-        } else {
-          filter.connect(gain).connect(audioCtx.destination);
-        }
+        filter.connect(gain).connect(audioCtx.destination);
         resonanceFilters.push({ filter, gain });
       });
     });
@@ -2321,6 +2310,9 @@
 
   function outputChain(node) {
     node.connect(masterGain);
+    resonanceFilters.forEach(res => {
+      node.connect(res.filter);
+    });
   }
 
   class SynthVoice {
@@ -2654,7 +2646,7 @@
     }
 
     activeVoices.forEach((t) => {
-      // Draw clean circular neon touch glow overlay matching GeoShred touch point burst
+      // Draw clean circular neon touch glow overlay for touch feedback
       const grad = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, 30);
       grad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
       grad.addColorStop(0.2, 'rgba(0, 210, 255, 0.6)');
@@ -2667,8 +2659,11 @@
     });
   }
 
-  // Request browser fullscreen mode automatically on first pointer down interaction and lock screen to landscape
+  // Request browser fullscreen mode once (not on every touch) and lock screen to landscape
+  let fullscreenAttempted = false;
   async function enterBrowserFullscreen() {
+    if (fullscreenAttempted) return; // avoid retrying (and re-warning) on every single touch
+    fullscreenAttempted = true;
     try {
       const doc = document.documentElement;
       if (doc.requestFullscreen && !document.fullscreenElement) {
@@ -2676,7 +2671,7 @@
       } else if (doc.webkitRequestFullscreen && !document.webkitFullscreenElement) {
         await doc.webkitRequestFullscreen();
       }
-      
+
       // Lock orientation to landscape mode once in fullscreen (Android Chrome/iOS Safari 16+)
       if (screen.orientation && screen.orientation.lock) {
         await screen.orientation.lock('landscape').catch(err => {
@@ -2686,6 +2681,9 @@
         screen.lockOrientation('landscape');
       }
     } catch (e) {
+      // Common and harmless in preview/iframe environments (permissions policy blocks
+      // fullscreen there); on the real deployed site opened directly in a browser tab
+      // this generally succeeds. Only logging once now instead of on every touch.
       console.warn("Fullscreen/Orientation lock blocked or ignored by browser policy:", e);
     }
   }
@@ -2718,17 +2716,8 @@
       const nearestFret = Math.max(0, Math.min(NUM_FRETS - 1, Math.floor(rawFret)));
       const totalSemitones = stringSemitones + nearestFret;
       const relSemitones = ((totalSemitones % 12) + 12) % 12;
-      
-      console.log("Raga Scale Validation:", {
-        raga: scaleKey,
-        nearestFret,
-        relSemitones,
-        inScale: scale.intervals.includes(relSemitones),
-        isDiatonicMode
-      });
 
       if (isDiatonicMode && !scale.intervals.includes(relSemitones)) {
-        console.log("Touch blocked (out-of-scale)");
         return; // Ignore/Silence out-of-scale touches
       }
     }
@@ -2982,7 +2971,7 @@
     }
   };
 
-  // Preset Navigation cycle listeners (GeoShred style)
+  // Preset Navigation cycle listeners
   setTimeout(() => {
     const presetButtons = Array.from(document.querySelectorAll('.modal-preset-btn'));
     
