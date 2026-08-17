@@ -279,7 +279,8 @@
     background: #fdd835;
     position: absolute;
     top: 2px;
-    left: 11px;
+    left: 50%;
+    margin-left: -1px; /* Perfectly centered horizontally on any sized knob dial */
     transform-origin: bottom center;
     border-radius: 1px;
     box-shadow: 0 0 3px #fdd835;
@@ -686,6 +687,10 @@
     .knob {
       width: 18px !important;
       height: 18px !important;
+    }
+    .knob-pointer {
+      height: 5px !important;
+      top: 1px !important;
     }
     .knob-value {
       font-size: 0.45rem !important;
@@ -1257,7 +1262,7 @@
     drawXyPad(px, py, true);
 
     activeVoices.forEach(t => {
-      const baseFreq = xyToFreq(t.x, t.y, !t.isFretless);
+      const baseFreq = xyToFreq(t.x, t.y, !t.isFretless, t.stringIndex);
       const bentFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
       t.voice.glideTo(bentFreq, 0.02);
 
@@ -1287,7 +1292,7 @@
     drawXyPad(0, 0, false);
 
     activeVoices.forEach(t => {
-      const baseFreq = xyToFreq(t.x, t.y, !t.isFretless);
+      const baseFreq = xyToFreq(t.x, t.y, !t.isFretless, t.stringIndex);
       t.voice.glideTo(baseFreq, 0.12);
 
       const relativeY = t.y % (H / NUM_STRINGS);
@@ -1747,13 +1752,18 @@
 
   let isDiatonicMode = true; // State of scale locking (Diatonic vs. Chromatic/Fretless)
 
-  function xyToFreq(x, y, isSnap) {
+  function xyToFreq(x, y, isSnap, lockedStringIndex) {
     if (!W || !H) return 220;
     const rh = H / NUM_STRINGS;
     if (rh <= 0) return 220;
 
-    let stringIndex = Math.floor((H - y) / rh);
-    stringIndex = Math.max(0, Math.min(NUM_STRINGS - 1, stringIndex));
+    let stringIndex;
+    if (lockedStringIndex !== undefined && lockedStringIndex !== null) {
+      stringIndex = lockedStringIndex;
+    } else {
+      stringIndex = Math.floor((H - y) / rh);
+      stringIndex = Math.max(0, Math.min(NUM_STRINGS - 1, stringIndex));
+    }
     if (isNaN(stringIndex)) stringIndex = 0;
 
     const stringSemitones = ROW_SEMITONE_OFFSETS[stringIndex];
@@ -1956,13 +1966,21 @@
   async function handleStart(id, x, y) {
     await enterBrowserFullscreen();
     await ensureCtx();
-    const freq = xyToFreq(x, y, true);
+    
+    // Resolve and lock the string index at touch start
+    const rh = H / NUM_STRINGS;
+    let stringIndex = Math.floor((H - y) / rh);
+    stringIndex = Math.max(0, Math.min(NUM_STRINGS - 1, stringIndex));
+    if (isNaN(stringIndex)) stringIndex = 0;
+
+    const freq = xyToFreq(x, y, true, stringIndex);
     const voice = new SynthVoice(freq);
     activeVoices.set(id, {
       startX: x, startY: y,
       x, y, voice, lastY: y, lastX: x,
       wiggleY: 0, wiggleX: 0,
       isFretless: false,
+      stringIndex: stringIndex, // Lock the touch permanently to this string row
       lastMoveTime: Date.now()
     });
   }
@@ -1983,12 +2001,12 @@
 
     if (dx < 35) {
       // 1. Micro-wiggle vibrato mode: zero delay (glideTime = 0) to instantly match physical finger wiggles
-      const baseFreq = xyToFreq(x, y, false);
+      const baseFreq = xyToFreq(x, y, false, t.stringIndex);
       targetFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
       glideTime = 0.0; 
     } else {
       // 2. Normal slide mode
-      const baseFreq = xyToFreq(x, y, false);
+      const baseFreq = xyToFreq(x, y, false, t.stringIndex);
       targetFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
       glideTime = knobValues.slide;
     }
@@ -2300,7 +2318,7 @@
       const now = Date.now();
       activeVoices.forEach((t) => {
         if (t.isFretless && (now - t.lastMoveTime > 180)) {
-          const snapFreq = xyToFreq(t.x, t.y, true);
+          const snapFreq = xyToFreq(t.x, t.y, true, t.stringIndex);
           t.voice.glideTo(snapFreq * Math.pow(2, masterPitchBend / 12), 0.25); 
         }
       });
