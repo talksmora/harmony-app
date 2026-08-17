@@ -605,6 +605,93 @@
     }
   }
 
+  /* Mobile Landscape specific overrides to keep controls panel ultra-slim and maximize fretboard height */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .controls-panel {
+      flex-wrap: nowrap !important;
+      padding: 3px 6px !important;
+      gap: 3px !important;
+      height: auto !important;
+    }
+    .left-controls {
+      order: unset !important;
+      width: auto !important;
+      gap: 3px !important;
+    }
+    .exit-btn {
+      padding: 3px 5px !important;
+      font-size: 0.65rem !important;
+    }
+    .raga-selector select {
+      padding: 3px 4px !important;
+      font-size: 0.65rem !important;
+    }
+    .octave-control {
+      padding: 1px 3px !important;
+      gap: 2px !important;
+    }
+    .oct-btn {
+      font-size: 0.65rem !important;
+      padding: 1px 3px !important;
+    }
+    .oct-val {
+      font-size: 0.75rem !important;
+    }
+    .preset-display-wrap {
+      gap: 2px !important;
+    }
+    .preset-nav-btn {
+      font-size: 0.75rem !important;
+      padding: 2px 4px !important;
+    }
+    .preset-display {
+      order: unset !important;
+      padding: 3px 6px !important;
+      min-width: 70px !important;
+    }
+    .preset-name {
+      font-size: 0.7rem !important;
+    }
+    .preset-category {
+      font-size: 0.45rem !important;
+    }
+    .diatonic-btn {
+      padding: 3px 6px !important;
+      font-size: 0.65rem !important;
+    }
+    .fx-toggle-btn {
+      padding: 3px 6px !important;
+      font-size: 0.65rem !important;
+    }
+    .xy-pad-container {
+      order: unset !important;
+      width: 100px !important;
+      height: 50px !important;
+      border-width: 1.5px !important;
+    }
+    .right-sliders {
+      order: unset !important;
+      gap: 4px !important;
+      margin-top: 0 !important;
+      width: auto !important;
+      justify-content: flex-end !important;
+    }
+    .knob-item {
+      width: 28px !important;
+      gap: 0px !important;
+    }
+    .knob-item label {
+      font-size: 0.45rem !important;
+    }
+    .knob {
+      width: 18px !important;
+      height: 18px !important;
+    }
+    .knob-value {
+      font-size: 0.45rem !important;
+    }
+  }
+
   /* Mobile Landscape specific overrides to prevent instrument modal clipping */
   @media (max-height: 500px) {
     .modal-content {
