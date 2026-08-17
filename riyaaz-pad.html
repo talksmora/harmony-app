@@ -656,6 +656,7 @@
     const parent = canvas.parentElement;
     W = parent.clientWidth;
     H = parent.clientHeight;
+    if (W <= 0 || H <= 0) return;
     canvas.width = W * window.devicePixelRatio;
     canvas.height = H * window.devicePixelRatio;
     ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
@@ -703,12 +704,13 @@
   const xyCtx = xyCanvas.getContext('2d');
   let xyW = 0, xyH = 0;
   let xyActive = false;
-  let masterPitchBend = 0; // in semitones
-  let masterFilterOffset = 0; // in Hz
+  let masterPitchBend = 0; 
+  let masterFilterOffset = 0; 
 
   function resizeXyCanvas() {
     xyW = xyPad.clientWidth;
     xyH = xyPad.clientHeight;
+    if (xyW <= 0 || xyH <= 0) return;
     xyCanvas.width = xyW * window.devicePixelRatio;
     xyCanvas.height = xyH * window.devicePixelRatio;
     xyCtx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
@@ -878,11 +880,21 @@
             const sr = sampleRate;
             const len = channel.length;
             for (let i = 0; i < len; i++) {
-              const f = freqParam.length > 1 ? freqParam[i] : freqParam[0];
-              const damping = dampingParam.length > 1 ? dampingParam[i] : dampingParam[0];
-              const baseFeedback = feedbackParam.length > 1 ? feedbackParam[i] : feedbackParam[0];
+              let f = freqParam.length > 1 ? freqParam[i] : freqParam[0];
               
-              const feedback = this.continuous ? Math.max(0.9915, baseFeedback) : baseFeedback;
+              // Safe clamp frequency inside AudioWorklet to prevent NaN on infinite delay ratio
+              if (isNaN(f) || !isFinite(f) || f < 20 || f > 20000) {
+                f = 220; 
+              }
+
+              let damping = dampingParam.length > 1 ? dampingParam[i] : dampingParam[0];
+              if (isNaN(damping) || !isFinite(damping)) damping = 0.18;
+              damping = Math.max(0.0, Math.min(0.99, damping));
+
+              const baseFeedback = feedbackParam.length > 1 ? feedbackParam[i] : feedbackParam[0];
+              let feedback = this.continuous ? Math.max(0.9915, baseFeedback) : baseFeedback;
+              if (isNaN(feedback) || !isFinite(feedback)) feedback = 0.985;
+              feedback = Math.max(0.2, Math.min(0.9999, feedback));
 
               const delaySamples = sr / f;
               let readIdx = this.writeIdx - delaySamples;
@@ -994,7 +1006,7 @@
     dryWetNodes.chorus.dry = chorusDry;
     dryWetNodes.chorus.wet = chorusWet;
 
-    // 3. Delay/Echo (Parallel Send Mix Setup to retain 100% dry signal volume)
+    // 3. Delay/Echo 
     echoDelayNode = audioCtx.createDelay();
     echoDelayNode.delayTime.value = 0.35;
     echoFeedbackNode = audioCtx.createGain();
@@ -1008,7 +1020,7 @@
     dryWetNodes.delay.dry = delayDry;
     dryWetNodes.delay.wet = delayWet;
 
-    // 4. Reverb Convolver (Parallel Send Mix Setup to retain 100% dry signal volume)
+    // 4. Reverb Convolver
     reverbNode = audioCtx.createConvolver();
     const len = audioCtx.sampleRate * 2.2;
     const impulse = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
@@ -1054,15 +1066,14 @@
     if (pedalStates[effectKey]) {
       if (effectKey === 'delay') {
         dry.gain.setTargetAtTime(1.0, now, 0.015);
-        wet.gain.setTargetAtTime(0.48, now, 0.015); // Parallel mix
+        wet.gain.setTargetAtTime(0.48, now, 0.015); 
       } else if (effectKey === 'reverb') {
         dry.gain.setTargetAtTime(1.0, now, 0.015);
-        wet.gain.setTargetAtTime(0.42, now, 0.015); // Parallel mix
+        wet.gain.setTargetAtTime(0.42, now, 0.015); 
       } else if (effectKey === 'chorus') {
         dry.gain.setTargetAtTime(1.0, now, 0.015);
-        wet.gain.setTargetAtTime(0.70, now, 0.015); // Parallel mix
+        wet.gain.setTargetAtTime(0.70, now, 0.015); 
       } else {
-        // Overdrive is insert (100% wet)
         dry.gain.setTargetAtTime(0, now, 0.015);
         wet.gain.setTargetAtTime(1.0, now, 0.015);
       }
@@ -1109,6 +1120,10 @@
 
   class SynthVoice {
     constructor(freq) {
+      if (isNaN(freq) || !isFinite(freq) || freq < 20) {
+        freq = 220; 
+      }
+
       const now = audioCtx.currentTime;
       const cfg = INSTRUMENT_PRESETS[activePreset];
 
@@ -1155,6 +1170,7 @@
     }
 
     glideTo(freq, glideTime) {
+      if (isNaN(freq) || !isFinite(freq) || freq < 20) return;
       const now = audioCtx.currentTime;
       this.stringNode.parameters.get('frequency').setTargetAtTime(freq, now, glideTime);
     }
@@ -1206,14 +1222,20 @@
   }
 
   function xyToFreq(x, y, isSnap) {
+    if (!W || !H) return 220;
     const rh = H / NUM_STRINGS;
+    if (rh <= 0) return 220;
+
     let stringIndex = Math.floor((H - y) / rh);
     stringIndex = Math.max(0, Math.min(NUM_STRINGS - 1, stringIndex));
+    if (isNaN(stringIndex)) stringIndex = 0;
 
     const stringSemitones = ROW_SEMITONE_OFFSETS[stringIndex];
     const fretWidth = W / NUM_FRETS;
+    if (fretWidth <= 0) return 220;
     const rawFret = x / fretWidth;
 
+    let freq = 220;
     if (isSnap) {
       const scaleKey = scaleSelect.value;
       const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
@@ -1235,11 +1257,16 @@
       
       const octave = Math.floor(currentSemitones / 12);
       const snappedSemitones = octave * 12 + closestInterval;
-      return BASE_SA * Math.pow(2, snappedSemitones / 12);
+      freq = BASE_SA * Math.pow(2, snappedSemitones / 12);
+    } else {
+      const continuousSemitones = stringSemitones + rawFret;
+      freq = BASE_SA * Math.pow(2, continuousSemitones / 12);
     }
 
-    const continuousSemitones = stringSemitones + rawFret;
-    return BASE_SA * Math.pow(2, continuousSemitones / 12);
+    if (isNaN(freq) || !isFinite(freq) || freq < 20) {
+      return 220;
+    }
+    return freq;
   }
 
   function isSemitoneInScale(relSemitones, scale) {
@@ -1248,6 +1275,7 @@
 
   function drawInterface() {
     ctx.clearRect(0, 0, W, H);
+    if (W <= 0 || H <= 0) return;
     const rh = H / NUM_STRINGS;
     const scaleKey = scaleSelect.value;
     const scale = SCALE_DATA[scaleKey] || SCALE_DATA.bilawal;
