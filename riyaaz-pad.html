@@ -664,7 +664,7 @@
 <script>
 (function(){
   const lang = (() => { try { return localStorage.getItem('harmonyAppLang') || 'gu'; } catch(e) { return 'gu'; } })();
-  const pageTitle = lang === 'en' ? '🎹 Riyaaz Pad' : lang === 'hi' ? '🎹  रियाज़ पैड' : '🎹 રિયાઝ પેડ';
+  const pageTitle = lang === 'en' ? '🎹 Riyaaz Pad' : lang === 'hi' ? '🎹  रियाઝ પેડ' : '🎹 રિયાઝ પેડ';
 
   const SCALE_DATA = {
     bilawal: {
@@ -823,6 +823,7 @@
   };
 
   const activeVoices = new Map();
+  const releasingVoices = new Set(); // Global set to prevent premature Garbage Collection of releasing voices
 
   // Floating Expression XY Pad logic
   const xyPad = document.getElementById('xyPad');
@@ -851,7 +852,7 @@
     xyCtx.lineWidth = 1;
     xyCtx.beginPath();
     xyCtx.moveTo(xyW / 2, 0); xyCtx.lineTo(xyW / 2, xyH);
-    xyCtx.moveTo(0, xyH / 2); xyCtx.lineTo(xyW, xyH / 2);
+    xyCtx.moveTo(0, xyH / 2); xyCtx.lineTo(W, xyH / 2);
     xyCtx.stroke();
 
     const dx = (px + 1) / 2 * xyW;
@@ -950,6 +951,13 @@
     }
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
+    // Auto-resume safeguard: attempt recovery if OS suspends the context
+    audioCtx.onstatechange = () => {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(e => console.warn("Failed to auto-resume AudioContext:", e));
+      }
+    };
+
     if (!workletModuleLoaded) {
       const code = `
         class WaveguideStringProcessor extends AudioWorkletProcessor {
@@ -1313,15 +1321,25 @@
       this.master.gain.setValueAtTime(this.master.gain.value, now);
       this.master.gain.setTargetAtTime(0, now, cfg.release / 4);
 
+      // Keep strong reference to prevent Garbage Collection during release phase
+      releasingVoices.add(this);
+
       const nodeRef = this.stringNode;
       const lfoRef = this.vibratoLfo;
+      const masterRef = this.master;
+      const filterRef = this.filter;
+      const voiceRef = this;
 
       setTimeout(() => {
         try {
           nodeRef.disconnect();
-          lfoRef.stop(); lfoRef.disconnect();
+          filterRef.disconnect();
+          masterRef.disconnect();
+          lfoRef.stop(); 
+          lfoRef.disconnect();
         } catch(e) {}
-      }, (cfg.release + 0.5) * 1000);
+        releasingVoices.delete(voiceRef);
+      }, (cfg.release + 0.8) * 1000);
     }
   }
 
