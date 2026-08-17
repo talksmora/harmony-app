@@ -1491,26 +1491,45 @@
     }
 
     activeVoices.forEach((t) => {
-      const grad = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, 35);
-      grad.addColorStop(0, 'rgba(184, 134, 11, 0.85)');
-      grad.addColorStop(0.3, 'rgba(231, 76, 60, 0.35)');
-      grad.addColorStop(1, 'rgba(231, 76, 60, 0)');
-      
-      ctx.beginPath();
-      ctx.arc(t.x, t.y, 35, 0, Math.PI * 2);
-      ctx.fillStyle = grad;
-      ctx.fill();
-
       const rhLocal = H / NUM_STRINGS;
       const stringIdx = Math.floor((H - t.y) / rhLocal);
       const stringY = H - (stringIdx + 1) * rhLocal + rhLocal / 2;
 
-      ctx.strokeStyle = '#e74c3c';
-      ctx.lineWidth = 2.8;
+      // Draw neon string aura
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#e74c3c';
+      ctx.strokeStyle = 'rgba(231, 76, 60, 0.85)';
+      ctx.lineWidth = 3.5;
+
       ctx.beginPath();
-      ctx.moveTo(t.x - 45, stringY + Math.sin(Date.now() * 0.08) * 1.5);
-      ctx.lineTo(t.x + 45, stringY - Math.sin(Date.now() * 0.08) * 1.5);
+      const waveLength = 180;
+      const amplitude = 5 + Math.sin(Date.now() * 0.08) * 3;
+      
+      for (let xOffset = -waveLength; xOffset <= waveLength; xOffset += 5) {
+        const drawX = t.x + xOffset;
+        if (drawX < 0 || drawX > W) continue;
+        
+        // Gaussian envelope to fade wave amplitude away from finger position
+        const env = Math.exp(-Math.pow(xOffset / (waveLength * 0.5), 2));
+        const sineVal = Math.sin((xOffset / 15) - (Date.now() * 0.05));
+        const drawY = stringY + sineVal * amplitude * env;
+        
+        if (xOffset === -waveLength) {
+          ctx.moveTo(drawX, drawY);
+        } else {
+          ctx.lineTo(drawX, drawY);
+        }
+      }
       ctx.stroke();
+      
+      // Draw inner bright core line
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = '#ffffff';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      
+      ctx.shadowBlur = 0; // Reset shadow properties
     });
   }
 
@@ -1556,27 +1575,37 @@
     let targetFreq;
     let glideTime = knobValues.slide;
 
-    if (t.isFretless) {
+    if (dx < 35) {
+      // 1. Micro-wiggle vibrato mode: zero delay (glideTime = 0) to instantly match physical finger wiggles
       const baseFreq = xyToFreq(x, y, false);
       targetFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
-      const deltaX = Math.abs(x - t.lastX);
-      t.wiggleX = t.wiggleX * 0.8 + deltaX * 0.2;
-      
-      if (t.wiggleX > 4) {
-        glideTime = 0.005; 
-      }
+      glideTime = 0.0; 
     } else {
-      const baseFreq = xyToFreq(t.startX, t.startY, true);
+      // 2. Normal slide mode
+      const baseFreq = xyToFreq(x, y, false);
       targetFreq = baseFreq * Math.pow(2, masterPitchBend / 12);
+      glideTime = knobValues.slide;
     }
 
     t.voice.glideTo(targetFreq, glideTime);
 
-    const relativeY = y % (H / NUM_STRINGS);
-    const normY = relativeY / (H / NUM_STRINGS); 
-    const cutoff = 1000 + (1 - normY) * 3500 + masterFilterOffset;
-    t.voice.filter.frequency.setTargetAtTime(cutoff, audioCtx.currentTime, 0.05);
+    // 3. Y-Axis Expression: sliding finger vertically inside the string row changes the timbre
+    const rhLocal = H / NUM_STRINGS;
+    const relativeY = y % rhLocal;
+    const normY = relativeY / rhLocal; // 0.0 at top of row, 1.0 at bottom of row
 
+    // Modulation A: Filter Cutoff (sliding UP increases cutoff frequency for brighter harmonics)
+    const baseCutoff = 800 + (1 - normY) * 4500;
+    t.voice.filter.frequency.setTargetAtTime(baseCutoff + masterFilterOffset, audioCtx.currentTime, 0.04);
+
+    // Modulation B: Sustain & Damping (sliding UP reduces damping and increases feedback for longer sustain)
+    const cfg = INSTRUMENT_PRESETS[activePreset] || INSTRUMENT_PRESETS['sitar'];
+    const dynamicDamping = Math.max(0.01, cfg.damping * (0.4 + normY * 0.6));
+    const dynamicFeedback = Math.min(0.9995, cfg.feedback + (1 - normY) * 0.005);
+    t.voice.stringNode.parameters.get('damping').setTargetAtTime(dynamicDamping, audioCtx.currentTime, 0.04);
+    t.voice.stringNode.parameters.get('feedback').setTargetAtTime(dynamicFeedback, audioCtx.currentTime, 0.04);
+
+    // Track vertical finger speed for manual vibrato depth mapping
     const dy = Math.abs(y - t.lastY);
     t.wiggleY = t.wiggleY * 0.82 + dy * 0.18;
     const userMaxVib = knobValues.vib;
