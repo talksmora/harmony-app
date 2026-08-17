@@ -76,18 +76,20 @@
   }
   .exit-btn {
     background: linear-gradient(135deg, #7c1a1a 0%, #4a0d0d 100%);
-    color: #f3e6d0;
-    border: 1.5px solid #5a626a;
+    color: #ffffff;
+    border: 1.5px solid #a83232;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 1.05rem;
     font-weight: 800;
-    padding: 6px 12px;
+    width: 32px !important;
+    height: 32px !important;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 6px rgba(0,0,0,0.5);
     transition: all 0.2s ease;
+    flex-shrink: 0 !important;
   }
   .exit-btn:hover {
     background: linear-gradient(135deg, #962222 0%, #5e0f0f 100%);
@@ -620,8 +622,10 @@
       gap: 3px !important;
     }
     .exit-btn {
-      padding: 3px 5px !important;
-      font-size: 0.65rem !important;
+      width: 26px !important;
+      height: 26px !important;
+      font-size: 0.85rem !important;
+      padding: 0 !important;
     }
     .raga-selector select {
       padding: 3px 4px !important;
@@ -787,10 +791,12 @@
       
       <!-- Top Bar Console (Authentic GeoShred UI look) -->
       <div class="controls-panel">
+        <!-- Floating Expression XY Pad exactly matching GeoShred Corner Pad (Now at left side corner) -->
+        <div class="xy-pad-container" id="xyPad">
+          <canvas id="xyCanvas"></canvas>
+        </div>
+
         <div class="left-controls">
-          <!-- Back/Exit Button to return to dashboard -->
-          <button class="exit-btn" id="exitPageBtn" title="ડેશબોર્ડ પર પાછા જાઓ">✕ બહાર નીકળો</button>
-          
           <div class="raga-selector">
             <select id="scaleSelect">
               <option value="bilawal">બિલાવલ (મેજર)</option>
@@ -827,11 +833,6 @@
         <!-- FX Toggle Button to open/close vintage pedalboard -->
         <button class="fx-toggle-btn" id="fxToggleBtn" title="અવાજની ઇફેક્ટ પેનલ ખોલો">⚙️ ઇફેક્ટ</button>
 
-        <!-- Floating Expression XY Pad exactly matching GeoShred Corner Pad -->
-        <div class="xy-pad-container" id="xyPad">
-          <canvas id="xyCanvas"></canvas>
-        </div>
-
         <!-- Interactive Rotary Dial Dials instead of sliders -->
         <div class="right-sliders">
           <div class="knob-item">
@@ -856,6 +857,9 @@
             <span class="knob-value" id="val-vol">1.20</span>
           </div>
         </div>
+
+        <!-- Back/Exit Button to return to dashboard (Now on right side upper corner) -->
+        <button class="exit-btn" id="exitPageBtn" title="ડેશબોર્ડ પર પાછા જાઓ">✕</button>
       </div>
 
       <!-- Fretboard Canvas -->
