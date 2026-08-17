@@ -1366,8 +1366,12 @@
           }
           triggerPluck(strength, freq, continuous) {
             this.strength = (typeof strength === 'number' && !isNaN(strength) && isFinite(strength)) ? strength : 0.35;
-            const periodSamples = Math.floor(sampleRate / freq);
+            let sanitizedFreq = (typeof freq === 'number' && !isNaN(freq) && isFinite(freq) && freq > 20) ? freq : 220;
+            const periodSamples = Math.floor(sampleRate / sanitizedFreq);
             this.excitationLength = Math.max(10, Math.min(periodSamples, 800));
+            if (isNaN(this.excitationLength) || !isFinite(this.excitationLength) || this.excitationLength < 10) {
+              this.excitationLength = 200;
+            }
             this.excitationBuffer = new Float32Array(this.excitationLength);
             for (let i = 0; i < this.excitationLength; i++) {
               this.excitationBuffer[i] = (Math.random() * 2 - 1) * this.strength * Math.pow(1 - i / this.excitationLength, 1.8);
@@ -1380,6 +1384,7 @@
           }
           process(inputs, outputs, parameters) {
             const output = outputs[0];
+            if (!output || output.length === 0) return true;
             const channel = output[0];
             if (!channel) return true;
             const freqParam = parameters.frequency;
@@ -1966,6 +1971,14 @@
     await enterBrowserFullscreen();
     await ensureCtx();
     
+    // Voice Stealing: Limit maximum concurrent active voices to 10 to prevent browser audio context exhaustion
+    if (activeVoices.size >= 10) {
+      const oldestId = activeVoices.keys().next().value;
+      if (oldestId !== undefined) {
+        handleEnd(oldestId);
+      }
+    }
+
     // Resolve and lock the string index at touch start
     const rh = H / NUM_STRINGS;
     let stringIndex = Math.floor((H - y) / rh);
