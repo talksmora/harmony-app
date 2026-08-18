@@ -1182,10 +1182,39 @@ function extractVideoId(url) {
   return (match && match[2].length === 11) ? match[2] : url;
 }
 
+const PIPED_INSTANCES = [
+  'https://pipedapi.kavin.rocks',
+  'https://api.piped.yt',
+  'https://piped-api.lunar.icu',
+  'https://piped-api.garudalinux.org',
+  'https://piped-api.us.projectsegfau.lt',
+  'https://piped-api.privacydev.net'
+];
+
+async function getPipedAudio(videoId, statusCallback) {
+  for (const instance of PIPED_INSTANCES) {
+    try {
+      statusCallback(lang === 'gu' ? `Piped સર્વર (${instance}) પર પ્રયાસ...` : `Trying Piped server (${instance})...`);
+      const res = await fetch(`${instance}/streams/${videoId}`);
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (!data.audioStreams || data.audioStreams.length === 0) continue;
+      
+      data.audioStreams.sort((a, b) => Number(b.bitrate || 0) - Number(a.bitrate || 0));
+      
+      const audioUrl = data.audioStreams[0].url;
+      return { audioUrl, title: data.title || 'audio' };
+    } catch (err) {
+      console.warn(`Failed Piped from ${instance}:`, err);
+    }
+  }
+  return null;
+}
+
 async function getInvidiousAudio(videoId, statusCallback) {
   for (const instance of INVIDIOUS_INSTANCES) {
     try {
-      statusCallback(lang === 'gu' ? `સર્વર (${instance}) પર પ્રયાસ કરી રહ્યા છીએ...` : `Trying server (${instance})...`);
+      statusCallback(lang === 'gu' ? `Invidious સર્વર (${instance}) પર પ્રયાસ...` : `Trying Invidious server (${instance})...`);
       const res = await fetch(`${instance}/api/v1/videos/${videoId}`);
       if (!res.ok) continue;
       const data = await res.json();
@@ -1202,10 +1231,26 @@ async function getInvidiousAudio(videoId, statusCallback) {
       }
       return { audioUrl, title: data.title || 'audio' };
     } catch (err) {
-      console.warn(`Failed fetching from ${instance}:`, err);
+      console.warn(`Failed Invidious from ${instance}:`, err);
     }
   }
-  throw new Error('All servers are busy. Please try again later.');
+  return null;
+}
+
+async function getUnifiedAudioStream(videoId, statusCallback) {
+  // Try Piped first
+  try {
+    const pipedRes = await getPipedAudio(videoId, statusCallback);
+    if (pipedRes) return pipedRes;
+  } catch (err) {
+    console.warn('Piped failed, falling back to Invidious:', err);
+  }
+  
+  // Try Invidious as fallback
+  const invidiousRes = await getInvidiousAudio(videoId, statusCallback);
+  if (invidiousRes) return invidiousRes;
+  
+  throw new Error('All download servers are currently busy. Please try again in a few moments.');
 }
 
 function updateStatusStyle(isError) {
@@ -1237,7 +1282,7 @@ loadToPlayerBtn.addEventListener('click', async () => {
   updateStatusStyle(false);
   
   try {
-    const { audioUrl, title } = await getInvidiousAudio(videoId, (msg) => {
+    const { audioUrl, title } = await getUnifiedAudioStream(videoId, (msg) => {
       ytStatusEl.textContent = msg;
     });
     
@@ -1272,7 +1317,7 @@ loadToPlayerBtn.addEventListener('click', async () => {
   } catch (err) {
     console.error(err);
     updateStatusStyle(true);
-    ytStatusEl.textContent = lang === 'gu' ? 'ભૂલ: ડાઉનલોડ ફેઈલ થયું. ફરી પ્રયાસ કરો.' : `Error: ${err.message}`;
+    ytStatusEl.textContent = lang === 'gu' ? `ભૂલ: ${err.message}` : `Error: ${err.message}`;
   }
 });
 
@@ -1287,7 +1332,7 @@ downloadFileBtn.addEventListener('click', async () => {
   updateStatusStyle(false);
   
   try {
-    const { audioUrl, title } = await getInvidiousAudio(videoId, (msg) => {
+    const { audioUrl, title } = await getUnifiedAudioStream(videoId, (msg) => {
       ytStatusEl.textContent = msg;
     });
     
@@ -1311,7 +1356,7 @@ downloadFileBtn.addEventListener('click', async () => {
   } catch (err) {
     console.error(err);
     updateStatusStyle(true);
-    ytStatusEl.textContent = lang === 'gu' ? 'ભૂલ: ડાઉનલોડ ફેઈલ થયું. ફરી પ્રયાસ કરો.' : `Error: ${err.message}`;
+    ytStatusEl.textContent = lang === 'gu' ? `ભૂલ: ${err.message}` : `Error: ${err.message}`;
   }
 });
 
