@@ -232,6 +232,18 @@
 
         <div id="ytStatus" style="display: none; padding: 10px; border-radius: 8px; font-size: 0.8rem; text-align: center; margin-top: 10px;"></div>
 
+        <!-- Alternative External Converters -->
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border);">
+          <div style="font-size: 0.78rem; font-weight: 600; margin-bottom: 8px; color: var(--subtitle);">
+            💡 જો ઉપર ડાયરેક્ટ લોડ ન થાય, તો આ લિંક્સનો ઉપયોગ કરો (લિંક ઓટો-ભરાઈ જશે):
+          </div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <a id="lnkYt1s" href="https://yt1s.com.co/download/" target="_blank" style="background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">🚀 Convert via YT1S</a>
+            <a id="lnkCobalt" href="https://cobalt.tools/" target="_blank" style="background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">🛡️ Cobalt (Ad-Free)</a>
+            <a id="lnkY2mate" href="https://y2mate.is/en/" target="_blank" style="background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">🔗 Y2Mate</a>
+          </div>
+        </div>
+
         <div class="dev-note" id="ytNote" style="margin-top: 10px;">
           નોંધ: આ ટૂલ માત્ર સંગીત અભ્યાસ અને રિયાઝ માટે જ છે.
         </div>
@@ -1365,6 +1377,24 @@ downloadFileBtn.addEventListener('click', async () => {
     console.error(err);
     updateStatusStyle(true);
     ytStatusEl.textContent = lang === 'gu' ? `ભૂલ: ${err.message}` : `Error: ${err.message}`;
+  }
+});
+
+// Dynamic update for alternative download links
+ytUrlInput.addEventListener('input', () => {
+  const url = ytUrlInput.value.trim();
+  const lnkYt1s = document.getElementById('lnkYt1s');
+  const lnkCobalt = document.getElementById('lnkCobalt');
+  const lnkY2mate = document.getElementById('lnkY2mate');
+  
+  if (url) {
+    lnkYt1s.href = `https://yt1s.com.co/download/?url=${encodeURIComponent(url)}`;
+    lnkCobalt.href = `https://cobalt.tools/?url=${encodeURIComponent(url)}`;
+    lnkY2mate.href = `https://y2mate.is/en/?url=${encodeURIComponent(url)}`;
+  } else {
+    lnkYt1s.href = 'https://yt1s.com.co/download/';
+    lnkCobalt.href = 'https://cobalt.tools/';
+    lnkY2mate.href = 'https://y2mate.is/en/';
   }
 });
 
