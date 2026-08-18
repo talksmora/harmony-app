@@ -1191,16 +1191,14 @@ const PIPED_INSTANCES = [
   'https://piped-api.privacydev.net'
 ];
 
-const CORS_PROXY = (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !window.location.protocol.startsWith('file'))
-  ? '/api/proxy?url='
-  : 'https://api.allorigins.win/raw?url=';
+const CORS_PROXY = 'https://corsproxy.io/?';
 
 async function getPipedAudio(videoId, statusCallback) {
   for (const instance of PIPED_INSTANCES) {
     try {
       statusCallback(lang === 'gu' ? `Piped સર્વર (${instance}) પર પ્રયાસ...` : `Trying Piped server (${instance})...`);
       const targetUrl = `${instance}/streams/${videoId}`;
-      const proxyUrl = CORS_PROXY + encodeURIComponent(targetUrl);
+      const proxyUrl = CORS_PROXY + targetUrl;
       const res = await fetch(proxyUrl);
       if (!res.ok) continue;
       const data = await res.json();
@@ -1222,7 +1220,7 @@ async function getInvidiousAudio(videoId, statusCallback) {
     try {
       statusCallback(lang === 'gu' ? `Invidious સર્વર (${instance}) પર પ્રયાસ...` : `Trying Invidious server (${instance})...`);
       const targetUrl = `${instance}/api/v1/videos/${videoId}`;
-      const proxyUrl = CORS_PROXY + encodeURIComponent(targetUrl);
+      const proxyUrl = CORS_PROXY + targetUrl;
       const res = await fetch(proxyUrl);
       if (!res.ok) continue;
       const data = await res.json();
@@ -1296,7 +1294,7 @@ loadToPlayerBtn.addEventListener('click', async () => {
     
     ytStatusEl.textContent = lang === 'gu' ? 'ઓડિયો ડાઉનલોડ થઈ રહ્યો છે...' : 'Downloading audio stream...';
     
-    const proxyAudioUrl = CORS_PROXY + encodeURIComponent(audioUrl);
+    const proxyAudioUrl = CORS_PROXY + audioUrl;
     const audioRes = await fetch(proxyAudioUrl);
     if (!audioRes.ok) throw new Error('Failed to download audio stream.');
     
@@ -1347,7 +1345,7 @@ downloadFileBtn.addEventListener('click', async () => {
     
     ytStatusEl.textContent = lang === 'gu' ? 'ઓડિયો ફાઇલ ડાઉનલોડ થઈ રહી છે...' : 'Downloading file...';
     
-    const proxyAudioUrl = CORS_PROXY + encodeURIComponent(audioUrl);
+    const proxyAudioUrl = CORS_PROXY + audioUrl;
     const audioRes = await fetch(proxyAudioUrl);
     if (!audioRes.ok) throw new Error('Failed to download audio stream.');
     
