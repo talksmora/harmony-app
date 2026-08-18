@@ -215,6 +215,9 @@
           </div>
         </div>
         <input type="file" id="fileInput" accept="audio/*" style="display:none;">
+        <div style="margin-top: 12px; display: none;" id="downloadShiftedDiv">
+          <button id="downloadShiftedBtn" style="width: 100%; background: #27ae60; color: #fff; border: none; padding: 10px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"></button>
+        </div>
       </div>
 
 
@@ -398,7 +401,8 @@ const PRACTICE_TEXT = {
     ytPlaceholder: 'YouTube વિડીયોની લિંક અહીં પેસ્ટ કરો...',
     ytBtnLoad: 'પ્લેયરમાં લોડ કરો',
     ytBtnDownload: 'ઓડિયો ડાઉનલોડ કરો',
-    ytNote: 'નોંધ: આ ટૂલ માત્ર સંગીત અભ્યાસ અને રિયાઝ માટે જ છે.'
+    ytNote: 'નોંધ: આ ટૂલ માત્ર સંગીત અભ્યાસ અને રિયાઝ માટે જ છે.',
+    downloadShifted: '📥 બદલાયેલા સ્કેલ/સ્પીડ સાથે ડાઉનલોડ કરો'
   },
   hi: {
     title: '🎧 Song Practice Tool',
@@ -448,7 +452,8 @@ const PRACTICE_TEXT = {
     ytPlaceholder: 'YouTube वीडियो लिंक यहाँ पेस्ट करें...',
     ytBtnLoad: 'प्लेयर में लोड करें',
     ytBtnDownload: 'ऑडियो डाउनलोड करें',
-    ytNote: 'नोट: यह टूल केवल संगीत अध्ययन और रियाज़ के लिए है।'
+    ytNote: 'नोट: यह टूल केवल संगीत अध्ययन और रियाज़ के लिए है।',
+    downloadShifted: '📥 बदले गए स्केल/स्पीड के साथ डाउनलोड करें'
   },
   en: {
     title: '🎧 Song Practice Tool',
@@ -498,7 +503,8 @@ const PRACTICE_TEXT = {
     ytPlaceholder: 'Paste YouTube video link here...',
     ytBtnLoad: 'Load to Player',
     ytBtnDownload: 'Download Audio File',
-    ytNote: 'Note: This tool is only for music study and practice purposes.'
+    ytNote: 'Note: This tool is only for music study and practice purposes.',
+    downloadShifted: '📥 Download with Shifted Scale/Speed'
   }
 };
 
@@ -529,6 +535,7 @@ function applyPageTranslations() {
   document.getElementById('addMarkerBtn').textContent = t.addMarker;
   document.getElementById('loopBtn').textContent = t.loopRange;
   document.getElementById('loopNote').textContent = t.loopNote;
+  document.getElementById('downloadShiftedBtn').textContent = t.downloadShifted;
 }
 
 let audioCtx, sourceNode, gainNode, eqNodes = [], pitchProcessor;
@@ -565,6 +572,8 @@ const eqPresetsEl = document.getElementById('eqPresets');
 const addMarkerBtn = document.getElementById('addMarkerBtn');
 const loopBtn = document.getElementById('loopBtn');
 const markerListEl = document.getElementById('markerList');
+const downloadShiftedBtn = document.getElementById('downloadShiftedBtn');
+const downloadShiftedDiv = document.getElementById('downloadShiftedDiv');
 
 uploadZone.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', async (e) => {
@@ -595,6 +604,7 @@ fileInput.addEventListener('change', async (e) => {
       console.warn('Auto scale detection failed:', err);
     }
   }, 100);
+  document.getElementById('downloadShiftedDiv').style.display = 'block';
 });
 
 function ensureCtx() {
@@ -940,6 +950,144 @@ document.querySelectorAll('[data-speed]').forEach(btn => {
     restartIfPlaying();
   });
 });
+// WAV Encoder and Offline Rendering
+function bufferToWav(buffer) {
+  const numOfChan = buffer.numberOfChannels,
+        length = buffer.length * numOfChan * 2 + 44,
+        bufferData = new ArrayBuffer(length),
+        view = new DataView(bufferData),
+        channels = [],
+        sampleRate = buffer.sampleRate;
+  
+  let i, sample, offset = 0, pos = 0;
+
+  function setUint16(data) {
+    view.setUint16(pos, data, true);
+    pos += 2;
+  }
+
+  function setUint32(data) {
+    view.setUint32(pos, data, true);
+    pos += 4;
+  }
+
+  setUint32(0x46464952); // "RIFF"
+  setUint32(length - 8); // file length - 8
+  setUint32(0x45564157); // "WAVE"
+
+  setUint32(0x20746d66); // "fmt " chunk
+  setUint32(16);         // chunk length
+  setUint16(1);          // sample format (raw PCM)
+  setUint16(numOfChan);
+  setUint32(sampleRate);
+  setUint32(sampleRate * numOfChan * 2); // byte rate
+  setUint16(numOfChan * 2);              // block align
+  setUint16(16);                         // bits per sample
+
+  setUint32(0x61746164); // "data" chunk
+  setUint32(length - pos - 4); // chunk length
+
+  for(i=0; i<numOfChan; i++) {
+    channels.push(buffer.getChannelData(i));
+  }
+
+  while(pos < length) {
+    for(i=0; i<numOfChan; i++) {
+      sample = Math.max(-1, Math.min(1, channels[i][offset]));
+      sample = (sample < 0 ? sample * 0x8000 : sample * 0x7FFF);
+      view.setInt16(pos, sample, true);
+      pos += 2;
+    }
+    offset++;
+  }
+
+  return new Blob([bufferData], { type: 'audio/wav' });
+}
+
+downloadShiftedBtn.addEventListener('click', async () => {
+  if (!audioBuffer) return;
+  
+  const originalText = downloadShiftedBtn.textContent;
+  downloadShiftedBtn.disabled = true;
+  downloadShiftedBtn.textContent = lang === 'gu' ? '⏳ ફાઇલ તૈયાર થઈ રહી છે...' : '⏳ Processing audio...';
+  
+  try {
+    const offlineCtx = new OfflineAudioContext(
+      audioBuffer.numberOfChannels,
+      Math.floor(audioBuffer.length / currentSpeed),
+      audioBuffer.sampleRate
+    );
+    
+    const offlineSource = offlineCtx.createBufferSource();
+    offlineSource.buffer = audioBuffer;
+    offlineSource.playbackRate.value = currentSpeed;
+    
+    const pitchRatio = varispeed ? 1 : computeEffectivePitchRatio();
+    let chainEnd = offlineSource;
+    let offlinePitchProcessor = null;
+    
+    if (!varispeed && Math.abs(pitchRatio - 1) > 0.001) {
+      offlinePitchProcessor = createPitchShifterNode(offlineCtx, pitchRatio);
+      offlineSource.connect(offlinePitchProcessor.input);
+      chainEnd = offlinePitchProcessor.output;
+    }
+    
+    const offlineGainNode = offlineCtx.createGain();
+    if (gainNode) {
+      offlineGainNode.gain.value = gainNode.gain.value;
+    }
+    
+    chainEnd.connect(offlineGainNode);
+    
+    if (eqToggle.checked && eqNodes && eqNodes.length > 0) {
+      const offlineEqNodes = EQ_BANDS_DEF.map(b => {
+        const f = offlineCtx.createBiquadFilter();
+        f.type = b.type;
+        f.frequency.value = b.freq;
+        if (b.type === 'peaking') f.Q.value = 1;
+        return f;
+      });
+      
+      eqNodes.forEach((node, idx) => {
+        offlineEqNodes[idx].gain.value = node.gain.value;
+      });
+      
+      offlineGainNode.connect(offlineEqNodes[0]);
+      for (let i = 0; i < offlineEqNodes.length - 1; i++) {
+        offlineEqNodes[i].connect(offlineEqNodes[i + 1]);
+      }
+      offlineEqNodes[offlineEqNodes.length - 1].connect(offlineCtx.destination);
+    } else {
+      offlineGainNode.connect(offlineCtx.destination);
+    }
+    
+    offlineSource.start(0);
+    
+    const renderedBuffer = await offlineCtx.startRendering();
+    const wavBlob = bufferToWav(renderedBuffer);
+    const downloadUrl = URL.createObjectURL(wavBlob);
+    
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    
+    const rawName = trackNameEl.textContent.replace('✅ ', '').replace('Loaded: ', '').replace('ભરાઈ ગયું: ', '').trim();
+    const cleanName = rawName.substring(0, rawName.lastIndexOf('.')) || rawName;
+    a.download = `${cleanName}_shifted.wav`;
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    URL.revokeObjectURL(downloadUrl);
+  } catch (err) {
+    console.error('Offline rendering failed:', err);
+    alert(lang === 'gu' ? 'રેન્ડરિંગ નિષ્ફળ ગયું.' : 'Rendering failed.');
+  } finally {
+    downloadShiftedBtn.disabled = false;
+    downloadShiftedBtn.textContent = originalText;
+  }
+});
+
 varispeedToggle.addEventListener('change', () => {
   varispeed = varispeedToggle.checked;
   if (varispeed) {
