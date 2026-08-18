@@ -1191,7 +1191,9 @@ const PIPED_INSTANCES = [
   'https://piped-api.privacydev.net'
 ];
 
-const CORS_PROXY = 'https://corsproxy.io/?';
+const CORS_PROXY = (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !window.location.protocol.startsWith('file'))
+  ? '/api/proxy?url='
+  : 'https://api.allorigins.win/raw?url=';
 
 async function getPipedAudio(videoId, statusCallback) {
   for (const instance of PIPED_INSTANCES) {
