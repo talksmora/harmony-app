@@ -216,6 +216,37 @@
         </div>
         <input type="file" id="fileInput" accept="audio/*" style="display:none;">
       </div>
+
+      <div class="box">
+        <h3 id="ytTitle">🔴 YouTube to MP3 Downloader (Study Only)</h3>
+        <p id="ytSubtitle" style="color:var(--subtitle); font-size:0.78rem; margin:0 0 12px;">અભ્યાસ માટે YouTube વિડીયોને MP3/WAV માં કન્વર્ટ કરો</p>
+        
+        <div class="ctrl-row" style="margin-bottom: 12px;">
+          <input type="text" id="ytUrl" placeholder="YouTube video link paste karo..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 0.85rem;">
+        </div>
+
+        <div class="ctrl-row" style="margin-bottom: 12px;">
+          <label id="ytFormatLabel" style="font-size:0.78rem; display:block; margin-bottom:4px;">Format:</label>
+          <select id="ytFormat" style="width: 100%; padding: 10px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem;">
+            <option value="mp3">MP3 (Audio)</option>
+            <option value="wav">WAV (Lossless Audio)</option>
+            <option value="mp4">MP4 (Video)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <button id="convertYtBtn" style="background: #e74c3c; color: #fff; border: none; padding: 10px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; flex: 1;">Convert</button>
+          <button id="openNewTabBtn" style="background: var(--bg); color: var(--text); border: 1.5px solid var(--border); padding: 8px 14px; border-radius: 10px; font-size: 0.82rem; cursor: pointer;">Open in New Tab</button>
+        </div>
+
+        <div id="ytIframeContainer" style="margin-top: 14px; display: none; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #000;">
+          <iframe id="ytIframe" src="" style="width: 100%; height: 62px; border: none; overflow: hidden;" scrolling="no"></iframe>
+        </div>
+
+        <div class="dev-note" id="ytNote" style="margin-top: 10px;">
+          નોંધ: આ ટૂલ માત્ર સંગીત અભ્યાસ અને રિયાઝ માટે જ છે.
+        </div>
+      </div>
  
       <div class="box">
         <h3 id="playbackTitle">▶️ Playback</h3>
@@ -390,7 +421,14 @@ const PRACTICE_TEXT = {
       'સફેદ ૬ (Safed 6)',
       'કાળી ૫ (Kali 5)',
       'સફેદ ૭ (Safed 7)'
-    ]
+    ],
+    ytTitle: '🔴 YouTube to MP3 Downloader (Study Only)',
+    ytSubtitle: 'અભ્યાસ માટે YouTube વિડીયોને MP3/WAV માં કન્વર્ટ કરો',
+    ytPlaceholder: 'YouTube વિડીયોની લિંક અહીં પેસ્ટ કરો...',
+    ytFormatLabel: 'પસંદ કરો ફોર્મેટ:',
+    ytBtnConvert: 'કન્વર્ટ કરો',
+    ytBtnOpenNewTab: 'નવી ટેબમાં ખોલો (જો કામ ન કરે તો)',
+    ytNote: 'નોંધ: આ ટૂલ માત્ર સંગીત અભ્યાસ અને રિયાઝ માટે જ છે.'
   },
   hi: {
     title: '🎧 Song Practice Tool',
@@ -434,7 +472,14 @@ const PRACTICE_TEXT = {
       'सफ़ेद ६ (Safed 6)',
       'काली ५ (Kali 5)',
       'सफ़ेद ७ (Safed 7)'
-    ]
+    ],
+    ytTitle: '🔴 YouTube to MP3 Downloader (Study Only)',
+    ytSubtitle: 'अध्ययन के लिए YouTube वीडियो को MP3/WAV में बदलें',
+    ytPlaceholder: 'YouTube वीडियो लिंक यहाँ पेस्ट करें...',
+    ytFormatLabel: 'फ़ॉर्मेट चुनें:',
+    ytBtnConvert: 'कन्वर्ट करें',
+    ytBtnOpenNewTab: 'नए टैब में खोलें (यदि काम न करे)',
+    ytNote: 'नोट: यह टूल केवल संगीत अध्ययन और रियाज़ के लिए है।'
   },
   en: {
     title: '🎧 Song Practice Tool',
@@ -478,7 +523,14 @@ const PRACTICE_TEXT = {
       'White 6 (Safed 6)',
       'Black 5 (Kali 5)',
       'White 7 (Safed 7)'
-    ]
+    ],
+    ytTitle: '🔴 YouTube to MP3 Downloader (Study Only)',
+    ytSubtitle: 'Convert YouTube videos to MP3/WAV for study purposes',
+    ytPlaceholder: 'Paste YouTube video link here...',
+    ytFormatLabel: 'Select Format:',
+    ytBtnConvert: 'Convert',
+    ytBtnOpenNewTab: 'Open in New Tab (if embed fails)',
+    ytNote: 'Note: This tool is only for music study and practice purposes.'
   }
 };
 
@@ -509,6 +561,14 @@ function applyPageTranslations() {
   document.getElementById('addMarkerBtn').textContent = t.addMarker;
   document.getElementById('loopBtn').textContent = t.loopRange;
   document.getElementById('loopNote').textContent = t.loopNote;
+  
+  document.getElementById('ytTitle').textContent = t.ytTitle;
+  document.getElementById('ytSubtitle').textContent = t.ytSubtitle;
+  document.getElementById('ytUrl').placeholder = t.ytPlaceholder;
+  document.getElementById('ytFormatLabel').textContent = t.ytFormatLabel;
+  document.getElementById('convertYtBtn').textContent = t.ytBtnConvert;
+  document.getElementById('openNewTabBtn').textContent = t.ytBtnOpenNewTab;
+  document.getElementById('ytNote').textContent = t.ytNote;
 }
 
 let audioCtx, sourceNode, gainNode, eqNodes = [], pitchProcessor;
@@ -1113,6 +1173,43 @@ function updateCurrentScaleDisplay() {
   const currentScaleTextEl = document.getElementById('currentScaleText');
   currentScaleTextEl.textContent = t.currentScale + NOTE_NAMES[newKeyIndex] + ' ' + originalScaleType + ' (' + t.harmoniumKeys[newKeyIndex] + ')' + centsText;
 }
+
+// YouTube Downloader Logic
+const ytUrlInput = document.getElementById('ytUrl');
+const ytFormatSelect = document.getElementById('ytFormat');
+const convertYtBtn = document.getElementById('convertYtBtn');
+const openNewTabBtn = document.getElementById('openNewTabBtn');
+const ytIframeContainer = document.getElementById('ytIframeContainer');
+const ytIframe = document.getElementById('ytIframe');
+
+function getCleanYoutubeUrl(url) {
+  if (!url) return '';
+  return url.trim();
+}
+
+convertYtBtn.addEventListener('click', () => {
+  const url = getCleanYoutubeUrl(ytUrlInput.value);
+  if (!url) {
+    alert(lang === 'gu' ? 'કૃપા કરીને પહેલા YouTube લિંક ઉમેરો.' : 'Please enter a YouTube URL first.');
+    return;
+  }
+  const format = ytFormatSelect.value;
+  const embedUrl = `https://p.savenow.to/api/button/?url=${encodeURIComponent(url)}&f=${format}&color=e74c3c`;
+  
+  ytIframe.src = embedUrl;
+  ytIframeContainer.style.display = 'block';
+});
+
+openNewTabBtn.addEventListener('click', () => {
+  const url = getCleanYoutubeUrl(ytUrlInput.value);
+  if (!url) {
+    alert(lang === 'gu' ? 'કૃપા કરીને પહેલા YouTube લિંક ઉમેરો.' : 'Please enter a YouTube URL first.');
+    return;
+  }
+  const format = ytFormatSelect.value;
+  const externalUrl = `https://p.savenow.to/api/button/?url=${encodeURIComponent(url)}&f=${format}&color=e74c3c`;
+  window.open(externalUrl, '_blank');
+});
 
 applyPageTranslations();
 initAppShell({ title: t.title });
